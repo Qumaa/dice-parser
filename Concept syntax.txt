@@ -1,0 +1,23 @@
+1. roll
+1d20 => 1..20
+2d20 => 2..40
+2d20 sum => same as above but printed out
+2d20 adv => keep the highest
+2d20 dis => keep the lowest
+
+XdY <mode> - basic operand
+X = number of dice
+Y = number of faces of said dice
+mode may not be specified, defaults to sum if so. Options are sum, adv(antage) and dis(advantage)
+
+support for +, -, * and /
+/ rounds down, while // rounds up
+
+braces to treat a sequence as a single operand
+2 (2d20 adv) adv = 4d20 adv
+2 (2d20 adv) dis
+
+2. chanceof
+specifying the difficulty class will output not the roll but the chance of success
+1d20 >= 12 => 45%
+supports >=, <=, >, <, = and !=
