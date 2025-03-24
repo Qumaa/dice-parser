@@ -6,7 +6,7 @@
         private readonly IAnalyzable _right;
         private readonly OperationDelegate _operationDelegate;
 
-        public Operation(IAnalyzable left, OperationDelegate operationDelegate, IAnalyzable right)
+        public Operation(IAnalyzable left, IAnalyzable right, OperationDelegate operationDelegate)
         {
             _left = left;
             _right = right;

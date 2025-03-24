@@ -12,22 +12,24 @@ namespace DiceRoll
             Stopwatch stopwatch = new();
             stopwatch.Start();
             
-            Constant modifier = Expression.Constant(1);
-            Dice dice = Expression.Dice(6);
-            
-            ProbabilityDistribution distribution = dice.GetProbabilityDistribution(); // 1d6
-            Console.WriteLine(ProbabilityToString(distribution));
-            
-            distribution = distribution.Combine(distribution); // 2d6
-            Console.WriteLine(ProbabilityToString(distribution));
-            
-            distribution = distribution.Combine(modifier.GetProbabilityDistribution()); // 2d6+1
-            Console.WriteLine(ProbabilityToString(distribution));
-            
+            Body();
+
             stopwatch.Stop();
             
-            
             Console.WriteLine($"Elapsed {stopwatch.ElapsedMilliseconds}ms ({stopwatch.Elapsed.Seconds:f2}s)");
+        }
+
+        private static void Body()
+        {
+            Dice d4 = Expression.Values.Dice(4);
+            Dice d20 = Expression.Values.Dice(20);
+            Constant mod = Expression.Values.Constant(3);
+
+            Composite roll = Expression.Values.Composite<Summation>( d20, d4, mod);
+            
+            Console.WriteLine(roll.Evaluate().Value);
+            Console.WriteLine();
+            Console.WriteLine(ProbabilityToString(roll.GetProbabilityDistribution()));
         }
 
         private static string ProbabilityToString(ProbabilityDistribution distribution) =>

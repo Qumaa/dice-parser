@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace DiceRoll.Expressions
 {
@@ -40,29 +39,6 @@ namespace DiceRoll.Expressions
                 if (current.Value > max.Value)
                     max = current;
             }
-        }
-
-        public ProbabilityDistribution Combine(ProbabilityDistribution other)
-        {
-            int minValue = Min.Value + other.Min.Value;
-            int maxValue = Max.Value + other.Max.Value;
-
-            double[] newProbabilities = new double[maxValue - minValue + 1];
-
-            foreach (Roll thisRoll in _probabilities)
-            foreach (Roll otherRoll in other)
-            {
-                int value = thisRoll.Outcome.Value + otherRoll.Outcome.Value;
-                double probability = thisRoll.Probability.Value * otherRoll.Probability.Value;
-
-                newProbabilities[value - minValue] += probability;
-            }
-
-            return new ProbabilityDistribution(newProbabilities
-                .Select(
-                    (d, i) => new Roll(i + minValue, d)
-                )
-            );
         }
 
         public IEnumerator<Roll> GetEnumerator() =>
