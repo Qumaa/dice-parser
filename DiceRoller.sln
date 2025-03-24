@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiceRoller", "DiceRoller\DiceRoller.csproj", "{6A0045DA-59D0-431B-8E21-99637E5D7884}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dice", "Dice\Dice.csproj", "{6A0045DA-59D0-431B-8E21-99637E5D7884}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
