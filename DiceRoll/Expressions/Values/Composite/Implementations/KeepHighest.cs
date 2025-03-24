@@ -18,8 +18,7 @@
             }
 
             public override ProbabilityDistribution GetProbabilityDistribution() =>
-                new Keep(_left.GetProbabilityDistribution(), _right.GetProbabilityDistribution(), KeepMode.Highest)
-                    .Evaluate();
+                Expression.Transformations.SelectHighest(_left, _right).Evaluate();
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace DiceRoll.Expressions
 {
-    public enum KeepMode
+    public enum SelectMode
     {
         Highest = 0,
         Lowest = 1
