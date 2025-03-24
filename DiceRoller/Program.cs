@@ -42,7 +42,7 @@ namespace Dice
 
     public interface IAnalyzable : IExpression<RollResult>
     {
-        ProbabilityData ProbabilityData { get; }
+        ProbabilityData GetProbabilityData();
     }
 
     public static class Expression
@@ -55,33 +55,36 @@ namespace Dice
     {
         private readonly int _value;
 
-        public ProbabilityData ProbabilityData { get; }
-
         public Constant(int value) 
         {
             _value = value;
-            ProbabilityData = ProbabilityData.OfConstant(_value);
         }
 
         public RollResult Evaluate() =>
-            ProbabilityData.Min;
+            new(_value);
+
+        public ProbabilityData GetProbabilityData() =>
+            ProbabilityData.OfConstant(_value);
     }
     
     public class Dice : IAnalyzable
     {
         private readonly Random _random;
+        private readonly int _faces;
+        private readonly int _number;
 
-        public ProbabilityData ProbabilityData { get; }
+        public ProbabilityData GetProbabilityData() =>
+            ProbabilityData.OfDice(_faces, _number);
 
         public Dice(Random random, int faces, int number)
         {
             _random = random;
-            
-            ProbabilityData = ProbabilityData.OfDice(faces, number);
+            _faces = faces;
+            _number = number;
         }
 
         public RollResult Evaluate() =>
-            new(_random.Next(ProbabilityData.Min.Value, ProbabilityData.Max.Value));
+            new(_random.Next(_number, _faces * _number));
     }
 
     public sealed class LikelihoodExpression : IExpression<Likelihood>
@@ -98,7 +101,7 @@ namespace Dice
         }
 
         public Likelihood Evaluate() =>
-            GetDelegate(_operation).Invoke(_left.ProbabilityData, _right.ProbabilityData);
+            GetDelegate(_operation).Invoke(_left.GetProbabilityData(), _right.GetProbabilityData());
 
         private static OperationDelegate GetDelegate(Operation operation)
         {
