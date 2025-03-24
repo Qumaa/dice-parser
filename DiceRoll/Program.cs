@@ -21,11 +21,10 @@ namespace DiceRoll
 
         private static void Body()
         {
-            Dice d4 = Expression.Values.Dice(4);
-            Dice d20 = Expression.Values.Dice(20);
-            Constant mod = Expression.Values.Constant(3);
+            Dice dice1 = Expression.Values.Dice(6);
+            Dice dice2 = Expression.Values.Dice(10);
 
-            Composite roll = Expression.Values.Composite<Summation>( d20, d4, mod);
+            Composite roll = Expression.Values.Composite<KeepLowest>( dice1, dice2);
             
             Console.WriteLine(roll.Evaluate().Value);
             Console.WriteLine();

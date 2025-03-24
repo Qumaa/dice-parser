@@ -21,11 +21,11 @@ namespace DiceRoll.Expressions
 
             double[] newProbabilities = new double[maxValue - minValue + 1];
 
-            foreach (Roll thisRoll in _source)
+            foreach (Roll sourceRoll in _source)
             foreach (Roll otherRoll in _other)
             {
-                int value = thisRoll.Outcome.Value + ApplyCombinationType(otherRoll.Outcome.Value);
-                double probability = thisRoll.Probability.Value * otherRoll.Probability.Value;
+                int value = sourceRoll.Outcome.Value + ApplyCombinationType(otherRoll.Outcome.Value);
+                double probability = sourceRoll.Probability.Value * otherRoll.Probability.Value;
 
                 newProbabilities[value - minValue] += probability;
             }

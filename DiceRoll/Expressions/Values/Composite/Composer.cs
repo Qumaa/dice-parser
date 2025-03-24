@@ -23,6 +23,29 @@ namespace DiceRoll.Expressions
         /// user-determined way.</returns>
         protected abstract IAnalyzable Compose(IAnalyzable[] source);
 
+        /// <summary>
+        /// This method iterates the input in pairs, applying the specified delegate to every pair.
+        /// Use this method inside <see cref="Compose"/> to automate the process.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="compositionDelegate"></param>
+        /// <returns></returns>
+        protected IAnalyzable IteratePairs(IAnalyzable[] source, ByPairsCompositionDelegate compositionDelegate)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+            ArgumentNullException.ThrowIfNull(compositionDelegate);
+            
+            for (int i = 1; i < source.Length; i++)
+            {
+                IAnalyzable previous = source[i - 1];
+                IAnalyzable current = source[i];
+
+                source[i] = compositionDelegate(previous, current);
+            }
+
+            return source[^1];
+        }
+
         private static IAnalyzable[] Validate(IEnumerable<IAnalyzable> source)
         {
             ArgumentNullException.ThrowIfNull(source);
@@ -38,6 +61,21 @@ namespace DiceRoll.Expressions
         public static Composer FromDelegate(CompositionDelegate compositionDelegate) =>
             new FuncComposer(compositionDelegate);
 
+        protected abstract class Composed : IAnalyzable
+        {
+            protected readonly IAnalyzable _left;
+            protected readonly IAnalyzable _right;
+            
+            protected Composed(IAnalyzable left, IAnalyzable right)
+            {
+                _left = left;
+                _right = right;
+            }
+
+            public abstract Outcome Evaluate();
+            public abstract ProbabilityDistribution GetProbabilityDistribution();
+        }
+
         private sealed class FuncComposer : Composer
         {
             private readonly CompositionDelegate _compositionDelegate;
@@ -52,5 +90,7 @@ namespace DiceRoll.Expressions
             protected override IAnalyzable Compose(IAnalyzable[] source) =>
                 _compositionDelegate.Invoke(source);
         }
+
+        protected delegate IAnalyzable ByPairsCompositionDelegate(IAnalyzable left, IAnalyzable right);
     }
 }
