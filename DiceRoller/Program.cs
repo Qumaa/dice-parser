@@ -14,9 +14,9 @@ namespace Dice
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
             
-            Constant dc = new(10);
-            Dice dice = new(new Random(0), 20, 2);
-            LikelihoodExpression dcExpr = new(dice, Operation.GreaterThan, dc);
+            Constant dc = Expression.Constant(10);
+            Dice dice = Expression.Dice(20);
+            LikelihoodExpression dcExpr = Expression.GreaterThanOrEqual(dice, dc);
             Likelihood likelihood = dcExpr.Evaluate();
             
             stopwatch.Stop();
@@ -49,6 +49,22 @@ namespace Dice
     {
         public static Constant Constant(int value) =>
             new(value);
+
+        public static Dice Dice(int faces, int number = 1) =>
+            new(new Random(), faces, number);
+        
+        public static LikelihoodExpression Equal(IAnalyzable left, IAnalyzable right) =>
+            new(left, Operation.Equal, right);
+        public static LikelihoodExpression NotEqual(IAnalyzable left, IAnalyzable right) =>
+            new(left, Operation.NotEqual, right);
+        public static LikelihoodExpression GreaterThan(IAnalyzable left, IAnalyzable right) =>
+            new(left, Operation.GreaterThan, right);
+        public static LikelihoodExpression GreaterThanOrEqual(IAnalyzable left, IAnalyzable right) =>
+            new(left, Operation.GreaterThanOrEqual, right);
+        public static LikelihoodExpression LessThan(IAnalyzable left, IAnalyzable right) =>
+            new(left, Operation.LessThan, right);
+        public static LikelihoodExpression LessThanOrEqual(IAnalyzable left, IAnalyzable right) =>
+            new(left, Operation.LessThanOrEqual, right);
     }
     
     public class Constant : IAnalyzable
