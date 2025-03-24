@@ -2,16 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Dice.Expressions
+namespace DiceRoll.Expressions
 {
-    public sealed class ProbabilityDistribution : IEnumerable<OutcomeProbability>
+    public sealed class ProbabilityDistribution : IEnumerable<Roll>
     {
         public readonly Outcome Min;
         public readonly Outcome Max;
         
-        private readonly IEnumerable<OutcomeProbability> _probabilities;
+        private readonly IEnumerable<Roll> _probabilities;
 
-        public ProbabilityDistribution(IEnumerable<OutcomeProbability> probabilities)
+        public ProbabilityDistribution(IEnumerable<Roll> probabilities)
         {
             _probabilities = probabilities;
             
@@ -20,7 +20,7 @@ namespace Dice.Expressions
 
         private void Init(out Outcome min, out Outcome max)
         {
-            using IEnumerator<OutcomeProbability> enumerator = _probabilities.GetEnumerator();
+            using IEnumerator<Roll> enumerator = _probabilities.GetEnumerator();
 
             if (!enumerator.MoveNext())
             {
@@ -49,8 +49,8 @@ namespace Dice.Expressions
 
             double[] newProbabilities = new double[maxValue - minValue + 1];
 
-            foreach (OutcomeProbability thisRoll in _probabilities)
-            foreach (OutcomeProbability otherRoll in other)
+            foreach (Roll thisRoll in _probabilities)
+            foreach (Roll otherRoll in other)
             {
                 int value = thisRoll.Outcome.Value + otherRoll.Outcome.Value;
                 double probability = thisRoll.Probability.Value * otherRoll.Probability.Value;
@@ -60,36 +60,15 @@ namespace Dice.Expressions
 
             return new ProbabilityDistribution(newProbabilities
                 .Select(
-                    (d, i) => (OutcomeProbability) new(i + minValue, d)
+                    (d, i) => new Roll(i + minValue, d)
                 )
             );
         }
 
-        public IEnumerator<OutcomeProbability> GetEnumerator() =>
+        public IEnumerator<Roll> GetEnumerator() =>
             _probabilities.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() =>
             GetEnumerator();
-
-        public static ProbabilityDistribution OfDice(int faces, int count = 1)
-        {
-            Probability probability = new(1d / faces);
-
-            ProbabilityDistribution distribution = new(Enumerable.Range(1, faces)
-                .Select(index => new Outcome(index))
-                .Select(rollResult => new OutcomeProbability(rollResult, probability)));
-
-            if (count <= 1)
-                goto ret;
-
-            for (int i = 1; i < count; i++)
-                distribution = distribution.Combine(distribution);
-
-            ret:
-            return distribution;
-        }
-
-        public static ProbabilityDistribution OfConstant(int value) =>
-            new(Enumerable.Repeat(new OutcomeProbability(value, Probability.Hundred), 1));
     }
 }

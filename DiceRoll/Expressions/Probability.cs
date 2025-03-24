@@ -1,4 +1,4 @@
-﻿namespace Dice.Expressions
+﻿namespace DiceRoll.Expressions
 {
     public readonly struct Probability
     {

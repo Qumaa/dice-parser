@@ -1,25 +1,31 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
-using Dice.Expressions;
+using DiceRoll.Expressions;
 
-namespace Dice
+namespace DiceRoll
 {
     class Program
     {
         static void Main(string[] args)
         {
-            Stopwatch stopwatch = new Stopwatch();
+            Stopwatch stopwatch = new();
             stopwatch.Start();
             
-            Constant dc = Expression.Constant(10);
-            Expressions.Dice dice = Expression.Dice(20);
-            OperationExpression dcExpr = Expression.GreaterThanOrEqual(dice, dc);
-            Probability probability = dcExpr.Evaluate();
+            Constant modifier = Expression.Constant(1);
+            Dice dice = Expression.Dice(6);
+            
+            ProbabilityDistribution distribution = dice.GetProbabilityDistribution(); // 1d6
+            Console.WriteLine(ProbabilityToString(distribution));
+            
+            distribution = distribution.Combine(distribution); // 2d6
+            Console.WriteLine(ProbabilityToString(distribution));
+            
+            distribution = distribution.Combine(modifier.GetProbabilityDistribution()); // 2d6+1
+            Console.WriteLine(ProbabilityToString(distribution));
             
             stopwatch.Stop();
             
-            Console.WriteLine(LikelihoodToString(probability));
             
             Console.WriteLine($"Elapsed {stopwatch.ElapsedMilliseconds}ms ({stopwatch.Elapsed.Seconds:f2}s)");
         }
