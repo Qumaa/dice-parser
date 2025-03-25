@@ -15,12 +15,12 @@
                 Subtract(left.GetProbabilityDistribution(), right.GetProbabilityDistribution());
 
             public static Selection SelectHighest(RollProbabilityDistribution left, RollProbabilityDistribution right) =>
-                new(left, right, SelectMode.Highest);
+                new SelectHighest(left, right);
             public static Selection SelectHighest(IAnalyzable left, IAnalyzable right) =>
                 SelectHighest(left.GetProbabilityDistribution(), right.GetProbabilityDistribution());
 
             public static Selection SelectLowest(RollProbabilityDistribution left, RollProbabilityDistribution right) =>
-                new(left, right, SelectMode.Lowest);
+                new SelectLowest(left, right);
             public static Selection SelectLowest(IAnalyzable left, IAnalyzable right) =>
                 SelectLowest(left.GetProbabilityDistribution(), right.GetProbabilityDistribution());
 

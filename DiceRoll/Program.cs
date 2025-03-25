@@ -21,13 +21,10 @@ namespace DiceRoll
 
         private static void Body()
         {
-            Dice dice = Expression.Values.Dice(20);
-            Constant constant = Expression.Values.Constant(10);
+            Dice dice = Expression.Values.Dice(6);
 
-            Operation roll = Expression.Operations.GreaterThan(dice, constant);
+            Composite roll = Expression.Values.KeepHighest(dice, dice);
             
-            Console.WriteLine(roll.Evaluate().Value);
-            Console.WriteLine();
             Console.WriteLine(ProbabilityToString(roll.GetProbabilityDistribution()));
         }
 

@@ -3,15 +3,13 @@ using System.Linq;
 
 namespace DiceRoll.Expressions
 {
-    public sealed class Selection : ProbabilityDistributionTransformation
+    public abstract class Selection : ProbabilityDistributionTransformation
     {
-        private readonly RollProbabilityDistribution _other;
-        private readonly SelectMode _selectMode;
+        protected readonly RollProbabilityDistribution _other;
 
-        public Selection(RollProbabilityDistribution source, RollProbabilityDistribution other, SelectMode selectMode) : base(source)
+        protected Selection(RollProbabilityDistribution source, RollProbabilityDistribution other) : base(source)
         {
             _other = other;
-            _selectMode = selectMode;
         }
 
         public override RollProbabilityDistribution Evaluate()
@@ -24,10 +22,8 @@ namespace DiceRoll.Expressions
 
         private Probability[] AllocateProbabilitiesArray(out int offset)
         {
-            int min = Math.Min(_source.Min.Value, _other.Min.Value);
-            int max = _selectMode is SelectMode.Lowest ? 
-                Math.Min(_source.Max.Value, _other.Max.Value) : 
-                Math.Max(_source.Max.Value, _other.Max.Value);
+            int min = GetMin();
+            int max = GetMax();
 
             offset = min;
             return new Probability[max - min + 1];
@@ -35,26 +31,57 @@ namespace DiceRoll.Expressions
 
         private void FillProbabilities(Probability[] probabilities, int offset)
         {
-            CDFProvider source = GetCDFProvider(_source);
-            CDFProvider other = GetCDFProvider(_other);
+            CDFTable source = new(_source);
+            CDFTable other = new(_other);
 
             for (int i = 0; i < probabilities.Length; i++)
             {
                 Outcome outcome = new(i + offset);
 
-                CDF sourceCdf = source.ForOutcome(outcome);
-                CDF otherCdf = other.ForOutcome(outcome);
+                CDF sourceCdf = CDFForOutcome(source, outcome);
+                CDF otherCdf = CDFForOutcome(other, outcome);
 
                 probabilities[i] = CDFToProbability(sourceCdf, otherCdf);
             }
         }
 
-        private CDFProvider GetCDFProvider(RollProbabilityDistribution distribution) =>
-            _selectMode is SelectMode.Highest ? new CDFTable(distribution) : new CDFTableReversed(distribution);
+        private CDF CDFForOutcome(CDFTable cdfTable, Outcome outcome) =>
+            new(cdfTable.EqualTo(outcome), GetSecondCDFValue(cdfTable, outcome));
+
+        private int GetMin() =>
+            Math.Min(_source.Min.Value, _other.Min.Value);
+
+        protected abstract int GetMax();
+
+        protected abstract Probability GetSecondCDFValue(CDFTable cdfTable, Outcome outcome);
 
         private static Probability CDFToProbability(CDF source, CDF other) =>
             new(source.Equal.Value * other.EqualOr.Value +
                 other.Equal.Value * source.EqualOr.Value -
                 source.Equal.Value * other.Equal.Value);
+    }
+
+    public sealed class SelectHighest : Selection
+    {
+        public SelectHighest(RollProbabilityDistribution source, RollProbabilityDistribution other) : 
+            base(source, other) { }
+
+        protected override int GetMax() =>
+            Math.Max(_source.Max.Value, _other.Max.Value);
+
+        protected override Probability GetSecondCDFValue(CDFTable cdfTable, Outcome outcome) =>
+            cdfTable.LessOrEqualThan(outcome);
+    }
+
+    public sealed class SelectLowest : Selection
+    {
+        public SelectLowest(RollProbabilityDistribution source, RollProbabilityDistribution other) : 
+            base(source, other) { }
+
+        protected override int GetMax() =>
+            Math.Min(_source.Max.Value, _other.Max.Value);
+
+        protected override Probability GetSecondCDFValue(CDFTable cdfTable, Outcome outcome) =>
+            cdfTable.GreaterOrEqualThan(outcome);
     }
 }
