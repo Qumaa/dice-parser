@@ -3,13 +3,16 @@ using System.Linq;
 
 namespace DiceRoll.Expressions
 {
-    public abstract class Selection : ProbabilityDistributionTransformation
+    public sealed class Selection : ProbabilityDistributionTransformation
     {
-        protected readonly RollProbabilityDistribution _other;
+        private readonly RollProbabilityDistribution _other;
+        private readonly SelectionType _selectionType;
 
-        protected Selection(RollProbabilityDistribution source, RollProbabilityDistribution other) : base(source)
+        public Selection(RollProbabilityDistribution source, RollProbabilityDistribution other,
+            SelectionType selectionType) : base(source)
         {
             _other = other;
+            _selectionType = selectionType;
         }
 
         public override RollProbabilityDistribution Evaluate()
@@ -51,37 +54,19 @@ namespace DiceRoll.Expressions
         private int GetMin() =>
             Math.Min(_source.Min.Value, _other.Min.Value);
 
-        protected abstract int GetMax();
+        private int GetMax() =>
+        _selectionType is SelectionType.Highest ?
+            Math.Max(_source.Max.Value, _other.Max.Value) :
+            Math.Min(_source.Max.Value, _other.Max.Value);
 
-        protected abstract Probability GetSecondCDFValue(CDFTable cdfTable, Outcome outcome);
+        private Probability GetSecondCDFValue(CDFTable cdfTable, Outcome outcome) =>
+            _selectionType is SelectionType.Highest ?
+                cdfTable.LessThanOrEqualTo(outcome) :
+                cdfTable.GreaterThanOrEqualTo(outcome);
 
         private static Probability CDFToProbability(CDF source, CDF other) =>
             new(source.Equal.Value * other.EqualOr.Value +
                 other.Equal.Value * source.EqualOr.Value -
                 source.Equal.Value * other.Equal.Value);
-    }
-
-    public sealed class SelectHighest : Selection
-    {
-        public SelectHighest(RollProbabilityDistribution source, RollProbabilityDistribution other) : 
-            base(source, other) { }
-
-        protected override int GetMax() =>
-            Math.Max(_source.Max.Value, _other.Max.Value);
-
-        protected override Probability GetSecondCDFValue(CDFTable cdfTable, Outcome outcome) =>
-            cdfTable.LessOrEqualThan(outcome);
-    }
-
-    public sealed class SelectLowest : Selection
-    {
-        public SelectLowest(RollProbabilityDistribution source, RollProbabilityDistribution other) : 
-            base(source, other) { }
-
-        protected override int GetMax() =>
-            Math.Min(_source.Max.Value, _other.Max.Value);
-
-        protected override Probability GetSecondCDFValue(CDFTable cdfTable, Outcome outcome) =>
-            cdfTable.GreaterOrEqualThan(outcome);
     }
 }

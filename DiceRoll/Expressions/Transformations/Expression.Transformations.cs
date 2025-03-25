@@ -2,7 +2,7 @@
 {
     public static partial class Expression
     {
-        public static partial class Transformations
+        public static partial class Transformation
         {
             public static Combination Add(RollProbabilityDistribution left, RollProbabilityDistribution right) =>
                 new(left, right, CombinationType.Add);
@@ -14,13 +14,14 @@
             public static Combination Subtract(IAnalyzable left, IAnalyzable right) =>
                 Subtract(left.GetProbabilityDistribution(), right.GetProbabilityDistribution());
 
-            public static Selection SelectHighest(RollProbabilityDistribution left, RollProbabilityDistribution right) =>
-                new SelectHighest(left, right);
+            public static Selection SelectHighest(RollProbabilityDistribution left,
+                RollProbabilityDistribution right) =>
+                new(left, right, SelectionType.Highest);
             public static Selection SelectHighest(IAnalyzable left, IAnalyzable right) =>
                 SelectHighest(left.GetProbabilityDistribution(), right.GetProbabilityDistribution());
 
             public static Selection SelectLowest(RollProbabilityDistribution left, RollProbabilityDistribution right) =>
-                new SelectLowest(left, right);
+                new(left, right, SelectionType.Lowest);
             public static Selection SelectLowest(IAnalyzable left, IAnalyzable right) =>
                 SelectLowest(left.GetProbabilityDistribution(), right.GetProbabilityDistribution());
 

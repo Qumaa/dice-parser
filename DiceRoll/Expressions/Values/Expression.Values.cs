@@ -4,7 +4,7 @@ namespace DiceRoll.Expressions
 {
     public static partial class Expression
     {
-        public static partial class Values
+        public static partial class Value
         {
             public static Constant Constant(int value) =>
                 new(value);

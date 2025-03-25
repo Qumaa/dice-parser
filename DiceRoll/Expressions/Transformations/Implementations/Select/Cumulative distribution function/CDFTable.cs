@@ -27,7 +27,7 @@ namespace DiceRoll.Expressions
             return _probabilities[OutcomeToIndex(outcome)];
         }
 
-        public Probability LessOrEqualThan(Outcome outcome)
+        public Probability LessThanOrEqualTo(Outcome outcome)
         {
             if (outcome.Value > _max.Value)
                 return Probability.Zero;
@@ -38,7 +38,7 @@ namespace DiceRoll.Expressions
             return _cdfProbabilities[OutcomeToIndex(outcome)];
         }
 
-        public Probability GreaterOrEqualThan(Outcome outcome)
+        public Probability GreaterThanOrEqualTo(Outcome outcome)
         {
             if (outcome.Value > _max.Value)
                 return Probability.Hundred;
@@ -72,9 +72,9 @@ namespace DiceRoll.Expressions
             cdfTable.EqualTo(outcome).Inversed();
 
         public static Probability GreaterThan(this CDFTable cdfTable, Outcome outcome) =>
-            cdfTable.LessOrEqualThan(outcome).Inversed();
+            cdfTable.LessThanOrEqualTo(outcome).Inversed();
         
         public static Probability LessThan(this CDFTable cdfTable, Outcome outcome) =>
-            cdfTable.GreaterOrEqualThan(outcome).Inversed();
+            cdfTable.GreaterThanOrEqualTo(outcome).Inversed();
     }
 }

@@ -26,8 +26,13 @@ namespace DiceRoll.Expressions
         {
             if (left.Max.Value < right.Min.Value || right.Max.Value < left.Min.Value)
                 return Probability.Zero;
-                
-            return Evaluate(left, right, (leftRoll, rightRoll) => leftRoll.Value == rightRoll.Value);
+
+            CDFTable leftTable = new(left);
+            CDFTable rightTable = new(right);
+
+            return new Probability(left.Intersection(right)
+                .Aggregate(0d, (accumulated, outcome) =>
+                        accumulated + (leftTable.EqualTo(outcome).Value * rightTable.EqualTo(outcome).Value)));
         }
 
         private static Probability GreaterThan(RollProbabilityDistribution left, RollProbabilityDistribution right)
@@ -35,24 +40,27 @@ namespace DiceRoll.Expressions
             if (left.Max.Value < right.Min.Value)
                 return Probability.Zero;
 
-            return Evaluate(left, right, (leftRoll, rightRoll) => leftRoll.Value > rightRoll.Value);
+            CDFTable leftTable = new(left);
+            CDFTable rightTable = new(right);
+
+            return new Probability(left.Select(x => x.Outcome)
+                .Aggregate(0d,
+                    (accumulated, outcome) =>
+                        accumulated + (leftTable.EqualTo(outcome).Value * rightTable.GreaterThan(outcome).Value)));
         }
 
         private static Probability LessThan(RollProbabilityDistribution left, RollProbabilityDistribution right)
         {
-            if ( right.Max.Value < left.Min.Value)
+            if ( left.Min.Value > right.Max.Value)
                 return Probability.Zero;
-                
-            return Evaluate(left, right, (leftRoll, rightRoll) => leftRoll.Value < rightRoll.Value);
+            
+            CDFTable leftTable = new(left);
+            CDFTable rightTable = new(right);
+
+            return new Probability(left.Select(x => x.Outcome)
+                .Aggregate(0d,
+                    (accumulated, outcome) =>
+                        accumulated + (leftTable.EqualTo(outcome).Value * rightTable.LessThan(outcome).Value)));
         }
-        
-        private static Probability Evaluate(RollProbabilityDistribution left, RollProbabilityDistribution right,
-            Func<Outcome, Outcome, bool> predicate) =>
-            new(left
-                .SelectMany(_ => right, (left, right) => new { left, right })
-                .Select(rolls => (rolls, probability: rolls.left.Probability.Value * rolls.right.Probability.Value))
-                .Where(t => predicate(t.rolls.left.Outcome, t.rolls.right.Outcome))
-                .Select(t => t.probability)
-                .Sum());
     }
 }

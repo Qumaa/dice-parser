@@ -18,7 +18,7 @@
             }
 
             public override RollProbabilityDistribution GetProbabilityDistribution() =>
-                Expression.Transformations.SelectHighest(_left, _right).Evaluate();
+                Expression.Transformation.SelectHighest(_left, _right).Evaluate();
         }
     }
 }

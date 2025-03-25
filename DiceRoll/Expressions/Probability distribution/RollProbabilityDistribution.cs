@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace DiceRoll.Expressions
 {
@@ -35,5 +36,14 @@ namespace DiceRoll.Expressions
                     max = current;
             }
         }
+    }
+
+    public static class RollProbabilityDistributionExtensions
+    {
+        public static IEnumerable<Outcome> Intersection(this RollProbabilityDistribution source,
+            RollProbabilityDistribution other) =>
+            source
+                .Select(x => x.Outcome)
+                .Where(x => x.Value >= other.Min.Value && x.Value <= other.Max.Value);
     }
 }

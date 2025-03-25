@@ -13,7 +13,7 @@
                 new(_left.Evaluate().Value + _right.Evaluate().Value);
 
             public override RollProbabilityDistribution GetProbabilityDistribution() =>
-                Expression.Transformations.Add(_left, _right).Evaluate();
+                Expression.Transformation.Add(_left, _right).Evaluate();
         }
     }
 }
