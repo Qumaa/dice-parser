@@ -1,25 +1,20 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace DiceRoll.Expressions
 {
-    public sealed class ProbabilityDistribution : IEnumerable<Roll>
+    public sealed class RollProbabilityDistribution : ProbabilityDistribution<Roll>
     {
         public readonly Outcome Min;
         public readonly Outcome Max;
-        
-        private readonly IEnumerable<Roll> _probabilities;
 
-        public ProbabilityDistribution(IEnumerable<Roll> probabilities)
+        public RollProbabilityDistribution(IEnumerable<Roll> probabilities) : base(probabilities)
         {
-            _probabilities = probabilities;
-            
             Init(out Min, out Max);
         }
 
         private void Init(out Outcome min, out Outcome max)
         {
-            using IEnumerator<Roll> enumerator = _probabilities.GetEnumerator();
+            using IEnumerator<Roll> enumerator = GetEnumerator();
 
             if (!enumerator.MoveNext())
             {
@@ -40,11 +35,5 @@ namespace DiceRoll.Expressions
                     max = current;
             }
         }
-
-        public IEnumerator<Roll> GetEnumerator() =>
-            _probabilities.GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() =>
-            GetEnumerator();
     }
 }

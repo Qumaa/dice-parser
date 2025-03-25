@@ -8,11 +8,11 @@ namespace DiceRoll.Expressions
         private readonly Random _random;
         private readonly int _faces;
 
-        public ProbabilityDistribution GetProbabilityDistribution()
+        public RollProbabilityDistribution GetProbabilityDistribution()
         {
             Probability eachFaceProbability = new(1d / _faces);
 
-            ProbabilityDistribution distribution = new(Enumerable.Range(1, _faces)
+            RollProbabilityDistribution distribution = new(Enumerable.Range(1, _faces)
                 .Select(faceValue => new Outcome(faceValue))
                 .Select(outcome => new Roll(outcome, eachFaceProbability)));
 

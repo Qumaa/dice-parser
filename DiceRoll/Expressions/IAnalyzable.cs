@@ -1,7 +1,4 @@
 ﻿namespace DiceRoll.Expressions
 {
-    public interface IAnalyzable : IRollable
-    {
-        ProbabilityDistribution GetProbabilityDistribution();
-    }
+    public interface IAnalyzable : IRollable, IDistributable<RollProbabilityDistribution, Roll> { }
 }

@@ -12,7 +12,7 @@
             public override Outcome Evaluate() =>
                 new(_left.Evaluate().Value + _right.Evaluate().Value);
 
-            public override ProbabilityDistribution GetProbabilityDistribution() =>
+            public override RollProbabilityDistribution GetProbabilityDistribution() =>
                 Expression.Transformations.Add(_left, _right).Evaluate();
         }
     }

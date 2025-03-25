@@ -22,7 +22,7 @@ namespace DiceRoll.Expressions
         private static OperationDelegate Not(OperationDelegate operationDelegate) =>
             (left, right) => operationDelegate(left, right).Inversed();
 
-        private static Probability Equal(ProbabilityDistribution left, ProbabilityDistribution right)
+        private static Probability Equal(RollProbabilityDistribution left, RollProbabilityDistribution right)
         {
             if (left.Max.Value < right.Min.Value || right.Max.Value < left.Min.Value)
                 return Probability.Zero;
@@ -30,7 +30,7 @@ namespace DiceRoll.Expressions
             return Evaluate(left, right, (leftRoll, rightRoll) => leftRoll.Value == rightRoll.Value);
         }
 
-        private static Probability GreaterThan(ProbabilityDistribution left, ProbabilityDistribution right)
+        private static Probability GreaterThan(RollProbabilityDistribution left, RollProbabilityDistribution right)
         {
             if (left.Max.Value < right.Min.Value)
                 return Probability.Zero;
@@ -38,7 +38,7 @@ namespace DiceRoll.Expressions
             return Evaluate(left, right, (leftRoll, rightRoll) => leftRoll.Value > rightRoll.Value);
         }
 
-        private static Probability LessThan(ProbabilityDistribution left, ProbabilityDistribution right)
+        private static Probability LessThan(RollProbabilityDistribution left, RollProbabilityDistribution right)
         {
             if ( right.Max.Value < left.Min.Value)
                 return Probability.Zero;
@@ -46,7 +46,7 @@ namespace DiceRoll.Expressions
             return Evaluate(left, right, (leftRoll, rightRoll) => leftRoll.Value < rightRoll.Value);
         }
         
-        private static Probability Evaluate(ProbabilityDistribution left, ProbabilityDistribution right,
+        private static Probability Evaluate(RollProbabilityDistribution left, RollProbabilityDistribution right,
             Func<Outcome, Outcome, bool> predicate) =>
             new(left
                 .SelectMany(_ => right, (left, right) => new { left, right })

@@ -1,4 +1,4 @@
 ﻿namespace DiceRoll.Expressions
 {
-    public delegate Probability OperationDelegate(ProbabilityDistribution left, ProbabilityDistribution right);
+    public delegate Probability OperationDelegate(RollProbabilityDistribution left, RollProbabilityDistribution right);
 }

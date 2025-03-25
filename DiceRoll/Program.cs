@@ -21,22 +21,27 @@ namespace DiceRoll
 
         private static void Body()
         {
-            Dice dice1 = Expression.Values.Dice(6);
-            Dice dice2 = Expression.Values.Dice(10);
+            Dice dice = Expression.Values.Dice(20);
+            Constant constant = Expression.Values.Constant(10);
 
-            Composite roll = Expression.Values.Composite<KeepLowest>( dice1, dice2);
+            Operation roll = Expression.Operations.GreaterThan(dice, constant);
             
             Console.WriteLine(roll.Evaluate().Value);
             Console.WriteLine();
             Console.WriteLine(ProbabilityToString(roll.GetProbabilityDistribution()));
         }
 
-        private static string ProbabilityToString(ProbabilityDistribution distribution) =>
+        private static string ProbabilityToString(RollProbabilityDistribution distribution) =>
             distribution.Aggregate("",
-                (s, probability) =>
-                    s + $"Probability of {probability.Outcome.Value} is {LikelihoodToString(probability.Probability)}%\n");
+                (s, roll) =>
+                    s + $"Probability of {roll.Outcome.Value} is {ProbabilityToString(roll.Probability)}%\n");
+        
+        private static string ProbabilityToString(BinaryProbabilityDistribution distribution) =>
+            distribution.Aggregate("",
+                (s, binary) =>
+                    s + $"Probability of {binary.Value} is {ProbabilityToString(binary.Probability)}%\n");
 
-        private static string LikelihoodToString(Probability probability) =>
+        private static string ProbabilityToString(Probability probability) =>
             $"{probability.Value * 100d:F2}%";
     }
 }

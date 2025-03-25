@@ -4,17 +4,17 @@ namespace DiceRoll.Expressions
 {
     public sealed class Combination : ProbabilityDistributionTransformation
     {
-        private readonly ProbabilityDistribution _other;
+        private readonly RollProbabilityDistribution _other;
         private readonly CombinationType _combinationType;
 
-        public Combination(ProbabilityDistribution source, ProbabilityDistribution other,
+        public Combination(RollProbabilityDistribution source, RollProbabilityDistribution other,
             CombinationType combinationType) : base(source)
         {
             _other = other;
             _combinationType = combinationType;
         }
 
-        public override ProbabilityDistribution Evaluate()
+        public override RollProbabilityDistribution Evaluate()
         {
             int minValue = _source.Min.Value + ApplyCombinationType(_other.Min.Value);
             int maxValue = _source.Max.Value + ApplyCombinationType(_other.Max.Value);
@@ -30,7 +30,7 @@ namespace DiceRoll.Expressions
                 newProbabilities[value - minValue] += probability;
             }
 
-            return new ProbabilityDistribution(newProbabilities
+            return new RollProbabilityDistribution(newProbabilities
                 .Select(
                     (d, i) => new Roll(i + minValue, d)
                 )

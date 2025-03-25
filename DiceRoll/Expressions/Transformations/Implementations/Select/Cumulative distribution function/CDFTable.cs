@@ -2,7 +2,7 @@
 {
     public sealed class CDFTable : CDFProvider
     {
-        public CDFTable(ProbabilityDistribution distribution) : base(distribution, BuildCDF) { }
+        public CDFTable(RollProbabilityDistribution distribution) : base(distribution, BuildCDF) { }
 
         protected override bool OutOfBounds(Outcome outcome, out CDF cdf)
         {

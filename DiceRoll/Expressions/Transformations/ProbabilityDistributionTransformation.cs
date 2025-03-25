@@ -1,14 +1,14 @@
 ﻿namespace DiceRoll.Expressions
 {
-    public abstract class ProbabilityDistributionTransformation : IExpression<ProbabilityDistribution>
+    public abstract class ProbabilityDistributionTransformation : IExpression<RollProbabilityDistribution>
     {
-        protected readonly ProbabilityDistribution _source;
+        protected readonly RollProbabilityDistribution _source;
         
-        protected ProbabilityDistributionTransformation(ProbabilityDistribution source)
+        protected ProbabilityDistributionTransformation(RollProbabilityDistribution source)
         {
             _source = source;
         }
 
-        public abstract ProbabilityDistribution Evaluate();
+        public abstract RollProbabilityDistribution Evaluate();
     }
 }

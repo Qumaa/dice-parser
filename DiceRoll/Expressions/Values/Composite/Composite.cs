@@ -13,7 +13,7 @@ namespace DiceRoll.Expressions
         public Outcome Evaluate() =>
             _composed.Evaluate();
 
-        public ProbabilityDistribution GetProbabilityDistribution() =>
+        public RollProbabilityDistribution GetProbabilityDistribution() =>
             _composed.GetProbabilityDistribution();
     }
 }

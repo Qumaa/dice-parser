@@ -17,7 +17,7 @@
                 return left.Value < right.Value ? left : right;
             }
 
-            public override ProbabilityDistribution GetProbabilityDistribution() =>
+            public override RollProbabilityDistribution GetProbabilityDistribution() =>
                 Expression.Transformations.SelectLowest(_left, _right).Evaluate();
         }
     }

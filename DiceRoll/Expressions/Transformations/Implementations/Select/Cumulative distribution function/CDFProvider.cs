@@ -9,7 +9,7 @@ namespace DiceRoll.Expressions
         private readonly Roll[] _rolls;
         private readonly Probability[] _cdfProbabilities;
 
-        protected CDFProvider(ProbabilityDistribution distribution, CDFBuilder cdfBuilder)
+        protected CDFProvider(RollProbabilityDistribution distribution, CDFBuilder cdfBuilder)
         {
             _min = distribution.Min;
             _max = distribution.Max;

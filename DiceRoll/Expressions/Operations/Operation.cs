@@ -1,6 +1,6 @@
 ﻿namespace DiceRoll.Expressions
 {
-    public sealed class Operation : IExpression<Probability>
+    public sealed class Operation : IOperation
     {
         private readonly IAnalyzable _left;
         private readonly IAnalyzable _right;
@@ -13,8 +13,10 @@
             _operationDelegate = operationDelegate;
         }
 
-        public Probability Evaluate() =>
-            _operationDelegate.Invoke(_left.GetProbabilityDistribution(), _right.GetProbabilityDistribution());
+        public BinaryProbabilityDistribution GetProbabilityDistribution() =>
+            new(_operationDelegate.Invoke(_left.GetProbabilityDistribution(), _right.GetProbabilityDistribution()));
 
+        public Outcome Evaluate() =>
+            _left.Evaluate();
     }
 }

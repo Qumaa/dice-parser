@@ -5,21 +5,21 @@ namespace DiceRoll.Expressions
 {
     public sealed class Selection : ProbabilityDistributionTransformation
     {
-        private readonly ProbabilityDistribution _other;
+        private readonly RollProbabilityDistribution _other;
         private readonly SelectMode _selectMode;
 
-        public Selection(ProbabilityDistribution source, ProbabilityDistribution other, SelectMode selectMode) : base(source)
+        public Selection(RollProbabilityDistribution source, RollProbabilityDistribution other, SelectMode selectMode) : base(source)
         {
             _other = other;
             _selectMode = selectMode;
         }
 
-        public override ProbabilityDistribution Evaluate()
+        public override RollProbabilityDistribution Evaluate()
         {
             Probability[] probabilities = AllocateProbabilitiesArray(out int indexToValueOffset);
             FillProbabilities(probabilities, indexToValueOffset);
 
-            return new ProbabilityDistribution(probabilities.Select((x, i) => new Roll(i + indexToValueOffset, x)));
+            return new RollProbabilityDistribution(probabilities.Select((x, i) => new Roll(i + indexToValueOffset, x)));
         }
 
         private Probability[] AllocateProbabilitiesArray(out int offset)
@@ -49,7 +49,7 @@ namespace DiceRoll.Expressions
             }
         }
 
-        private CDFProvider GetCDFProvider(ProbabilityDistribution distribution) =>
+        private CDFProvider GetCDFProvider(RollProbabilityDistribution distribution) =>
             _selectMode is SelectMode.Highest ? new CDFTable(distribution) : new CDFTableReversed(distribution);
 
         private static Probability CDFToProbability(CDF source, CDF other) =>

@@ -14,7 +14,7 @@ namespace DiceRoll.Expressions
         public Outcome Evaluate() =>
             new(_value);
 
-        public ProbabilityDistribution GetProbabilityDistribution() =>
+        public RollProbabilityDistribution GetProbabilityDistribution() =>
             new(Enumerable.Repeat(new Roll(_value, Probability.Hundred), 1));
     }
 }

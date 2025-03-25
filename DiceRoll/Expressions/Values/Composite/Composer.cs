@@ -73,7 +73,7 @@ namespace DiceRoll.Expressions
             }
 
             public abstract Outcome Evaluate();
-            public abstract ProbabilityDistribution GetProbabilityDistribution();
+            public abstract RollProbabilityDistribution GetProbabilityDistribution();
         }
 
         private sealed class FuncComposer : Composer
