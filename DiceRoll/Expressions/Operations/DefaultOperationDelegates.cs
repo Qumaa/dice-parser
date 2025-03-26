@@ -1,5 +1,5 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
+using DiceRoll.Exceptions;
 
 namespace DiceRoll.Expressions
 {
@@ -7,6 +7,8 @@ namespace DiceRoll.Expressions
     {
         public static OperationDelegate Get(OperationType operationType)
         {
+            EnumNotDefinedException.ThrowIfNotDefined(operationType);
+            
             return operationType switch
             {
                 OperationType.Equal => Equal,
@@ -14,8 +16,7 @@ namespace DiceRoll.Expressions
                 OperationType.GreaterThan => GreaterThan,
                 OperationType.GreaterThanOrEqual => Not(LessThan),
                 OperationType.LessThan => LessThan,
-                OperationType.LessThanOrEqual => Not(GreaterThan),
-                _ => throw new ArgumentOutOfRangeException(nameof(operationType), operationType, null)
+                OperationType.LessThanOrEqual => Not(GreaterThan)
             };
         }
 
@@ -24,7 +25,7 @@ namespace DiceRoll.Expressions
 
         private static Probability Equal(RollProbabilityDistribution left, RollProbabilityDistribution right)
         {
-            if (left.Max < right.Min || right.Max < left.Min)
+            if (left.Max < right.Min || left.Min > right.Max)
                 return Probability.Zero;
 
             CDFTable leftTable = new(left);
@@ -37,7 +38,7 @@ namespace DiceRoll.Expressions
 
         private static Probability GreaterThan(RollProbabilityDistribution left, RollProbabilityDistribution right)
         {
-            if (left.Max < right.Min)
+            if (left.Max <= right.Min)
                 return Probability.Zero;
 
             CDFTable leftTable = new(left);
@@ -51,7 +52,7 @@ namespace DiceRoll.Expressions
 
         private static Probability LessThan(RollProbabilityDistribution left, RollProbabilityDistribution right)
         {
-            if ( left.Min > right.Max)
+            if ( left.Min >= right.Max)
                 return Probability.Zero;
             
             CDFTable leftTable = new(left);

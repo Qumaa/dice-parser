@@ -1,5 +1,8 @@
-﻿namespace DiceRoll.Expressions
+﻿using System.Runtime.InteropServices;
+
+namespace DiceRoll.Expressions
 {
+    [StructLayout(LayoutKind.Auto)]
     public readonly struct Logical
     {
         public readonly Binary Outcome;

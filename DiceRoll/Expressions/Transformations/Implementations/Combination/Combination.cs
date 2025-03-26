@@ -1,4 +1,6 @@
-﻿namespace DiceRoll.Expressions
+﻿using DiceRoll.Exceptions;
+
+namespace DiceRoll.Expressions
 {
     public sealed class Combination : MergeTransformation
     {
@@ -7,6 +9,8 @@
         public Combination(RollProbabilityDistribution source, RollProbabilityDistribution other,
             CombinationType combinationType) : base(source, other)
         {
+            EnumNotDefinedException.ThrowIfNotDefined(combinationType);
+            
             _combinationType = combinationType;
         }
 

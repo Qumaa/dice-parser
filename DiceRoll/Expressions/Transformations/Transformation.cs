@@ -1,4 +1,6 @@
-﻿namespace DiceRoll.Expressions
+﻿using System;
+
+namespace DiceRoll.Expressions
 {
     public abstract class Transformation : IExpression<RollProbabilityDistribution>
     {
@@ -6,6 +8,8 @@
         
         protected Transformation(RollProbabilityDistribution source)
         {
+            ArgumentNullException.ThrowIfNull(source);
+            
             _source = source;
         }
 

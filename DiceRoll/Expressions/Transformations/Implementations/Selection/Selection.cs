@@ -1,4 +1,5 @@
 ﻿using System;
+using DiceRoll.Exceptions;
 
 namespace DiceRoll.Expressions
 {
@@ -9,6 +10,8 @@ namespace DiceRoll.Expressions
         public Selection(RollProbabilityDistribution source, RollProbabilityDistribution other,
             SelectionType selectionType) : base(source, other)
         {
+            EnumNotDefinedException.ThrowIfNotDefined(selectionType);
+            
             _selectionType = selectionType;
         }
 

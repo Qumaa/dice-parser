@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using DiceRoll.Exceptions;
 
 namespace DiceRoll.Expressions
 {
@@ -7,6 +8,15 @@ namespace DiceRoll.Expressions
     {
         private readonly Random _random;
         private readonly int _faces;
+
+        public Dice(Random random, int faces)
+        {
+            ArgumentNullException.ThrowIfNull(random);
+            FacesNumberException.ThrowIfInvalid(faces);
+            
+            _random = random;
+            _faces = faces;
+        }
 
         public RollProbabilityDistribution GetProbabilityDistribution()
         {
@@ -17,12 +27,6 @@ namespace DiceRoll.Expressions
                 .Select(outcome => new Roll(outcome, eachFaceProbability)));
 
             return distribution;
-        }
-
-        public Dice(Random random, int faces)
-        {
-            _random = random;
-            _faces = faces;
         }
 
         public Outcome Evaluate() =>

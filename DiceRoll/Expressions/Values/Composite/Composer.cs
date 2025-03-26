@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using DiceRoll.Exceptions;
 
 namespace DiceRoll.Expressions
 {
@@ -30,7 +31,7 @@ namespace DiceRoll.Expressions
         /// <param name="source"></param>
         /// <param name="compositionDelegate"></param>
         /// <returns></returns>
-        protected IAnalyzable IteratePairs(IAnalyzable[] source, ByPairsCompositionDelegate compositionDelegate)
+        protected static IAnalyzable IteratePairs(IAnalyzable[] source, ByPairsCompositionDelegate compositionDelegate)
         {
             ArgumentNullException.ThrowIfNull(source);
             ArgumentNullException.ThrowIfNull(compositionDelegate);
@@ -53,7 +54,8 @@ namespace DiceRoll.Expressions
             IAnalyzable[] sourceArray = source as IAnalyzable[] ?? source.ToArray();
 
             if (sourceArray.Length is 0)
-                throw new ArgumentException("Expression composer may not compose empty sequence of expressions.", nameof(source));
+                throw new EmptySequenceException("Expression composer may not compose empty sequence of expressions.",
+                    nameof(source));
 
             return sourceArray;
         }

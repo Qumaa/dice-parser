@@ -12,6 +12,8 @@ namespace DiceRoll.Expressions
 
         public CDFTable(RollProbabilityDistribution distribution)
         {
+            ArgumentNullException.ThrowIfNull(distribution);
+            
             _min = distribution.Min;
             _max = distribution.Max;
                 

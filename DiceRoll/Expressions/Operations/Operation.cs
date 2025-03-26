@@ -1,4 +1,6 @@
-﻿namespace DiceRoll.Expressions
+﻿using System;
+
+namespace DiceRoll.Expressions
 {
     public sealed class Operation : IOperation
     {
@@ -8,6 +10,10 @@
 
         public Operation(IAnalyzable left, IAnalyzable right, OperationDelegate operationDelegate)
         {
+            ArgumentNullException.ThrowIfNull(left);
+            ArgumentNullException.ThrowIfNull(right);
+            ArgumentNullException.ThrowIfNull(operationDelegate);
+            
             _left = left;
             _right = right;
             _operationDelegate = operationDelegate;

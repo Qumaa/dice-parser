@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 namespace DiceRoll.Expressions
 {
@@ -9,6 +10,8 @@ namespace DiceRoll.Expressions
         protected MergeTransformation(RollProbabilityDistribution source,
             RollProbabilityDistribution other) : base(source)
         {
+            ArgumentNullException.ThrowIfNull(other);
+            
             _other = other;
         }
         

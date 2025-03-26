@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using DiceRoll.Exceptions;
 
 namespace DiceRoll.Expressions
 {
@@ -9,6 +10,8 @@ namespace DiceRoll.Expressions
         
         protected ProbabilityDistribution(IEnumerable<T> probabilities) 
         {
+            EmptySequenceException.ThrowIfNullOrEmpty(probabilities);
+            
             _probabilities = probabilities;
         }
 
