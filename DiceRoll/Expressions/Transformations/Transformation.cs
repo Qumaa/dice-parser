@@ -1,10 +1,10 @@
 ﻿namespace DiceRoll.Expressions
 {
-    public abstract class ProbabilityDistributionTransformation : IExpression<RollProbabilityDistribution>
+    public abstract class Transformation : IExpression<RollProbabilityDistribution>
     {
         protected readonly RollProbabilityDistribution _source;
         
-        protected ProbabilityDistributionTransformation(RollProbabilityDistribution source)
+        protected Transformation(RollProbabilityDistribution source)
         {
             _source = source;
         }

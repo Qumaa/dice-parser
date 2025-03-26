@@ -1,6 +1,6 @@
 ﻿namespace DiceRoll.Expressions
 {
-    public sealed class Combination : CommonProbabilityDistributionTransformation
+    public sealed class Combination : MergeTransformation
     {
         private readonly CombinationType _combinationType;
 
@@ -10,15 +10,15 @@
             _combinationType = combinationType;
         }
 
-        protected override Probability[] AllocateProbabilitiesArray(out int valueToIndexOffset)
+        protected override Probability[] AllocateProbabilitiesArray(out int outcomeToIndexOffset)
         {
             int minValue = _source.Min.Value + ApplyCombinationType(_other.Min).Value;
             int maxValue = _source.Max.Value + ApplyCombinationType(_other.Max).Value;
 
-            return new Probability[maxValue - (valueToIndexOffset = minValue) + 1];
+            return new Probability[maxValue - (outcomeToIndexOffset = minValue) + 1];
         }
 
-        protected override Probability[] GenerateProbabilities(Probability[] probabilities, int valueToIndexOffset)
+        protected override Probability[] GenerateProbabilities(Probability[] probabilities, int outcomeToIndexOffset)
         {
             foreach (Roll sourceRoll in _source)
             foreach (Roll otherRoll in _other)
@@ -26,7 +26,7 @@
                 Outcome outcome = sourceRoll.Outcome + ApplyCombinationType(otherRoll.Outcome);
                 Probability probability = sourceRoll.Probability * otherRoll.Probability;
 
-                probabilities[outcome.Value - valueToIndexOffset] += probability;
+                probabilities[outcome.Value - outcomeToIndexOffset] += probability;
             }
 
             return probabilities;

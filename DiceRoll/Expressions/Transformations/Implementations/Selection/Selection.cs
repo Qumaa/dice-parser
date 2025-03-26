@@ -2,7 +2,7 @@
 
 namespace DiceRoll.Expressions
 {
-    public sealed class Selection : CommonProbabilityDistributionTransformation
+    public sealed class Selection : MergeTransformation
     {
         private readonly SelectionType _selectionType;
 
@@ -12,17 +12,17 @@ namespace DiceRoll.Expressions
             _selectionType = selectionType;
         }
 
-        protected override Probability[] AllocateProbabilitiesArray(out int indexToValueOffset) =>
-            new Probability[GetMax() - (indexToValueOffset = GetMin()) + 1];
+        protected override Probability[] AllocateProbabilitiesArray(out int outcomeToIndexOffset) =>
+            new Probability[GetMax() - (outcomeToIndexOffset = GetMin()) + 1];
 
-        protected override Probability[] GenerateProbabilities(Probability[] probabilities, int valueToIndexOffset)
+        protected override Probability[] GenerateProbabilities(Probability[] probabilities, int outcomeToIndexOffset)
         {
             CDFTable source = new(_source);
             CDFTable other = new(_other);
 
             for (int i = 0; i < probabilities.Length; i++)
             {
-                Outcome outcome = new(i + valueToIndexOffset);
+                Outcome outcome = new(i + outcomeToIndexOffset);
 
                 CDF sourceCdf = CDFForOutcome(source, outcome);
                 CDF otherCdf = CDFForOutcome(other, outcome);
