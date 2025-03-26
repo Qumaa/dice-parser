@@ -3,12 +3,23 @@
     public readonly struct Binary
     {
         public readonly bool Value;
-        public readonly Probability Probability;
         
-        public Binary(bool value, Probability probability)
+        public Binary(bool value)
         {
             Value = value;
-            Probability = probability;
         }
+
+        public static Binary operator !(Binary self) =>
+            new(!self.Value);
+
+        public static Binary operator &(Binary left, Binary right) =>
+            new(left.Value & right.Value);
+        public static Binary operator |(Binary left, Binary right) =>
+            new(left.Value | right.Value);
+
+        public static bool operator true(Binary self) =>
+            self.Value;
+        public static bool operator false(Binary self) =>
+            !self.Value;
     }
 }

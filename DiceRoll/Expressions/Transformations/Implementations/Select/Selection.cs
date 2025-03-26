@@ -1,53 +1,37 @@
 ﻿using System;
-using System.Linq;
 
 namespace DiceRoll.Expressions
 {
-    public sealed class Selection : ProbabilityDistributionTransformation
+    public sealed class Selection : CommonProbabilityDistributionTransformation
     {
-        private readonly RollProbabilityDistribution _other;
         private readonly SelectionType _selectionType;
 
         public Selection(RollProbabilityDistribution source, RollProbabilityDistribution other,
-            SelectionType selectionType) : base(source)
+            SelectionType selectionType) : base(source, other)
         {
-            _other = other;
             _selectionType = selectionType;
         }
 
-        public override RollProbabilityDistribution Evaluate()
-        {
-            Probability[] probabilities = AllocateProbabilitiesArray(out int indexToValueOffset);
-            FillProbabilities(probabilities, indexToValueOffset);
+        protected override Probability[] AllocateProbabilitiesArray(out int indexToValueOffset) =>
+            new Probability[GetMax() - (indexToValueOffset = GetMin()) + 1];
 
-            return new RollProbabilityDistribution(probabilities.Select((x, i) => new Roll(i + indexToValueOffset, x)));
-        }
-
-        private Probability[] AllocateProbabilitiesArray(out int offset)
-        {
-            int min = GetMin();
-            int max = GetMax();
-
-            offset = min;
-            return new Probability[max - min + 1];
-        }
-
-        private void FillProbabilities(Probability[] probabilities, int offset)
+        protected override Probability[] GenerateProbabilities(Probability[] probabilities, int valueToIndexOffset)
         {
             CDFTable source = new(_source);
             CDFTable other = new(_other);
 
             for (int i = 0; i < probabilities.Length; i++)
             {
-                Outcome outcome = new(i + offset);
+                Outcome outcome = new(i + valueToIndexOffset);
 
                 CDF sourceCdf = CDFForOutcome(source, outcome);
                 CDF otherCdf = CDFForOutcome(other, outcome);
 
                 probabilities[i] = CDFToProbability(sourceCdf, otherCdf);
             }
-        }
 
+            return probabilities;        }
+        
         private CDF CDFForOutcome(CDFTable cdfTable, Outcome outcome) =>
             new(cdfTable.EqualTo(outcome), GetSecondCDFValue(cdfTable, outcome));
 
@@ -65,8 +49,8 @@ namespace DiceRoll.Expressions
                 cdfTable.GreaterThanOrEqualTo(outcome);
 
         private static Probability CDFToProbability(CDF source, CDF other) =>
-            new(source.Equal.Value * other.EqualOr.Value +
-                other.Equal.Value * source.EqualOr.Value -
-                source.Equal.Value * other.Equal.Value);
+            source.Equal * other.EqualOr +
+            other.Equal * source.EqualOr -
+            source.Equal * other.Equal;
     }
 }

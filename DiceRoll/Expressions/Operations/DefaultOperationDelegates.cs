@@ -24,43 +24,43 @@ namespace DiceRoll.Expressions
 
         private static Probability Equal(RollProbabilityDistribution left, RollProbabilityDistribution right)
         {
-            if (left.Max.Value < right.Min.Value || right.Max.Value < left.Min.Value)
+            if (left.Max < right.Min || right.Max < left.Min)
                 return Probability.Zero;
 
             CDFTable leftTable = new(left);
             CDFTable rightTable = new(right);
 
-            return new Probability(left.Intersection(right)
-                .Aggregate(0d, (accumulated, outcome) =>
-                        accumulated + (leftTable.EqualTo(outcome).Value * rightTable.EqualTo(outcome).Value)));
+            return left.Intersection(right)
+                .Aggregate(Probability.Zero, (accumulated, outcome) =>
+                    accumulated + (leftTable.EqualTo(outcome) * rightTable.EqualTo(outcome)));
         }
 
         private static Probability GreaterThan(RollProbabilityDistribution left, RollProbabilityDistribution right)
         {
-            if (left.Max.Value < right.Min.Value)
+            if (left.Max < right.Min)
                 return Probability.Zero;
 
             CDFTable leftTable = new(left);
             CDFTable rightTable = new(right);
 
-            return new Probability(left.Select(x => x.Outcome)
-                .Aggregate(0d,
+            return left.Select(x => x.Outcome)
+                .Aggregate(Probability.Zero, 
                     (accumulated, outcome) =>
-                        accumulated + (leftTable.EqualTo(outcome).Value * rightTable.GreaterThan(outcome).Value)));
+                        accumulated + (leftTable.EqualTo(outcome) * rightTable.GreaterThan(outcome)));
         }
 
         private static Probability LessThan(RollProbabilityDistribution left, RollProbabilityDistribution right)
         {
-            if ( left.Min.Value > right.Max.Value)
+            if ( left.Min > right.Max)
                 return Probability.Zero;
             
             CDFTable leftTable = new(left);
             CDFTable rightTable = new(right);
 
-            return new Probability(left.Select(x => x.Outcome)
-                .Aggregate(0d,
+            return left.Select(x => x.Outcome)
+                .Aggregate(Probability.Zero,
                     (accumulated, outcome) =>
-                        accumulated + (leftTable.EqualTo(outcome).Value * rightTable.LessThan(outcome).Value)));
+                        accumulated + (leftTable.EqualTo(outcome) * rightTable.LessThan(outcome)));
         }
     }
 }

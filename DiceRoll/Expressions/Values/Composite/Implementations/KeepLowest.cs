@@ -9,13 +9,8 @@
         {
             public Lowest(IAnalyzable left, IAnalyzable right) : base(left, right) { }
             
-            public override Outcome Evaluate()
-            {
-                Outcome left = _left.Evaluate();
-                Outcome right = _right.Evaluate();
-
-                return left.Value < right.Value ? left : right;
-            }
+            public override Outcome Evaluate() =>
+                Outcome.Min(_left.Evaluate(), _right.Evaluate());
 
             public override RollProbabilityDistribution GetProbabilityDistribution() =>
                 Expression.Transformation.SelectLowest(_left, _right).Evaluate();

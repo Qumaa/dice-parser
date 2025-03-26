@@ -29,10 +29,10 @@ namespace DiceRoll.Expressions
             {
                 Outcome current = enumerator.Current.Outcome;
 
-                if (current.Value < min.Value)
+                if (current < min)
                     min = current;
 
-                if (current.Value > max.Value)
+                if (current > max)
                     max = current;
             }
         }
@@ -44,6 +44,6 @@ namespace DiceRoll.Expressions
             RollProbabilityDistribution other) =>
             source
                 .Select(x => x.Outcome)
-                .Where(x => x.Value >= other.Min.Value && x.Value <= other.Max.Value);
+                .Where(x => x >= other.Min && x <= other.Max);
     }
 }

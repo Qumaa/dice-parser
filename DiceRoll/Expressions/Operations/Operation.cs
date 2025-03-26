@@ -13,7 +13,7 @@
             _operationDelegate = operationDelegate;
         }
 
-        public BinaryProbabilityDistribution GetProbabilityDistribution() =>
+        public LogicalProbabilityDistribution GetProbabilityDistribution() =>
             new(_operationDelegate.Invoke(_left.GetProbabilityDistribution(), _right.GetProbabilityDistribution()));
 
         public Outcome Evaluate() =>

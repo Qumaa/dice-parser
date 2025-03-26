@@ -36,10 +36,10 @@ namespace DiceRoll
                 (s, roll) =>
                     s + $"Probability of {roll.Outcome.Value} is {ProbabilityToString(roll.Probability)}%\n");
         
-        private static string ProbabilityToString(BinaryProbabilityDistribution distribution) =>
+        private static string ProbabilityToString(LogicalProbabilityDistribution distribution) =>
             distribution.Aggregate("",
                 (s, binary) =>
-                    s + $"Probability of {binary.Value} is {ProbabilityToString(binary.Probability)}%\n");
+                    s + $"Probability of {binary.Outcome.Value} is {ProbabilityToString(binary.Probability)}%\n");
 
         private static string ProbabilityToString(Probability probability) =>
             $"{probability.Value * 100d:F2}%";

@@ -1,43 +1,38 @@
-﻿using System.Linq;
-
-namespace DiceRoll.Expressions
+﻿namespace DiceRoll.Expressions
 {
-    public sealed class Combination : ProbabilityDistributionTransformation
+    public sealed class Combination : CommonProbabilityDistributionTransformation
     {
-        private readonly RollProbabilityDistribution _other;
         private readonly CombinationType _combinationType;
 
         public Combination(RollProbabilityDistribution source, RollProbabilityDistribution other,
-            CombinationType combinationType) : base(source)
+            CombinationType combinationType) : base(source, other)
         {
-            _other = other;
             _combinationType = combinationType;
         }
 
-        public override RollProbabilityDistribution Evaluate()
+        protected override Probability[] AllocateProbabilitiesArray(out int valueToIndexOffset)
         {
-            int minValue = _source.Min.Value + ApplyCombinationType(_other.Min.Value);
-            int maxValue = _source.Max.Value + ApplyCombinationType(_other.Max.Value);
+            int minValue = _source.Min.Value + ApplyCombinationType(_other.Min).Value;
+            int maxValue = _source.Max.Value + ApplyCombinationType(_other.Max).Value;
 
-            double[] newProbabilities = new double[maxValue - minValue + 1];
+            return new Probability[maxValue - (valueToIndexOffset = minValue) + 1];
+        }
 
+        protected override Probability[] GenerateProbabilities(Probability[] probabilities, int valueToIndexOffset)
+        {
             foreach (Roll sourceRoll in _source)
             foreach (Roll otherRoll in _other)
             {
-                int value = sourceRoll.Outcome.Value + ApplyCombinationType(otherRoll.Outcome.Value);
-                double probability = sourceRoll.Probability.Value * otherRoll.Probability.Value;
+                Outcome outcome = sourceRoll.Outcome + ApplyCombinationType(otherRoll.Outcome);
+                Probability probability = sourceRoll.Probability * otherRoll.Probability;
 
-                newProbabilities[value - minValue] += probability;
+                probabilities[outcome.Value - valueToIndexOffset] += probability;
             }
 
-            return new RollProbabilityDistribution(newProbabilities
-                .Select(
-                    (d, i) => new Roll(i + minValue, d)
-                )
-            );
+            return probabilities;
         }
 
-        private int ApplyCombinationType(int value) =>
+        private Outcome ApplyCombinationType(Outcome value) =>
             _combinationType is CombinationType.Subtract ? -value : value;
     }
 }

@@ -1,4 +1,4 @@
 ﻿namespace DiceRoll.Expressions
 {
-    public interface IOperation : IRollable, IDistributable<BinaryProbabilityDistribution, Binary> { }
+    public interface IOperation : IRollable, IDistributable<LogicalProbabilityDistribution, Logical> { }
 }

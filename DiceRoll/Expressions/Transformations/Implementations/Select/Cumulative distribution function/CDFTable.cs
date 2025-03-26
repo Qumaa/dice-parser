@@ -21,7 +21,7 @@ namespace DiceRoll.Expressions
 
         public Probability EqualTo(Outcome outcome)
         {
-            if (outcome.Value < _min.Value || outcome.Value > _max.Value)
+            if (outcome < _min || outcome > _max)
                 return Probability.Zero;
 
             return _probabilities[OutcomeToIndex(outcome)];
@@ -29,10 +29,10 @@ namespace DiceRoll.Expressions
 
         public Probability LessThanOrEqualTo(Outcome outcome)
         {
-            if (outcome.Value > _max.Value)
+            if (outcome > _max)
                 return Probability.Zero;
             
-            if (outcome.Value < _min.Value)
+            if (outcome < _min)
                 return Probability.Hundred;
 
             return _cdfProbabilities[OutcomeToIndex(outcome)];
@@ -40,10 +40,10 @@ namespace DiceRoll.Expressions
 
         public Probability GreaterThanOrEqualTo(Outcome outcome)
         {
-            if (outcome.Value > _max.Value)
+            if (outcome > _max)
                 return Probability.Hundred;
             
-            if (outcome.Value < _min.Value)
+            if (outcome < _min)
                 return Probability.Zero;
 
             return _cdfProbabilities[OutcomeToIndex(outcome, true)];
@@ -60,7 +60,7 @@ namespace DiceRoll.Expressions
             cdf[0] = probabilities[0];
                 
             for (int i = 1; i < cdf.Length; i++)
-                cdf[i] = new Probability(probabilities[i].Value + cdf[i - 1].Value);
+                cdf[i] = probabilities[i] + cdf[i - 1];
                 
             return cdf;
         }

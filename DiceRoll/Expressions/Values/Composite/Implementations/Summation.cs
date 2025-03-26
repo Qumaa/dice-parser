@@ -10,7 +10,7 @@
             public Sum(IAnalyzable left, IAnalyzable right) : base(left, right) { }
 
             public override Outcome Evaluate() =>
-                new(_left.Evaluate().Value + _right.Evaluate().Value);
+                _left.Evaluate() + _right.Evaluate();
 
             public override RollProbabilityDistribution GetProbabilityDistribution() =>
                 Expression.Transformation.Add(_left, _right).Evaluate();
