@@ -1,0 +1,19 @@
+﻿namespace DiceRoll.Nodes
+{
+    public sealed class Summation : Composer
+    {
+        protected override IAnalyzable Compose(IAnalyzable[] source) =>
+            IteratePairs(source, (left, right) => new Sum(left, right));
+
+        private sealed class Sum : Composed
+        {
+            public Sum(IAnalyzable left, IAnalyzable right) : base(left, right) { }
+
+            public override Outcome Evaluate() =>
+                _left.Evaluate() + _right.Evaluate();
+
+            public override RollProbabilityDistribution GetProbabilityDistribution() =>
+                Node.Transformation.Add(_left, _right).Evaluate();
+        }
+    }
+}

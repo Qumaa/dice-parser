@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
-using DiceRoll.Expressions;
+using DiceRoll.Nodes;
 
 namespace DiceRoll
 {
@@ -21,12 +21,12 @@ namespace DiceRoll
 
         private static void Body()
         {
-            Dice d20 = Expression.Value.Dice(20);
-            Composite adv = Expression.Value.Composite<KeepHighest>(d20, d20);
+            Dice d20 = Node.Value.Dice(20);
+            Composite adv = Node.Value.Composite<KeepHighest>(d20, d20);
 
-            Constant dc = Expression.Value.Constant(10);
-
-            Operation op = Expression.Operation.GreaterThanOrEqual(adv, dc);
+            Constant dc = Node.Value.Constant(10);
+            
+            Operation op = Node.Operation.GreaterThanOrEqual(adv, dc);
 
             Console.WriteLine(ProbabilityToString(op.GetProbabilityDistribution()));
         }
