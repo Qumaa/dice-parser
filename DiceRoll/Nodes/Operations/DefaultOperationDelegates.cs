@@ -7,7 +7,7 @@ namespace DiceRoll.Nodes
     {
         public static OperationDelegate Get(OperationType operationType)
         {
-            EnumNotDefinedException.ThrowIfNotDefined(operationType);
+            EnumValueNotDefinedException.ThrowIfValueNotDefined(operationType);
             
             return operationType switch
             {

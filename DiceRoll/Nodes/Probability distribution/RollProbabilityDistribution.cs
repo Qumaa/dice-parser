@@ -3,6 +3,11 @@ using System.Linq;
 
 namespace DiceRoll.Nodes
 {
+    /// <summary>
+    /// A numeric implementation of <see cref="ProbabilityDistribution{T}">ProbabilityDistribution</see>
+    /// of type <see cref="Roll"/> with a reasonable naming.
+    /// Provides extra numbers-related functionality.
+    /// </summary>
     public sealed class RollProbabilityDistribution : ProbabilityDistribution<Roll>
     {
         public readonly Outcome Min;

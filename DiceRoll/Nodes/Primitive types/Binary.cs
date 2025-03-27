@@ -1,5 +1,9 @@
 ﻿namespace DiceRoll.Nodes
 {
+    /// <summary>
+    /// A <see cref="bool">boolean</see> value wrapper.
+    /// Use this type as the target evaluation type for binary operation <see cref="INode{T}">nodes</see>.
+    /// </summary>
     public readonly struct Binary
     {
         public readonly bool Value;

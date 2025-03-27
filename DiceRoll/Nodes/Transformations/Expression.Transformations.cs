@@ -2,6 +2,9 @@
 {
     public static partial class Node
     {
+        /// <summary>
+        /// Contains nodes that represent numeric values and their probability distribution transformations.
+        /// </summary>
         public static partial class Transformation
         {
             public static Combination Add(RollProbabilityDistribution left, RollProbabilityDistribution right) =>

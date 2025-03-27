@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using DiceRoll.Exceptions;
 
 namespace DiceRoll.Nodes
 {
+    /// <summary>
+    /// A <see cref="double">double-precision</see> number wrapper, explicitly stating the intent to treat it as a percentage.
+    /// </summary>
     public readonly struct Probability : IEquatable<Probability>, IComparable<Probability>, IComparable
     {
         public readonly double Value;
@@ -11,6 +15,9 @@ namespace DiceRoll.Nodes
 
         public static Probability Zero => new(0d);
 
+        /// <param name="probability">A <see cref="double">double-precision</see> number to represent,
+        /// where 0 = 0% and 1 = 100%.</param>
+        /// <exception cref="NegativeProbabilityException">When <paramref name="probability"/> is below 0.</exception>
         public Probability(double probability) 
         {
             NegativeProbabilityException.ThrowIfNegative(probability);

@@ -3,9 +3,9 @@ using System.Runtime.CompilerServices;
 
 namespace DiceRoll.Exceptions
 {
-    public static class EnumNotDefinedException
+    public static class EnumValueNotDefinedException
     {
-        public static void ThrowIfNotDefined<TEnum>(TEnum value,
+        public static void ThrowIfValueNotDefined<TEnum>(TEnum value,
             [CallerArgumentExpression("value")] string paramName = null) 
             where TEnum : struct, Enum
         {

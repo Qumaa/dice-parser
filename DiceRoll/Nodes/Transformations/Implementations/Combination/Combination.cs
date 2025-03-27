@@ -9,7 +9,7 @@ namespace DiceRoll.Nodes
         public Combination(RollProbabilityDistribution source, RollProbabilityDistribution other,
             CombinationType combinationType) : base(source, other)
         {
-            EnumNotDefinedException.ThrowIfNotDefined(combinationType);
+            EnumValueNotDefinedException.ThrowIfValueNotDefined(combinationType);
             
             _combinationType = combinationType;
         }

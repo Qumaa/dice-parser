@@ -4,10 +4,15 @@ using DiceRoll.Exceptions;
 
 namespace DiceRoll.Nodes
 {
+    /// <summary>
+    /// Base class that represents a range of values along with their probabilities.
+    /// </summary>
+    /// <typeparam name="T">Type of contained values. Usually contains a field of type <see cref="Probability"/> (not enforced).</typeparam>
     public abstract class ProbabilityDistribution<T> : IEnumerable<T>
     {
         private readonly IEnumerable<T> _probabilities;
         
+        /// <param name="probabilities">Sequence of <typeparamref name="T"/>.</param>
         protected ProbabilityDistribution(IEnumerable<T> probabilities) 
         {
             EmptySequenceException.ThrowIfNullOrEmpty(probabilities);

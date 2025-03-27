@@ -10,7 +10,7 @@ namespace DiceRoll.Nodes
         public Selection(RollProbabilityDistribution source, RollProbabilityDistribution other,
             SelectionType selectionType) : base(source, other)
         {
-            EnumNotDefinedException.ThrowIfNotDefined(selectionType);
+            EnumValueNotDefinedException.ThrowIfValueNotDefined(selectionType);
             
             _selectionType = selectionType;
         }
