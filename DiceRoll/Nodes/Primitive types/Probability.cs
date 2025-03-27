@@ -13,6 +13,7 @@ namespace DiceRoll.Nodes
 
         public Probability(double probability) 
         {
+            NegativeProbabilityException.ThrowIfNegative(probability);
             Value = probability;
         }
 
