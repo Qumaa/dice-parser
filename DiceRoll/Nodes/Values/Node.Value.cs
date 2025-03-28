@@ -1,15 +1,16 @@
 ﻿using System;
+using System.Linq;
 
 namespace DiceRoll.Nodes
 {
     public static partial class Node
     {
         private static readonly Random _allDiceRandom = new();
-        
+
         /// <summary>
         /// Contains nodes that represent numeric values used in rolls - dice, modifiers, etc.
         /// </summary>
-        public static partial class Value
+        public static class Value
         {
             /// <summary>
             /// Creates a <see cref="DiceRoll.Nodes.Constant"/>.
@@ -33,10 +34,15 @@ namespace DiceRoll.Nodes
             /// Only supports <see cref="IAnalyzable">numerical nodes</see>.
             /// </summary>
             /// <param name="composer">A <see cref="Composer"/> implementation instance.</param>
-            /// <param name="sequence">A sequence of <see cref="IAnalyzable">numerical nodes</see>.</param>
+            /// <param name="first">The first mandatory <see cref="IAnalyzable">numerical node</see>.</param>
+            /// <param name="second">The second mandatory <see cref="IAnalyzable">numerical node</see>.</param>
+            /// <param name="sequence">
+            /// A sequence of <see cref="IAnalyzable">numerical nodes</see> beyond the first mandatory two.
+            /// </param>
             /// <returns>A <see cref="DiceRoll.Nodes.Composite"/> node.</returns>
-            public static IAnalyzable Composite(Composer composer, params IAnalyzable[] sequence) =>
-                new Composite(sequence, composer);
+            public static IAnalyzable Composite(Composer composer, IAnalyzable first, IAnalyzable second,
+                params IAnalyzable[] sequence) =>
+                new Composite(sequence.Prepend(second).Prepend(first), composer);
 
             /// <summary>
             /// <para>
@@ -49,13 +55,18 @@ namespace DiceRoll.Nodes
             /// to <c>Composite&lt;Composer&gt;(sequence)</c>.
             /// </para>
             /// </summary>
-            /// <param name="sequence">A sequence of <see cref="IAnalyzable">numerical nodes</see>.</param>
+            /// <param name="first">The first mandatory <see cref="IAnalyzable">numerical node</see>.</param>
+            /// <param name="second">The second mandatory <see cref="IAnalyzable">numerical node</see>.</param>
+            /// <param name="sequence">
+            /// A sequence of <see cref="IAnalyzable">numerical nodes</see> beyond the first mandatory two.
+            /// </param>
             /// <typeparam name="T">
             /// A <see cref="Composer"/> implementation type with a parameterless constructor.
             /// </typeparam>
             /// <returns>A <see cref="DiceRoll.Nodes.Composite"/> node.</returns>
-            public static IAnalyzable Composite<T>(params IAnalyzable[] sequence) where T : Composer, new() =>
-                Composite(new T(), sequence);
+            public static IAnalyzable Composite<T>(IAnalyzable first, IAnalyzable second, params IAnalyzable[] sequence)
+                where T : Composer, new() =>
+                Composite(new T(), first, second, sequence);
 
             /// <summary>
             /// <para>
@@ -67,15 +78,17 @@ namespace DiceRoll.Nodes
             /// A shorthand for <see cref="Composite{T}">Composite&lt;Summarize&gt;</see>.
             /// </para>
             /// </summary>
+            /// <param name="first">The first mandatory <see cref="IAnalyzable">numerical node</see>.</param>
+            /// <param name="second">The second mandatory <see cref="IAnalyzable">numerical node</see>.</param>
             /// <param name="sequence">
-            /// A sequence of <see cref="IAnalyzable">numerical nodes</see> to summarize.
+            /// A sequence of <see cref="IAnalyzable">numerical nodes</see> beyond the first mandatory two to summarize.
             /// </param>
             /// <returns>
             /// A <see cref="DiceRoll.Nodes.Composite"/> node that evaluates to the total.
             /// </returns>
-            public static IAnalyzable Summation(params IAnalyzable[] sequence) =>
-                Composite<Summarize>(sequence);
-            
+            public static IAnalyzable Summation(IAnalyzable first, IAnalyzable second, params IAnalyzable[] sequence) =>
+                Composite<Summarize>(first, second, sequence);
+
             /// <summary>
             /// <para>
             /// Creates a <see cref="DiceRoll.Nodes.Composite"/> node that evaluates all composed nodes
@@ -87,17 +100,18 @@ namespace DiceRoll.Nodes
             /// A shorthand for <see cref="Composite{T}">Composite&lt;KeepHighest&gt;</see>.
             /// </para>
             /// </summary>
+            /// <param name="first">The first mandatory <see cref="IAnalyzable">numerical node</see>.</param>
+            /// <param name="second">The second mandatory <see cref="IAnalyzable">numerical node</see>.</param>
             /// <param name="sequence">
-            /// A sequence of <see cref="IAnalyzable">numerical nodes</see> to select the largest
-            /// <see cref="Outcome"/> from among them.
+            /// A sequence of <see cref="IAnalyzable">numerical nodes</see> beyond the first mandatory two to select the
+            /// largest <see cref="Outcome"/> from among them.
             /// </param>
             /// <returns>
-            /// A <see cref="DiceRoll.Nodes.Composite"/> node that evaluates to the largest
-            /// <see cref="Outcome"/>.
+            /// A <see cref="DiceRoll.Nodes.Composite"/> node that evaluates to the largest <see cref="Outcome"/>.
             /// </returns>
-            public static IAnalyzable Highest(params IAnalyzable[] sequence) =>
-                Composite<KeepHighest>(sequence);
-            
+            public static IAnalyzable Highest(IAnalyzable first, IAnalyzable second, params IAnalyzable[] sequence) =>
+                Composite<KeepHighest>(first, second, sequence);
+
             /// <summary>
             /// <para>
             /// Creates a <see cref="DiceRoll.Nodes.Composite"/> node that evaluates all composed nodes
@@ -109,16 +123,17 @@ namespace DiceRoll.Nodes
             /// A shorthand for <see cref="Composite{T}">Composite&lt;KeepLowest&gt;</see>.
             /// </para>
             /// </summary>
+            /// <param name="first">The first mandatory <see cref="IAnalyzable">numerical node</see>.</param>
+            /// <param name="second">The second mandatory <see cref="IAnalyzable">numerical node</see>.</param>
             /// <param name="sequence">
-            /// A sequence of <see cref="IAnalyzable">numerical nodes</see> to select the smallest
-            /// <see cref="Outcome"/> from among them.
+            /// A sequence of <see cref="IAnalyzable">numerical nodes</see> beyond the first mandatory two to select the
+            /// smallest <see cref="Outcome"/> from among them.
             /// </param>
             /// <returns>
-            /// A <see cref="DiceRoll.Nodes.Composite"/> node that evaluates to the smallest
-            /// <see cref="Outcome"/>.
+            /// A <see cref="DiceRoll.Nodes.Composite"/> node that evaluates to the smallest <see cref="Outcome"/>.
             /// </returns>
-            public static IAnalyzable Lowest(params IAnalyzable[] sequence) =>
-                Composite<KeepLowest>(sequence);
+            public static IAnalyzable Lowest(IAnalyzable first, IAnalyzable second, params IAnalyzable[] sequence) =>
+                Composite<KeepLowest>(first, second, sequence);
         }
     }
 }
