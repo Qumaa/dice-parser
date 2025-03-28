@@ -9,7 +9,7 @@ namespace DiceRoll.Nodes
     /// <typeparam name="T"><inheritdoc cref="ProbabilityOf{T}"/></typeparam>
     public class GenericProbabilityDistribution<T> : ProbabilityDistribution<ProbabilityOf<T>>
     {
-        /// <param name="probabilities">Sequence of <see cref="ProbabilityOf{T}"/> of type <typeparamref name="T"/>.</param>
+        /// <inheritdoc cref="ProbabilityDistribution{T}(IEnumerable{T})"/>
         public GenericProbabilityDistribution(IEnumerable<ProbabilityOf<T>> probabilities) : base(probabilities) { }
     }
 }

@@ -2,6 +2,11 @@
 
 namespace DiceRoll.Nodes
 {
+    /// <summary>
+    /// A boolean implementation of <see cref="ProbabilityDistribution{T}">ProbabilityDistribution</see>
+    /// of type <see cref="Logical"/> with a reasonable naming.
+    /// Always contains 2 boolean values.
+    /// </summary>
     public sealed class LogicalProbabilityDistribution : ProbabilityDistribution<Logical>
     {
         public LogicalProbabilityDistribution(Probability ofTrue) : 

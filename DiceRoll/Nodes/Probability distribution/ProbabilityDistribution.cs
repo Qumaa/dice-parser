@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using DiceRoll.Exceptions;
 
@@ -13,6 +14,8 @@ namespace DiceRoll.Nodes
         private readonly IEnumerable<T> _probabilities;
         
         /// <param name="probabilities">Sequence of <typeparamref name="T"/>.</param>
+        /// <exception cref="ArgumentNullException">When <paramref name="probabilities"/> is null.</exception>
+        /// <exception cref="EmptySequenceException">When <paramref name="probabilities"/> is empty.</exception>
         protected ProbabilityDistribution(IEnumerable<T> probabilities) 
         {
             EmptySequenceException.ThrowIfNullOrEmpty(probabilities);
