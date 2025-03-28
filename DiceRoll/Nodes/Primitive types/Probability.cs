@@ -5,7 +5,8 @@ using DiceRoll.Exceptions;
 namespace DiceRoll.Nodes
 {
     /// <summary>
-    /// A <see cref="double">double-precision</see> number wrapper, explicitly stating the intent to treat it as a percentage.
+    /// A <see cref="double">double-precision</see> number wrapper,
+    /// explicitly stating the intent to treat it as a likelihood of something.
     /// </summary>
     public readonly struct Probability : IEquatable<Probability>, IComparable<Probability>, IComparable
     {
