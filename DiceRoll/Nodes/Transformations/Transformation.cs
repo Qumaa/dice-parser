@@ -2,17 +2,19 @@
 
 namespace DiceRoll.Nodes
 {
-    public abstract class Transformation : INode<RollProbabilityDistribution>
+    public abstract class Transformation : IAnalyzable
     {
-        protected readonly RollProbabilityDistribution _source;
+        protected readonly IAnalyzable _source;
         
-        protected Transformation(RollProbabilityDistribution source)
+        protected Transformation(IAnalyzable source)
         {
             ArgumentNullException.ThrowIfNull(source);
             
             _source = source;
         }
 
-        public abstract RollProbabilityDistribution Evaluate();
+        public abstract Outcome Evaluate();
+        
+        public abstract RollProbabilityDistribution GetProbabilityDistribution();
     }
 }

@@ -21,14 +21,14 @@ namespace DiceRoll
 
         private static void Body()
         {
-            Dice d20 = Node.Value.Dice(20);
-            Composite adv = Node.Value.Composite<KeepHighest>(d20, d20);
+            IAnalyzable d6 = Node.Value.Dice(6);
+            IAnalyzable adv = Node.Value.Highest(d6, d6);
+            IAnalyzable dis = Node.Value.Lowest(d6, d6);
+            IAnalyzable sum = Node.Value.Summation(d6, d6);
 
-            Constant dc = Node.Value.Constant(10);
-            
-            Operation op = Node.Operation.GreaterThanOrEqual(adv, dc);
-
-            Console.WriteLine(ProbabilityToString(op.GetProbabilityDistribution()));
+            Console.WriteLine(ProbabilityToString(adv.GetProbabilityDistribution()));
+            Console.WriteLine(ProbabilityToString(dis.GetProbabilityDistribution()));
+            Console.WriteLine(ProbabilityToString(sum.GetProbabilityDistribution()));
         }
 
         private static string ProbabilityToString(RollProbabilityDistribution distribution) =>

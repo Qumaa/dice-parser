@@ -49,6 +49,16 @@ namespace DiceRoll.Nodes
             RollProbabilityDistribution other) =>
             source
                 .Select(x => x.Outcome)
-                .Where(x => x >= other.Min && x <= other.Max);
+                .Where(x => x >= other.Min && x <= other.Max)
+                .Intersect(other.Select(x => x.Outcome), Outcome.EqualityComparer);
+        
+        public static IEnumerable<Outcome> Union(this RollProbabilityDistribution source, 
+            RollProbabilityDistribution other) =>
+            source
+                .Select(x => x.Outcome)
+                .Union(other.Select(x => x.Outcome), Outcome.EqualityComparer);
+        
+        public static IEnumerable<Outcome> Distinct(this RollProbabilityDistribution source) =>
+            source.Select(x => x.Outcome).Distinct(Outcome.EqualityComparer);
     }
 }

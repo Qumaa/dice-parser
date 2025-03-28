@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Linq;
 using DiceRoll.Exceptions;
 
 namespace DiceRoll.Nodes
@@ -7,44 +7,42 @@ namespace DiceRoll.Nodes
     {
         private readonly SelectionType _selectionType;
 
-        public Selection(RollProbabilityDistribution source, RollProbabilityDistribution other,
-            SelectionType selectionType) : base(source, other)
+        public Selection(IAnalyzable source, IAnalyzable other, SelectionType selectionType) : base(source, other)
         {
             EnumValueNotDefinedException.ThrowIfValueNotDefined(selectionType);
             
             _selectionType = selectionType;
         }
 
-        protected override Probability[] AllocateProbabilitiesArray(out int outcomeToIndexOffset) =>
-            new Probability[GetMax() - (outcomeToIndexOffset = GetMin()) + 1];
+        public override Outcome Evaluate() =>
+            _selectionType is SelectionType.Highest ?
+                Outcome.Max(_source.Evaluate(), _other.Evaluate()) : 
+                Outcome.Min(_source.Evaluate(), _other.Evaluate());
 
-        protected override Probability[] GenerateProbabilities(Probability[] probabilities, int outcomeToIndexOffset)
+        public override RollProbabilityDistribution GetProbabilityDistribution()
         {
-            CDFTable source = new(_source);
-            CDFTable other = new(_other);
+            RollProbabilityDistribution source = _source.GetProbabilityDistribution();
+            RollProbabilityDistribution other = _other.GetProbabilityDistribution();
+            
+            CDFTable sourceTable = new(source);
+            CDFTable otherTable = new(other);
 
-            for (int i = 0; i < probabilities.Length; i++)
-            {
-                Outcome outcome = new(i + outcomeToIndexOffset);
+            return new RollProbabilityDistribution(source
+                .Union(other)
+                .Select(outcome =>
+                    new Roll(
+                        outcome,
+                        CDFToProbability(
+                            CDFForOutcome(sourceTable, outcome), 
+                            CDFForOutcome(otherTable, outcome)
+                            )
+                        )
+                )
+            );
+        }
 
-                CDF sourceCdf = CDFForOutcome(source, outcome);
-                CDF otherCdf = CDFForOutcome(other, outcome);
-
-                probabilities[i] = CDFToProbability(sourceCdf, otherCdf);
-            }
-
-            return probabilities;        }
-        
         private CDF CDFForOutcome(CDFTable cdfTable, Outcome outcome) =>
             new(cdfTable.EqualTo(outcome), GetSecondCDFValue(cdfTable, outcome));
-
-        private int GetMin() =>
-            Math.Min(_source.Min.Value, _other.Min.Value);
-
-        private int GetMax() =>
-        _selectionType is SelectionType.Highest ?
-            Math.Max(_source.Max.Value, _other.Max.Value) :
-            Math.Min(_source.Max.Value, _other.Max.Value);
 
         private Probability GetSecondCDFValue(CDFTable cdfTable, Outcome outcome) =>
             _selectionType is SelectionType.Highest ?

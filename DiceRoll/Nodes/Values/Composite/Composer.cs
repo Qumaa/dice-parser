@@ -43,18 +43,18 @@ namespace DiceRoll.Nodes
 
         /// <summary>
         /// This method iterates <paramref name="source"/> in pairs, applying the specified
-        /// <see cref="ByPairsCompositionDelegate">delegate</see> to every pair of adjacent array elements.
+        /// <see cref="PairCompositionDelegate">delegate</see> to every pair of adjacent array elements.
         /// Use this method inside <see cref="Compose">Compose</see> to automate the process when it boils down to combining pairs
         /// of input nodes.
         /// </summary>
         /// <param name="source">An array of objects to compose with at least 2 elements in it. Safe to modify.</param>
         /// <param name="compositionDelegate">
-        /// A <see cref="ByPairsCompositionDelegate">delegate</see> to apply to <paramref name="source"/>.
+        /// A <see cref="PairCompositionDelegate">delegate</see> to apply to <paramref name="source"/>.
         /// </param>
         /// <returns>
         /// A single object that implements <see cref="IAnalyzable"/> and combines <paramref name="source"/>.
         /// </returns>
-        protected static IAnalyzable IteratePairs(IAnalyzable[] source, ByPairsCompositionDelegate compositionDelegate)
+        protected static IAnalyzable IteratePairs(IAnalyzable[] source, PairCompositionDelegate compositionDelegate)
         {
             ArgumentNullException.ThrowIfNull(source);
             ArgumentNullException.ThrowIfNull(compositionDelegate);
@@ -85,24 +85,6 @@ namespace DiceRoll.Nodes
         public static Composer FromDelegate(CompositionDelegate compositionDelegate) =>
             new FuncComposer(compositionDelegate);
 
-        /// <summary>
-        /// A base class for convenient usage of <see cref="Composer.IteratePairs">IteratePairs</see> implementations.
-        /// </summary>
-        protected abstract class PairComposition : IAnalyzable
-        {
-            protected readonly IAnalyzable _left;
-            protected readonly IAnalyzable _right;
-            
-            protected PairComposition(IAnalyzable left, IAnalyzable right)
-            {
-                _left = left;
-                _right = right;
-            }
-
-            public abstract Outcome Evaluate();
-            public abstract RollProbabilityDistribution GetProbabilityDistribution();
-        }
-
         private sealed class FuncComposer : Composer
         {
             private readonly CompositionDelegate _compositionDelegate;
@@ -122,6 +104,6 @@ namespace DiceRoll.Nodes
         /// <para>Delegate used to combine two nodes into one.</para>
         /// <para>Usually delegates the call to a fitting <see cref="Transformation"/> implementation evaluation.</para>
         /// </summary>
-        protected delegate IAnalyzable ByPairsCompositionDelegate(IAnalyzable left, IAnalyzable right);
+        protected delegate IAnalyzable PairCompositionDelegate(IAnalyzable left, IAnalyzable right);
     }
 }

@@ -1,4 +1,6 @@
-﻿using DiceRoll.Exceptions;
+﻿using System.Collections.Generic;
+using System.Linq;
+using DiceRoll.Exceptions;
 
 namespace DiceRoll.Nodes
 {
@@ -6,37 +8,37 @@ namespace DiceRoll.Nodes
     {
         private readonly CombinationType _combinationType;
 
-        public Combination(RollProbabilityDistribution source, RollProbabilityDistribution other,
-            CombinationType combinationType) : base(source, other)
+        public Combination(IAnalyzable source, IAnalyzable other, CombinationType combinationType) : base(source, other)
         {
             EnumValueNotDefinedException.ThrowIfValueNotDefined(combinationType);
             
             _combinationType = combinationType;
         }
 
-        protected override Probability[] AllocateProbabilitiesArray(out int outcomeToIndexOffset)
-        {
-            int minValue = _source.Min.Value + ApplyCombinationType(_other.Min).Value;
-            int maxValue = _source.Max.Value + ApplyCombinationType(_other.Max).Value;
+        public override Outcome Evaluate() =>
+            Combine(_source.Evaluate(), _other.Evaluate());
 
-            return new Probability[maxValue - (outcomeToIndexOffset = minValue) + 1];
-        }
-
-        protected override Probability[] GenerateProbabilities(Probability[] probabilities, int outcomeToIndexOffset)
+        public override RollProbabilityDistribution GetProbabilityDistribution()
         {
-            foreach (Roll sourceRoll in _source)
-            foreach (Roll otherRoll in _other)
+            RollProbabilityDistribution source = _source.GetProbabilityDistribution();
+            RollProbabilityDistribution other = _other.GetProbabilityDistribution();
+
+            Dictionary<Outcome, Probability> probabilities = new();
+            
+            foreach (Roll sourceRoll in source)
+            foreach (Roll otherRoll in other)
             {
-                Outcome outcome = sourceRoll.Outcome + ApplyCombinationType(otherRoll.Outcome);
+                Outcome outcome = Combine(sourceRoll.Outcome, otherRoll.Outcome);
                 Probability probability = sourceRoll.Probability * otherRoll.Probability;
 
-                probabilities[outcome.Value - outcomeToIndexOffset] += probability;
+                if (!probabilities.TryAdd(outcome, probability))
+                    probabilities[outcome] += probability;
             }
 
-            return probabilities;
+            return new RollProbabilityDistribution(probabilities.Select(x => new Roll(x.Key, x.Value)));
         }
 
-        private Outcome ApplyCombinationType(Outcome value) =>
-            _combinationType is CombinationType.Subtract ? -value : value;
+        private Outcome Combine(Outcome left, Outcome right) =>
+            left + (_combinationType is CombinationType.Subtract ? -right : right);
     }
 }

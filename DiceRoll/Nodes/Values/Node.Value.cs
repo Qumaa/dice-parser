@@ -16,16 +16,46 @@ namespace DiceRoll.Nodes
             /// May represent a roll modifier, a check difficulty etc.
             /// </summary>
             /// <param name="value">The actual numeric value.</param>
-            public static Constant Constant(int value) =>
-                new(value);
+            public static IAnalyzable Constant(int value) =>
+                new Constant(value);
 
             /// <summary>
             /// Creates a <see cref="DiceRoll.Nodes.Dice"/>.
             /// All the dice created this way share their <see cref="Random"/> instance.
             /// </summary>
             /// <param name="faces">A number of faces the virtual dice will have.</param>
-            public static Dice Dice(int faces) =>
-                new(_allDiceRandom, faces);
+            public static IAnalyzable Dice(int faces) =>
+                new Dice(_allDiceRandom, faces);
+
+            /// <summary>
+            /// Creates a <see cref="DiceRoll.Nodes.Composite"/> node that evaluates all composed nodes
+            /// based on the passed <see cref="Composer"/> implementation instance.
+            /// Only supports <see cref="IAnalyzable">numerical nodes</see>.
+            /// </summary>
+            /// <param name="composer">A <see cref="Composer"/> implementation instance.</param>
+            /// <param name="sequence">A sequence of <see cref="IAnalyzable">numerical nodes</see>.</param>
+            /// <returns>A <see cref="DiceRoll.Nodes.Composite"/> node.</returns>
+            public static IAnalyzable Composite(Composer composer, params IAnalyzable[] sequence) =>
+                new Composite(sequence, composer);
+
+            /// <summary>
+            /// <para>
+            /// A variant of the <see cref="Composite">Composite</see> method that automatically creates a
+            /// <see cref="Composer"/> instance of type <typeparamref name="T"/>,
+            /// provided that it has a parameterless constructor. 
+            /// </para>
+            /// <para>
+            /// Shortens the notation from <c>Composite(new Composer(), sequence)</c>
+            /// to <c>Composite&lt;Composer&gt;(sequence)</c>.
+            /// </para>
+            /// </summary>
+            /// <param name="sequence">A sequence of <see cref="IAnalyzable">numerical nodes</see>.</param>
+            /// <typeparam name="T">
+            /// A <see cref="Composer"/> implementation type with a parameterless constructor.
+            /// </typeparam>
+            /// <returns>A <see cref="DiceRoll.Nodes.Composite"/> node.</returns>
+            public static IAnalyzable Composite<T>(params IAnalyzable[] sequence) where T : Composer, new() =>
+                Composite(new T(), sequence);
 
             /// <summary>
             /// <para>
@@ -43,7 +73,7 @@ namespace DiceRoll.Nodes
             /// <returns>
             /// A <see cref="DiceRoll.Nodes.Composite"/> node that evaluates to the total.
             /// </returns>
-            public static Composite Summarize(params IAnalyzable[] sequence) =>
+            public static IAnalyzable Summation(params IAnalyzable[] sequence) =>
                 Composite<Summarize>(sequence);
             
             /// <summary>
@@ -65,7 +95,7 @@ namespace DiceRoll.Nodes
             /// A <see cref="DiceRoll.Nodes.Composite"/> node that evaluates to the largest
             /// <see cref="Outcome"/>.
             /// </returns>
-            public static Composite KeepHighest(params IAnalyzable[] sequence) =>
+            public static IAnalyzable Highest(params IAnalyzable[] sequence) =>
                 Composite<KeepHighest>(sequence);
             
             /// <summary>
@@ -87,36 +117,8 @@ namespace DiceRoll.Nodes
             /// A <see cref="DiceRoll.Nodes.Composite"/> node that evaluates to the smallest
             /// <see cref="Outcome"/>.
             /// </returns>
-            public static Composite KeepLowest(params IAnalyzable[] sequence) =>
+            public static IAnalyzable Lowest(params IAnalyzable[] sequence) =>
                 Composite<KeepLowest>(sequence);
-
-            /// <summary>
-            /// Creates a <see cref="DiceRoll.Nodes.Composite"/> node that evaluates all composed nodes
-            /// based on the passed <see cref="Composer"/> implementation instance.
-            /// Only supports <see cref="IAnalyzable">numerical nodes</see>.
-            /// </summary>
-            /// <param name="composer">A <see cref="Composer"/> implementation instance.</param>
-            /// <param name="sequence">A sequence of <see cref="IAnalyzable">numerical nodes</see>.</param>
-            /// <returns>A <see cref="DiceRoll.Nodes.Composite"/> node.</returns>
-            public static Composite Composite(Composer composer, params IAnalyzable[] sequence) =>
-                new(sequence, composer);
-
-            /// <summary>
-            /// <para>
-            /// A variant of the <see cref="Composite">Composite</see> method that automatically creates a
-            /// <see cref="Composer"/> instance of type <typeparamref name="T"/>,
-            /// provided that it has a parameterless constructor. 
-            /// </para>
-            /// <para>
-            /// Shortens the notation from <c>Composite(new Composer(), sequence)</c>
-            /// to <c>Composite&lt;Composer&gt;(sequence)</c>.
-            /// </para>
-            /// </summary>
-            /// <param name="sequence">A sequence of <see cref="IAnalyzable">numerical nodes</see>.</param>
-            /// <typeparam name="T">A <see cref="Composer"/> implementation type.</typeparam>
-            /// <returns>A <see cref="DiceRoll.Nodes.Composite"/> node.</returns>
-            public static Composite Composite<T>(params IAnalyzable[] sequence) where T : Composer, new() =>
-                Composite(new T(), sequence);
         }
     }
 }
