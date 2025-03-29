@@ -4,10 +4,21 @@ using DiceRoll.Exceptions;
 
 namespace DiceRoll.Nodes
 {
+    /// <summary>
+    /// Merges two arbitrary <see cref="IAnalyzable">numeric nodes</see> by either adding or subtracting their
+    /// <see cref="Outcome"/> and provides an updated
+    /// <see cref="RollProbabilityDistribution">probability distribution</see> of the results.
+    /// </summary>
+    /// <seealso cref="CombinationType"/>
     public sealed class Combination : MergeTransformation
     {
         private readonly CombinationType _combinationType;
 
+        /// <inheritdoc cref="MergeTransformation(IAnalyzable, IAnalyzable)"/>
+        /// <param name="combinationType">The type of combination.</param>
+        /// <exception cref="EnumValueNotDefinedException">
+        /// When <paramref name="combinationType"/> holds a not defined value.
+        /// </exception>
         public Combination(IAnalyzable source, IAnalyzable other, CombinationType combinationType) : base(source, other)
         {
             EnumValueNotDefinedException.ThrowIfValueNotDefined(combinationType);
