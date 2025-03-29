@@ -17,10 +17,10 @@ namespace DiceRoll.Nodes
         /// is combined.</param>
         /// <exception cref="ArgumentNullException">When either <paramref name="sequence"/> or
         /// <paramref name="composer"/> are null.</exception>
-        /// <exception cref="EmptySequenceException">When <paramref name="sequence"/> is empty.</exception>
+        /// <exception cref="EmptyEnumerableException">When <paramref name="sequence"/> is empty.</exception>
         public Composite(IEnumerable<IAnalyzable> sequence, Composer composer)
         {
-            EmptySequenceException.ThrowIfNullOrEmpty(sequence);
+            EmptyEnumerableException.ThrowIfNullOrEmpty(sequence);
             ArgumentNullException.ThrowIfNull(composer);
             
             _composite = composer.Compose(sequence);
