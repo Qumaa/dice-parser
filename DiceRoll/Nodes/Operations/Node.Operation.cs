@@ -5,22 +5,22 @@
         public static partial class Operation
         {
             public static IOperation Equal(IAnalyzable left, IAnalyzable right) =>
-                new Nodes.Operation(left, right, DefaultOperationDelegates.Get(OperationType.Equal));
+                new DefaultOperation(left, right, OperationType.Equal);
 
             public static IOperation NotEqual(IAnalyzable left, IAnalyzable right) =>
-                new Nodes.Operation(left, right, DefaultOperationDelegates.Get(OperationType.NotEqual));
+                new DefaultOperation(left, right, OperationType.NotEqual);
 
             public static IOperation GreaterThan(IAnalyzable left, IAnalyzable right) =>
-                new Nodes.Operation(left, right, DefaultOperationDelegates.Get(OperationType.GreaterThan));
+                new DefaultOperation(left, right, OperationType.GreaterThan);
 
             public static IOperation GreaterThanOrEqual(IAnalyzable left, IAnalyzable right) =>
-                new Nodes.Operation(left, right, DefaultOperationDelegates.Get(OperationType.GreaterThanOrEqual));
+                new DefaultOperation(left, right, OperationType.GreaterThanOrEqual);
 
             public static IOperation LessThan(IAnalyzable left, IAnalyzable right) =>
-                new Nodes.Operation(left, right, DefaultOperationDelegates.Get(OperationType.LessThan));
+                new DefaultOperation(left, right, OperationType.LessThan);
 
             public static IOperation LessThanOrEqual(IAnalyzable left, IAnalyzable right) =>
-                new Nodes.Operation(left, right, DefaultOperationDelegates.Get(OperationType.LessThanOrEqual));
+                new DefaultOperation(left, right, OperationType.LessThanOrEqual);
         }
     }
 }

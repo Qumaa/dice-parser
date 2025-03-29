@@ -1,4 +1,4 @@
 ﻿namespace DiceRoll.Nodes
 {
-    public delegate Probability OperationDelegate(RollProbabilityDistribution left, RollProbabilityDistribution right);
+    public delegate Binary OperationDelegate(Outcome left, Outcome right);
 }

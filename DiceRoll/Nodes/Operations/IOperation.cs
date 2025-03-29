@@ -1,4 +1,7 @@
 ﻿namespace DiceRoll.Nodes
 {
-    public interface IOperation : IRollable, IDistributable<LogicalProbabilityDistribution, Logical> { }
+    public interface IOperation : INode<Binary>, IDistributable<LogicalProbabilityDistribution, Logical>
+    {
+        IAnalyzable GetNumeric();
+    }
 }
