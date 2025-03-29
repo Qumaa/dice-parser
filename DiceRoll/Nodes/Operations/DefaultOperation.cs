@@ -1,30 +1,27 @@
-﻿using System;
-
-namespace DiceRoll.Nodes
+﻿namespace DiceRoll.Nodes
 {
-    public sealed class DefaultOperation : IOperation
+    public sealed class DefaultOperation : Operation
     {
-        private readonly IAnalyzable _left;
-        private readonly IAnalyzable _right;
         private readonly OperationDelegates _delegates;
 
-        public DefaultOperation(IAnalyzable left, IAnalyzable right, OperationType operationType)
+        public DefaultOperation(IAnalyzable left, IAnalyzable right, OperationType operationType) : base(left, right)
         {
-            ArgumentNullException.ThrowIfNull(left);
-            ArgumentNullException.ThrowIfNull(right);
-            
-            _left = left;
-            _right = right;
             _delegates = DefaultOperationDelegates.Get(operationType);
         }
 
-        public LogicalProbabilityDistribution GetProbabilityDistribution() =>
+        public override LogicalProbabilityDistribution GetProbabilityDistribution() =>
             new(_delegates.Probability.Invoke(_left.GetProbabilityDistribution(), _right.GetProbabilityDistribution()));
 
-        public Binary Evaluate() =>
+        public override Binary Evaluate() =>
             _delegates.Evaluation(_left.Evaluate(), _right.Evaluate());
 
-        public IAnalyzable GetNumeric() =>
-            _left;
+        public override OperationVerboseEvaluation EvaluateVerbose()
+        {
+            Outcome leftOutcome = _left.Evaluate();
+            Outcome rightOutcome = _right.Evaluate();
+            Binary operationOutcome = _delegates.Evaluation(leftOutcome, rightOutcome);
+            
+            return new OperationVerboseEvaluation(this, operationOutcome, _left, leftOutcome, _right, rightOutcome);
+        }
     }
 }

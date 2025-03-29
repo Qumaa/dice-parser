@@ -2,6 +2,6 @@
 {
     public interface IOperation : INode<Binary>, IDistributable<LogicalProbabilityDistribution, Logical>
     {
-        IAnalyzable GetNumeric();
+        OperationVerboseEvaluation EvaluateVerbose();
     }
 }
