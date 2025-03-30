@@ -14,6 +14,9 @@
         /// <summary>
         /// Tells the <see cref="Combination"/> instance to subtract one input node from another.
         /// </summary>
-        Subtract = 1
+        Subtract = 1,
+        Multiply = 2,
+        DivideRoundDownwards = 3,
+        DivideRoundUpwards = 4,
     }
 }

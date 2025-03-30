@@ -35,7 +35,7 @@ namespace DiceRoll.Exceptions
         public static void ThrowIfNegative(double probability,
             [CallerArgumentExpression("probability")] string paramName = null)
         {
-            if (probability <= 0)
+            if (probability < 0)
                 throw new NegativeProbabilityException(probability, paramName);
         }
         private static string GetErrorMessage(double probability) =>

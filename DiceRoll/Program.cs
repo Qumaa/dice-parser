@@ -21,14 +21,14 @@ namespace DiceRoll
 
         private static void Body()
         {
-            IAnalyzable d6 = Node.Value.Dice(6);
-            IAnalyzable adv = Node.Value.Highest(d6, d6);
-            IAnalyzable dis = Node.Value.Lowest(d6, d6);
-            IAnalyzable sum = Node.Value.Summation(d6, d6);
+            IAnalyzable d20 = Node.Value.Dice(20);
+            IAnalyzable adv = Node.Value.Highest(d20, d20);
 
-            Console.WriteLine(ProbabilityToString(adv.GetProbabilityDistribution()));
-            Console.WriteLine(ProbabilityToString(dis.GetProbabilityDistribution()));
-            Console.WriteLine(ProbabilityToString(sum.GetProbabilityDistribution()));
+            IAnalyzable threshold = Node.Value.Constant(14);
+            
+            IOperation op = Node.Operation.GreaterThanOrEqual(adv, threshold);
+            
+            Console.WriteLine(ProbabilityToString(op.GetProbabilityDistribution()));
         }
 
         private static string ProbabilityToString(RollProbabilityDistribution distribution) =>
@@ -43,6 +43,9 @@ namespace DiceRoll
 
         private static string ProbabilityToString(Probability probability) =>
             $"{probability.Value * 100d:F2}%";
+        
+        private static string OutcomeToString(Outcome outcome) =>
+            outcome.Value.ToString();
     }
 }
 

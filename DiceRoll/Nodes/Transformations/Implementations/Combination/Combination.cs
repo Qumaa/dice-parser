@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using DiceRoll.Exceptions;
 
@@ -21,6 +22,8 @@ namespace DiceRoll.Nodes
         /// </exception>
         public Combination(IAnalyzable source, IAnalyzable other, CombinationType combinationType) : base(source, other)
         {
+            if (IsDivision(combinationType))
+                ZeroDivisorException.ThrowIfAnyZero(_other.GetProbabilityDistribution());
             EnumValueNotDefinedException.ThrowIfValueNotDefined(combinationType);
             
             _combinationType = combinationType;
@@ -46,10 +49,30 @@ namespace DiceRoll.Nodes
                     probabilities[outcome] += probability;
             }
 
-            return new RollProbabilityDistribution(probabilities.Select(x => new Roll(x.Key, x.Value)));
+            return new RollProbabilityDistribution(probabilities
+                .Select(x => new Roll(x.Key, x.Value))
+                .OrderBy(x => x.Outcome)
+            );
         }
 
         private Outcome Combine(Outcome left, Outcome right) =>
-            left + (_combinationType is CombinationType.Subtract ? -right : right);
+            _combinationType switch
+            {
+                CombinationType.Add => left + right,
+                CombinationType.Subtract => left - right,
+                CombinationType.Multiply => left * right,
+                CombinationType.DivideRoundDownwards => left / right,
+                CombinationType.DivideRoundUpwards => DivideRoundUpwards(left, right)
+            };
+
+        private static bool IsDivision(CombinationType combinationType) =>
+            combinationType is CombinationType.DivideRoundDownwards or CombinationType.DivideRoundUpwards;
+
+        private static Outcome DivideRoundUpwards(Outcome left, Outcome right)
+        {
+            Outcome outcome = left / right;
+            
+            return outcome * right < left ? outcome + 1 : outcome;
+        }
     }
 }

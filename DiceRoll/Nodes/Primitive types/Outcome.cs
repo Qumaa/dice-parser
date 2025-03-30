@@ -102,16 +102,43 @@ namespace DiceRoll.Nodes
 
         public static bool operator >(Outcome left, Outcome right) =>
             left.Value > right.Value;
+        public static bool operator >(Outcome left, int right) =>
+            left.Value > right;
         public static bool operator >=(Outcome left, Outcome right) =>
             left.Value >= right.Value;
+        public static bool operator >=(Outcome left, int right) =>
+            left.Value >= right;
         public static bool operator <(Outcome left, Outcome right) =>
             left.Value < right.Value;
+        public static bool operator <(Outcome left, int right) =>
+            left.Value < right;
         public static bool operator <=(Outcome left, Outcome right) =>
             left.Value <= right.Value;
+        public static bool operator <=(Outcome left, int right) =>
+            left.Value <= right;
         public static bool operator ==(Outcome left, Outcome right) =>
             left.Value == right.Value;
+        public static bool operator ==(Outcome left, int right) =>
+            left.Value == right;
         public static bool operator !=(Outcome left, Outcome right) =>
-            !(left == right);
+            left.Value != right.Value;
+        public static bool operator !=(Outcome left, int right) =>
+            left.Value != right;
+        
+        public static Outcome operator &(Outcome left, Outcome right) =>
+            new(left.Value & right.Value);
+        public static Outcome operator &(Outcome left, int right) =>
+            new(left.Value & right);
+        
+        public static Outcome operator |(Outcome left, Outcome right) =>
+            new(left.Value | right.Value);
+        public static Outcome operator |(Outcome left, int right) =>
+            new(left.Value | right);
+        
+        public static Outcome operator ^(Outcome left, Outcome right) =>
+            new(left.Value ^ right.Value);
+        public static Outcome operator ^(Outcome left, int right) =>
+            new(left.Value ^ right);
 
     #endregion
     }

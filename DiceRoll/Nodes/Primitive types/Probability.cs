@@ -27,6 +27,9 @@ namespace DiceRoll.Nodes
 
         public Probability Inversed() =>
             new(1d - Value);
+        
+        public Probability Normalized() =>
+            new(double.Min(Value, 1d));
 
     #region Members and operators
 

@@ -36,6 +36,15 @@
             /// </returns>
             public static IAnalyzable Subtract(IAnalyzable left, IAnalyzable right) =>
                 new Combination(left, right, CombinationType.Subtract);
+            
+            public static IAnalyzable Multiply(IAnalyzable left, IAnalyzable right) =>
+                new Combination(left, right, CombinationType.Multiply);
+            
+            public static IAnalyzable DivideRoundDown(IAnalyzable left, IAnalyzable right) =>
+                new Combination(left, right, CombinationType.DivideRoundDownwards);
+            
+            public static IAnalyzable DivideRoundUp(IAnalyzable left, IAnalyzable right) =>
+                new Combination(left, right, CombinationType.DivideRoundUpwards);
 
             /// <summary>
             /// Selects the highest evaluation result of two arbitrary <see cref="IAnalyzable">numeric nodes</see>

@@ -19,9 +19,9 @@
         /// <exception cref="DiceRoll.Exceptions.NegativeProbabilityException">
         /// When <paramref name="ofTrue"/> is above 100%, resulting in the probability of false being below 0%.
         /// </exception>
-        public LogicalProbabilityDistribution(Probability ofTrue) : base(ToEnumerable(ofTrue))
+        public LogicalProbabilityDistribution(Probability ofTrue) : base(ToEnumerable(ofTrue.Normalized()))
         {
-            _ofTrue = ofTrue;
+            _ofTrue = ofTrue.Normalized();
         }
 
         private static Logical[] ToEnumerable(Probability ofTrue) =>

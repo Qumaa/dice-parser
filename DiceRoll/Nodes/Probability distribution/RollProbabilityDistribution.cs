@@ -46,6 +46,9 @@ namespace DiceRoll.Nodes
 
     public static class RollProbabilityDistributionExtensions
     {
+        public static RollProbabilityDistribution ToRollProbabilityDistribution(this IEnumerable<Roll> probabilities) => 
+            new(probabilities);
+        
         public static IEnumerable<Outcome> Intersection(this RollProbabilityDistribution source,
             RollProbabilityDistribution other) =>
             source
