@@ -2,12 +2,17 @@
 
 namespace DiceRoll.Nodes
 {
-    public abstract class Operation : IOperation
+    /// <summary>
+    /// Base class that allows to wrap two arbitrary <see cref="IAnalyzable">numeric nodes</see> to perform binary
+    /// operations on their <see cref="Outcome"/> and provide a
+    /// <see cref="RollProbabilityDistribution">probability distribution</see> of true and false of said operation.
+    /// </summary>
+    public abstract class NumericOperation : IOperation
     {
         protected readonly IAnalyzable _left;
         protected readonly IAnalyzable _right;
 
-        protected Operation(IAnalyzable left, IAnalyzable right)
+        protected NumericOperation(IAnalyzable left, IAnalyzable right)
         {
             ArgumentNullException.ThrowIfNull(left);
             ArgumentNullException.ThrowIfNull(right);
@@ -19,7 +24,5 @@ namespace DiceRoll.Nodes
         public abstract Binary Evaluate();
 
         public abstract LogicalProbabilityDistribution GetProbabilityDistribution();
-        
-        public abstract OperationVerboseEvaluation EvaluateVerbose();
     }
 }

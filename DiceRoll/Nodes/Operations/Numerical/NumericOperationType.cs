@@ -1,6 +1,6 @@
 ﻿namespace DiceRoll.Nodes
 {
-    public enum OperationType
+    public enum NumericOperationType
     {
         Equal = 0,
         NotEqual = 1,

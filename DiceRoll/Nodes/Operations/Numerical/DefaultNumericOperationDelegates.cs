@@ -3,27 +3,27 @@ using DiceRoll.Exceptions;
 
 namespace DiceRoll.Nodes
 {
-    public static class DefaultOperationDelegates
+    public static class DefaultNumericOperationDelegates
     {
-        public static OperationDelegates Get(OperationType operationType) =>
-            new(Evaluation.Get(operationType), ProbabilityEvaluation.Get(operationType));
-        
+        public static NumericOperationDelegates Get(NumericOperationType operationType)
+        {
+            EnumValueNotDefinedException.ThrowIfValueNotDefined(operationType);
+            
+            return new NumericOperationDelegates(Evaluation.Get(operationType), ProbabilityEvaluation.Get(operationType));
+        }
+
         public static class Evaluation
         {
-            public static OperationDelegate Get(OperationType operationType)
-            {
-                EnumValueNotDefinedException.ThrowIfValueNotDefined(operationType);
-
-                return operationType switch
+            public static NumericOperationEvaluationDelegate Get(NumericOperationType operationType) =>
+                operationType switch
                 {
-                    OperationType.Equal => Equal,
-                    OperationType.NotEqual => NotEqual,
-                    OperationType.GreaterThan => GreaterThan,
-                    OperationType.GreaterThanOrEqual => GreaterThanOrEqual,
-                    OperationType.LessThan => LessThan,
-                    OperationType.LessThanOrEqual => LessThanOrEqual
+                    NumericOperationType.Equal => Equal,
+                    NumericOperationType.NotEqual => NotEqual,
+                    NumericOperationType.GreaterThan => GreaterThan,
+                    NumericOperationType.GreaterThanOrEqual => GreaterThanOrEqual,
+                    NumericOperationType.LessThan => LessThan,
+                    NumericOperationType.LessThanOrEqual => LessThanOrEqual
                 };
-            }
 
             private static Binary Equal(Outcome left, Outcome right) =>
                 new(left == right);
@@ -46,22 +46,18 @@ namespace DiceRoll.Nodes
         
         public static class ProbabilityEvaluation
         {
-            public static OperationProbabilityDelegate Get(OperationType operationType)
-            {
-                EnumValueNotDefinedException.ThrowIfValueNotDefined(operationType);
-            
-                return operationType switch
+            public static NumericOperationProbabilityDelegate Get(NumericOperationType operationType) =>
+                operationType switch
                 {
-                    OperationType.Equal => Equal,
-                    OperationType.NotEqual => Not(Equal),
-                    OperationType.GreaterThan => GreaterThan,
-                    OperationType.GreaterThanOrEqual => Not(LessThan),
-                    OperationType.LessThan => LessThan,
-                    OperationType.LessThanOrEqual => Not(GreaterThan)
+                    NumericOperationType.Equal => Equal,
+                    NumericOperationType.NotEqual => Not(Equal),
+                    NumericOperationType.GreaterThan => GreaterThan,
+                    NumericOperationType.GreaterThanOrEqual => Not(LessThan),
+                    NumericOperationType.LessThan => LessThan,
+                    NumericOperationType.LessThanOrEqual => Not(GreaterThan)
                 };
-            }
 
-            private static OperationProbabilityDelegate Not(OperationProbabilityDelegate @delegate) =>
+            private static NumericOperationProbabilityDelegate Not(NumericOperationProbabilityDelegate @delegate) =>
                 (left, right) => @delegate(left, right).Inversed();
 
             private static Probability Equal(RollProbabilityDistribution left, RollProbabilityDistribution right)
