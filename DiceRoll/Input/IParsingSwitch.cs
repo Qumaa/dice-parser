@@ -1,6 +1,4 @@
-﻿using DiceRoll.Nodes;
-
-namespace DiceRoll.Input
+﻿namespace DiceRoll.Input
 {
     public interface IParsingSwitch
     {
