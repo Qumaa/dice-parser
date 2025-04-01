@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using DiceRoll.Exceptions;
-
-namespace DiceRoll.Nodes
+﻿namespace DiceRoll
 {
     /// <summary>
     /// A <see cref="IAnalyzable">numerical node</see> that combines an arbitrary sequence of

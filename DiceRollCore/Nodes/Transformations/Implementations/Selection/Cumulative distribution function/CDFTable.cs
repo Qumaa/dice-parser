@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-
-namespace DiceRoll.Nodes
+﻿namespace DiceRoll
 {
     public sealed class CDFTable
     {

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using DiceRoll.Exceptions;
-
-namespace DiceRoll.Nodes
+﻿namespace DiceRoll
 {
     /// <summary>
     /// A <see cref="double">double-precision</see> number wrapper,

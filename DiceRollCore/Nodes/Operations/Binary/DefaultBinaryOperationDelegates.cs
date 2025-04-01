@@ -1,7 +1,4 @@
-﻿using System;
-using DiceRoll.Exceptions;
-
-namespace DiceRoll.Nodes
+﻿namespace DiceRoll
 {
     public static class DefaultBinaryOperationDelegates
     {

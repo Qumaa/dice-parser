@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using DiceRoll.Exceptions;
+﻿using System.Collections;
 
-namespace DiceRoll.Nodes
+namespace DiceRoll
 {
     /// <summary>
     /// Base class that represents a range of values along with their probabilities.

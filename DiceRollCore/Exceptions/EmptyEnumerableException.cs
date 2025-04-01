@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 
-namespace DiceRoll.Exceptions
+namespace DiceRoll
 {
     /// <summary>
     /// The exception that is thrown when an <see cref="IEnumerable{T}"/> parameter passed to a method

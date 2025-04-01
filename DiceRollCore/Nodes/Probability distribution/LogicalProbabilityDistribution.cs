@@ -1,4 +1,4 @@
-﻿namespace DiceRoll.Nodes
+﻿namespace DiceRoll
 {
     /// <summary>
     /// A boolean implementation of <see cref="ProbabilityDistribution{T}">ProbabilityDistribution</see>
@@ -16,7 +16,7 @@
         /// <see cref="Probability"/> of true within the distribution.
         /// Must be within the 0% to 100% range to properly calculate the probability of false.
         /// </param>
-        /// <exception cref="DiceRoll.Exceptions.NegativeProbabilityException">
+        /// <exception cref="DiceRoll.NegativeProbabilityException">
         /// When <paramref name="ofTrue"/> is above 100%, resulting in the probability of false being below 0%.
         /// </exception>
         public LogicalProbabilityDistribution(Probability ofTrue) : base(ToEnumerable(ofTrue.Normalized()))

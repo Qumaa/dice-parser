@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace DiceRoll.Nodes
+namespace DiceRoll
 {
     /// <summary>
     /// <para>Represent the boolean outcome of a node.</para>

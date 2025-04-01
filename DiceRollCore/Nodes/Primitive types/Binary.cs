@@ -1,4 +1,4 @@
-﻿namespace DiceRoll.Nodes
+﻿namespace DiceRoll
 {
     /// <summary>
     /// A <see cref="bool">boolean</see> value wrapper.

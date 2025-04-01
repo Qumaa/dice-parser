@@ -1,10 +1,9 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 
-namespace DiceRoll.Exceptions
+namespace DiceRoll
 {
     /// <summary>
-    /// The exception that is thrown when the <see cref="DiceRoll.Nodes.Dice(Random, int)"/> constructor receives 0 or
+    /// The exception that is thrown when the <see cref="DiceRoll.Dice(Random, int)"/> constructor receives 0 or
     /// a negative value.
     /// </summary>
     public sealed class DiceFacesException : ArgumentException

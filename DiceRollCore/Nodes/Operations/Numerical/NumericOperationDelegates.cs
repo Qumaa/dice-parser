@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace DiceRoll.Nodes
+namespace DiceRoll
 {
     [StructLayout(LayoutKind.Auto)]
     public readonly struct NumericOperationDelegates

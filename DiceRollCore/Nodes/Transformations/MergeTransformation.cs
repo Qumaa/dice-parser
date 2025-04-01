@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace DiceRoll.Nodes
+﻿namespace DiceRoll
 {
     /// <summary>
     /// A base class for any <see cref="Transformation"/> that merges two arbitrary

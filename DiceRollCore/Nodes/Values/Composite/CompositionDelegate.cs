@@ -1,4 +1,4 @@
-﻿namespace DiceRoll.Nodes
+﻿namespace DiceRoll
 {
     public delegate IAnalyzable CompositionDelegate(IAnalyzable[] composed);
 }

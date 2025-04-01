@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace DiceRoll.Nodes
+namespace DiceRoll
 {
     /// <summary>
     /// An arbitrary value of type <typeparamref name="T"/> wrapper that associates the value with certain

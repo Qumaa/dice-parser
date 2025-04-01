@@ -1,8 +1,4 @@
-﻿using System;
-using System.Linq;
-using DiceRoll.Exceptions;
-
-namespace DiceRoll.Nodes
+﻿namespace DiceRoll
 {
     /// <summary>
     /// A <see cref="IAnalyzable">numerical node</see> that represents a singular N-sided die.

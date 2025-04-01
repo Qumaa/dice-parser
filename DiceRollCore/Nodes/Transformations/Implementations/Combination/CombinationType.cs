@@ -1,4 +1,4 @@
-﻿namespace DiceRoll.Nodes
+﻿namespace DiceRoll
 {
     /// <summary>
     /// Determines the behaviour of a <see cref="Combination"/> instance.

@@ -1,7 +1,6 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 
-namespace DiceRoll.Exceptions
+namespace DiceRoll
 {
     /// <summary>
     /// The exception that is thrown when a not defined enum value is passed to a method.

@@ -1,4 +1,4 @@
-﻿namespace DiceRoll.Nodes
+﻿namespace DiceRoll
 {
     /// <summary>
     /// Composes the sequence of <see cref="IAnalyzable">numerical nodes</see>,

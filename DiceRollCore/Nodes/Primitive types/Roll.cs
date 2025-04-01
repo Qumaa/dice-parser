@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace DiceRoll.Nodes
+namespace DiceRoll
 {
     /// <summary>
     /// <para>Represents the numerical result of a node named after a dice roll.</para>

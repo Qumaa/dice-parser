@@ -1,9 +1,6 @@
-﻿using System;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using DiceRoll.Nodes;
+﻿using System.Runtime.CompilerServices;
 
-namespace DiceRoll.Exceptions
+namespace DiceRoll
 {
     public sealed class ZeroDivisorException : DivideByZeroException
     {

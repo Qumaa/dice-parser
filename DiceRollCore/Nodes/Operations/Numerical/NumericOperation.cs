@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace DiceRoll.Nodes
+﻿namespace DiceRoll
 {
     /// <summary>
     /// Base class that allows to wrap two arbitrary <see cref="IAnalyzable">numeric nodes</see> to perform binary

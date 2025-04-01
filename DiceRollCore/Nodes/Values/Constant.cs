@@ -1,6 +1,4 @@
-﻿using System.Linq;
-
-namespace DiceRoll.Nodes
+﻿namespace DiceRoll
 {
     /// <summary>
     /// A <see cref="IAnalyzable">numerical node</see> that represents a singular <see cref="int">integer</see> number.

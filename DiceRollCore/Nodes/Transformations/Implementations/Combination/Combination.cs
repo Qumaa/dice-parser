@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using DiceRoll.Exceptions;
-
-namespace DiceRoll.Nodes
+﻿namespace DiceRoll
 {
     /// <summary>
     /// Merges two arbitrary <see cref="IAnalyzable">numeric nodes</see> by either adding or subtracting their

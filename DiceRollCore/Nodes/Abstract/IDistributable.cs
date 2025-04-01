@@ -1,4 +1,4 @@
-﻿namespace DiceRoll.Nodes
+﻿namespace DiceRoll
 {
     /// <summary>
     /// Base interface for any range of arbitrary values to analyze or transform their probabilities.

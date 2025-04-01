@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace DiceRoll.Nodes
+﻿namespace DiceRoll
 {
     public abstract class BinaryOperation : IOperation
     {

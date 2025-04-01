@@ -1,4 +1,4 @@
-﻿namespace DiceRoll.Nodes
+﻿namespace DiceRoll
 {
     public delegate Binary BinaryOperationEvaluationDelegate(Binary left, Binary right);
 }

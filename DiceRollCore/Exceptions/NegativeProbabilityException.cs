@@ -1,10 +1,9 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 
-namespace DiceRoll.Exceptions
+namespace DiceRoll
 {
     /// <summary>
-    /// The exception that is thrown when the <see cref="DiceRoll.Nodes.Probability(double)"/> constructor receives
+    /// The exception that is thrown when the <see cref="DiceRoll.Probability(double)"/> constructor receives
     /// a negative value.
     /// </summary>
     public sealed class NegativeProbabilityException : ArgumentException
