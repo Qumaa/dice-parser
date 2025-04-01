@@ -1,4 +1,7 @@
-﻿namespace DiceRoll
+﻿using System;
+using System.Linq;
+
+namespace DiceRoll
 {
     public static partial class Node
     {

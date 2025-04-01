@@ -1,4 +1,6 @@
-﻿namespace DiceRoll
+﻿using System;
+
+namespace DiceRoll
 {
     /// <summary>
     /// A base class for any <see cref="Transformation"/> that merges two arbitrary

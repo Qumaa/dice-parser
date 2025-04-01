@@ -1,4 +1,7 @@
-﻿namespace DiceRoll
+﻿using System;
+using System.Collections.Generic;
+
+namespace DiceRoll
 {
     /// <summary>
     /// A <see cref="IAnalyzable">numerical node</see> that combines an arbitrary sequence of

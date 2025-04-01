@@ -1,4 +1,7 @@
-﻿namespace DiceRoll
+﻿using System.Collections.Generic;
+using System.Linq;
+
+namespace DiceRoll
 {
     /// <summary>
     /// A numeric implementation of <see cref="ProbabilityDistribution{T}">ProbabilityDistribution</see>

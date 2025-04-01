@@ -1,4 +1,6 @@
-﻿namespace DiceRoll
+﻿using System.Linq;
+
+namespace DiceRoll
 {
     public static class DefaultNumericOperationDelegates
     {

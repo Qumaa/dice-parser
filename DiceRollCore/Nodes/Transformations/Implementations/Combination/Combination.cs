@@ -1,4 +1,7 @@
-﻿namespace DiceRoll
+﻿using System.Collections.Generic;
+using System.Linq;
+
+namespace DiceRoll
 {
     /// <summary>
     /// Merges two arbitrary <see cref="IAnalyzable">numeric nodes</see> by either adding or subtracting their

@@ -1,4 +1,7 @@
-﻿namespace DiceRoll
+﻿using System;
+using System.Collections.Generic;
+
+namespace DiceRoll
 {
     /// <summary>
     /// An <see cref="int">integer</see> number wrapper.

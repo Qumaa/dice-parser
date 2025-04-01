@@ -1,4 +1,7 @@
-﻿namespace DiceRoll
+﻿using System;
+using System.Linq;
+
+namespace DiceRoll
 {
     /// <summary>
     /// A <see cref="IAnalyzable">numerical node</see> that represents a singular N-sided die.
