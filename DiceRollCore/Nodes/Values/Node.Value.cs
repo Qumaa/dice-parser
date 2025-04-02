@@ -43,6 +43,9 @@ namespace DiceRoll
             public static IAnalyzable Composite(Composer composer, IAnalyzable first, IAnalyzable second,
                 params IAnalyzable[] sequence) =>
                 new Composite(sequence.Prepend(second).Prepend(first), composer);
+            
+            public static IAnalyzable Composite(Composer composer, IAnalyzable node, int repetitionCount) =>
+                new Composite(node, repetitionCount, composer);
 
             /// <summary>
             /// <para>
@@ -67,6 +70,10 @@ namespace DiceRoll
             public static IAnalyzable Composite<T>(IAnalyzable first, IAnalyzable second, params IAnalyzable[] sequence)
                 where T : Composer, new() =>
                 Composite(new T(), first, second, sequence);
+            
+            public static IAnalyzable Composite<T>(IAnalyzable node, int repetitionCount)
+                where T : Composer, new() =>
+                Composite(new T(), node, repetitionCount);
 
             /// <summary>
             /// <para>
@@ -88,6 +95,9 @@ namespace DiceRoll
             /// </returns>
             public static IAnalyzable Summation(IAnalyzable first, IAnalyzable second, params IAnalyzable[] sequence) =>
                 Composite<Summarize>(first, second, sequence);
+            
+            public static IAnalyzable Summation(IAnalyzable node, int repetitionCount) =>
+                Composite<Summarize>(node, repetitionCount);
 
             /// <summary>
             /// <para>
@@ -111,6 +121,9 @@ namespace DiceRoll
             /// </returns>
             public static IAnalyzable Highest(IAnalyzable first, IAnalyzable second, params IAnalyzable[] sequence) =>
                 Composite<KeepHighest>(first, second, sequence);
+            
+            public static IAnalyzable Highest(IAnalyzable node, int repetitionCount) =>
+                Composite<KeepHighest>(node, repetitionCount);
 
             /// <summary>
             /// <para>
@@ -134,6 +147,12 @@ namespace DiceRoll
             /// </returns>
             public static IAnalyzable Lowest(IAnalyzable first, IAnalyzable second, params IAnalyzable[] sequence) =>
                 Composite<KeepLowest>(first, second, sequence);
+            
+            public static IAnalyzable Lowest(IAnalyzable node, int repetitionCount) =>
+                Composite<KeepLowest>(node, repetitionCount);
+
+            public static IConditional Conditional(IAnalyzable value, IOperation condition) =>
+                new Conditional(condition, value);
         }
     }
 }

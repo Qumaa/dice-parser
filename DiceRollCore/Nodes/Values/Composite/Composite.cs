@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DiceRoll
 {
@@ -24,6 +25,9 @@ namespace DiceRoll
             
             _composite = composer.Compose(sequence);
         }
+
+        public Composite(IAnalyzable node, int repetitionCount, Composer composer) :
+            this(Enumerable.Repeat(node, CompositeRepetitionException.ThrowIfBelowTwo(repetitionCount)), composer) { }
 
         public Outcome Evaluate() =>
             _composite.Evaluate();
