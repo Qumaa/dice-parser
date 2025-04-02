@@ -3,28 +3,28 @@
 namespace DiceRoll
 {
     /// <summary>
-    /// Base class that allows to wrap an arbitrary <see cref="IAnalyzable">numeric node</see> to transform its
+    /// Base class that allows to wrap an arbitrary <see cref="INumeric">numeric node</see> to transform its
     /// <see cref="Outcome"/> and <see cref="RollProbabilityDistribution">probability distribution</see>
     /// of the results.
     /// </summary>
-    public abstract class Transformation : IAnalyzable
+    public abstract class Transformation : NumericNode
     {
         /// <summary>
-        /// The main <see cref="IAnalyzable">numeric node</see>.
+        /// The main <see cref="INumeric">numeric node</see>.
         /// </summary>
-        protected readonly IAnalyzable _source;
+        protected readonly INumeric _source;
         
-        /// <param name="source">The main <see cref="IAnalyzable">numeric node</see>.</param>
+        /// <param name="source">The main <see cref="INumeric">numeric node</see>.</param>
         /// <exception cref="ArgumentNullException">When <paramref name="source"/> is null.</exception>
-        protected Transformation(IAnalyzable source)
+        protected Transformation(INumeric source)
         {
             ArgumentNullException.ThrowIfNull(source);
             
             _source = source;
         }
 
-        public abstract Outcome Evaluate();
+        public abstract override Outcome Evaluate();
         
-        public abstract RollProbabilityDistribution GetProbabilityDistribution();
+        public abstract override RollProbabilityDistribution GetProbabilityDistribution();
     }
 }

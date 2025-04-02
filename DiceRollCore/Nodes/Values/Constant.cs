@@ -3,9 +3,9 @@
 namespace DiceRoll
 {
     /// <summary>
-    /// A <see cref="IAnalyzable">numerical node</see> that represents a singular <see cref="int">integer</see> number.
+    /// A <see cref="INumeric">numerical node</see> that represents a singular <see cref="int">integer</see> number.
     /// </summary>
-    public sealed class Constant : IAnalyzable
+    public sealed class Constant : NumericNode
     {
         private readonly int _value;
         
@@ -15,10 +15,10 @@ namespace DiceRoll
             _value = value;
         }
 
-        public Outcome Evaluate() =>
+        public override Outcome Evaluate() =>
             new(_value);
 
-        public RollProbabilityDistribution GetProbabilityDistribution() =>
+        public override RollProbabilityDistribution GetProbabilityDistribution() =>
             new(Enumerable.Repeat(new Roll(_value, Probability.Hundred), 1));
     }
 }

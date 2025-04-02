@@ -2,7 +2,7 @@
 
 namespace DiceRoll
 {
-    public sealed class NotBinaryOperation : IOperation
+    public sealed class NotBinaryOperation : Operation
     {
         private readonly IOperation _operation;
         
@@ -13,10 +13,10 @@ namespace DiceRoll
             _operation = operation;
         }
 
-        public Binary Evaluate() =>
+        public override Binary Evaluate() =>
             !_operation.Evaluate();
 
-        public LogicalProbabilityDistribution GetProbabilityDistribution() =>
+        public override LogicalProbabilityDistribution GetProbabilityDistribution() =>
             new(_operation.GetProbabilityDistribution().False);
     }
 }

@@ -12,5 +12,5 @@
     /// evaluation value.
     /// </para>
     /// </summary>
-    public interface IAnalyzable : IRollable, IDistributable<RollProbabilityDistribution, Roll> { }
+    public interface INumeric : IRollable, IDistributable<RollProbabilityDistribution, Roll> { }
 }

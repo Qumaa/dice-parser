@@ -2,7 +2,7 @@
 {
     /// <summary>
     /// <para>
-    /// Base interface for any node of binary operation between two <see cref="IAnalyzable">numerical nodes</see>
+    /// Base interface for any node of binary operation between two <see cref="INumeric">numerical nodes</see>
     /// that takes part in expressions.
     /// Implements <see cref="INode{T}">INode</see> of type <see cref="Binary"/>
     /// and <see cref="IDistributable{T,TType}">IDistributable</see> of type <see cref="Logical"/>.

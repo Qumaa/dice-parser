@@ -4,7 +4,7 @@ using System.Linq;
 namespace DiceRoll
 {
     /// <summary>
-    /// Merges two arbitrary <see cref="IAnalyzable">numeric nodes</see> by either adding or subtracting their
+    /// Merges two arbitrary <see cref="INumeric">numeric nodes</see> by either adding or subtracting their
     /// <see cref="Outcome"/> and provides an updated
     /// <see cref="RollProbabilityDistribution">probability distribution</see> of the results.
     /// </summary>
@@ -13,12 +13,12 @@ namespace DiceRoll
     {
         private readonly CombinationType _combinationType;
 
-        /// <inheritdoc cref="MergeTransformation(IAnalyzable, IAnalyzable)"/>
+        /// <inheritdoc cref="MergeTransformation(INumeric, INumeric)"/>
         /// <param name="combinationType">The type of combination.</param>
         /// <exception cref="EnumValueNotDefinedException">
         /// When <paramref name="combinationType"/> holds a not defined value.
         /// </exception>
-        public Combination(IAnalyzable source, IAnalyzable other, CombinationType combinationType) : base(source, other)
+        public Combination(INumeric source, INumeric other, CombinationType combinationType) : base(source, other)
         {
             if (IsDivision(combinationType))
                 ZeroDivisorException.ThrowIfAnyZero(_other.GetProbabilityDistribution());

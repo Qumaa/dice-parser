@@ -7,7 +7,7 @@ namespace DiceRoll
     /// <summary>
     /// <para>
     /// Base class to determine the behaviour of <see cref="Composite"/> nodes.
-    /// All inheritors must not only define a way to compose multiple <see cref="IAnalyzable">numerical nodes</see>
+    /// All inheritors must not only define a way to compose multiple <see cref="INumeric">numerical nodes</see>
     /// into one, but also a way to correctly combine their
     /// <see cref="RollProbabilityDistribution">probability distributions</see>.
     /// </para>
@@ -23,9 +23,9 @@ namespace DiceRoll
         /// </summary>
         /// <param name="source">A sequence of nodes.</param>
         /// <returns>A combined node.</returns>
-        public IAnalyzable Compose(IEnumerable<IAnalyzable> source)
+        public INumeric Compose(IEnumerable<INumeric> source)
         {
-            IAnalyzable[] validatedSource = ToArray(source);
+            INumeric[] validatedSource = ToArray(source);
 
             return validatedSource.Length is 1 ? validatedSource[0] : Compose(validatedSource);
         }
@@ -37,9 +37,9 @@ namespace DiceRoll
         /// </summary>
         /// <param name="source">An array of objects to compose with at least 2 elements in it. Safe to modify.</param>
         /// <returns>
-        /// A single object that implements <see cref="IAnalyzable"/> and combines <paramref name="source"/>.
+        /// A single object that implements <see cref="INumeric"/> and combines <paramref name="source"/>.
         /// </returns>
-        protected abstract IAnalyzable Compose(IAnalyzable[] source);
+        protected abstract INumeric Compose(INumeric[] source);
 
         /// <summary>
         /// This method iterates <paramref name="source"/> in pairs, applying the specified
@@ -52,17 +52,17 @@ namespace DiceRoll
         /// A <see cref="PairCompositionDelegate">delegate</see> to apply to <paramref name="source"/>.
         /// </param>
         /// <returns>
-        /// A single object that implements <see cref="IAnalyzable"/> and combines <paramref name="source"/>.
+        /// A single object that implements <see cref="INumeric"/> and combines <paramref name="source"/>.
         /// </returns>
-        protected static IAnalyzable IteratePairs(IAnalyzable[] source, PairCompositionDelegate compositionDelegate)
+        protected static INumeric IteratePairs(INumeric[] source, PairCompositionDelegate compositionDelegate)
         {
             ArgumentNullException.ThrowIfNull(source);
             ArgumentNullException.ThrowIfNull(compositionDelegate);
             
             for (int i = 1; i < source.Length; i++)
             {
-                IAnalyzable previous = source[i - 1];
-                IAnalyzable current = source[i];
+                INumeric previous = source[i - 1];
+                INumeric current = source[i];
 
                 source[i] = compositionDelegate(previous, current);
             }
@@ -70,8 +70,8 @@ namespace DiceRoll
             return source[^1];
         }
 
-        private static IAnalyzable[] ToArray(IEnumerable<IAnalyzable> source) =>
-            source as IAnalyzable[] ?? source.ToArray();
+        private static INumeric[] ToArray(IEnumerable<INumeric> source) =>
+            source as INumeric[] ?? source.ToArray();
 
         /// <summary>
         /// Create a <see cref="Composer"/> instance out of <see cref="CompositionDelegate">CompositionDelegate</see>
@@ -96,7 +96,7 @@ namespace DiceRoll
                 _compositionDelegate = func;
             }
 
-            protected override IAnalyzable Compose(IAnalyzable[] source) =>
+            protected override INumeric Compose(INumeric[] source) =>
                 _compositionDelegate.Invoke(source);
         }
 
@@ -104,6 +104,6 @@ namespace DiceRoll
         /// <para>Delegate used to combine two nodes into one.</para>
         /// <para>Usually delegates the call to a fitting <see cref="Transformation"/> implementation evaluation.</para>
         /// </summary>
-        protected delegate IAnalyzable PairCompositionDelegate(IAnalyzable left, IAnalyzable right);
+        protected delegate INumeric PairCompositionDelegate(INumeric left, INumeric right);
     }
 }

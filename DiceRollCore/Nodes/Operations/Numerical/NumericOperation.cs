@@ -3,16 +3,16 @@
 namespace DiceRoll
 {
     /// <summary>
-    /// Base class that allows to wrap two arbitrary <see cref="IAnalyzable">numeric nodes</see> to perform binary
+    /// Base class that allows to wrap two arbitrary <see cref="INumeric">numeric nodes</see> to perform binary
     /// operations on their <see cref="Outcome"/> and provide a
     /// <see cref="RollProbabilityDistribution">probability distribution</see> of true and false of said operation.
     /// </summary>
-    public abstract class NumericOperation : IOperation
+    public abstract class NumericOperation : Operation
     {
-        protected readonly IAnalyzable _left;
-        protected readonly IAnalyzable _right;
+        protected readonly INumeric _left;
+        protected readonly INumeric _right;
 
-        protected NumericOperation(IAnalyzable left, IAnalyzable right)
+        protected NumericOperation(INumeric left, INumeric right)
         {
             ArgumentNullException.ThrowIfNull(left);
             ArgumentNullException.ThrowIfNull(right);
@@ -21,8 +21,8 @@ namespace DiceRoll
             _right = right;
         }
 
-        public abstract Binary Evaluate();
+        public abstract override Binary Evaluate();
 
-        public abstract LogicalProbabilityDistribution GetProbabilityDistribution();
+        public abstract override LogicalProbabilityDistribution GetProbabilityDistribution();
     }
 }
