@@ -2,7 +2,7 @@
 {
     public interface IParsingSwitch
     {
-        void ForNumeric(IAnalyzable numeric);
+        void ForNumeric(INumeric numeric);
         void ForOperation(IOperation operation);
     }
 }
