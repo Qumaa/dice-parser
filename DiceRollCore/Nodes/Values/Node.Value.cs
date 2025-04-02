@@ -134,6 +134,9 @@ namespace DiceRoll
             /// </returns>
             public static IAnalyzable Lowest(IAnalyzable first, IAnalyzable second, params IAnalyzable[] sequence) =>
                 Composite<KeepLowest>(first, second, sequence);
+
+            public static IConditional Conditional(IAnalyzable value, IOperation condition) =>
+                new Conditional(condition, value);
         }
     }
 }
