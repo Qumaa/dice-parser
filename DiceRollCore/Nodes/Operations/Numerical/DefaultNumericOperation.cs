@@ -4,7 +4,7 @@
     {
         private readonly NumericOperationDelegates _delegates;
 
-        public DefaultNumericOperation(IAnalyzable left, IAnalyzable right, NumericOperationType operationType) : base(left, right)
+        public DefaultNumericOperation(INumeric left, INumeric right, NumericOperationType operationType) : base(left, right)
         {
             _delegates = DefaultNumericOperationDelegates.Get(operationType);
         }

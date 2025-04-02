@@ -5,9 +5,9 @@ namespace DiceRoll
     public sealed class Conditional : IConditional
     {
         private readonly IOperation _condition;
-        private readonly IAnalyzable _value;
+        private readonly INumeric _value;
         
-        public Conditional(IOperation condition, IAnalyzable value)
+        public Conditional(IOperation condition, INumeric value)
         {
             _condition = condition;
             _value = value;
@@ -24,5 +24,8 @@ namespace DiceRoll
                 .Select(x => new Roll(x.Outcome, x.Probability * ofTrue))
                 .ToRollProbabilityDistribution();
         }
+
+        public void Visit(INodeVisitor visitor) =>
+            visitor.ForConditional(this);
     }
 }

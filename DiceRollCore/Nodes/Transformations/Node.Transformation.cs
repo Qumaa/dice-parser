@@ -8,72 +8,72 @@
         public static partial class Transformation
         {
             /// <summary>
-            /// Adds two arbitrary <see cref="IAnalyzable">numeric nodes</see>
+            /// Adds two arbitrary <see cref="INumeric">numeric nodes</see>
             /// and provides an updated <see cref="RollProbabilityDistribution">probability distribution</see>
             /// of the results.
             /// </summary>
-            /// <param name="left">The first <see cref="IAnalyzable">numeric node</see>.</param>
-            /// <param name="right">The second <see cref="IAnalyzable">numeric node</see>.</param>
+            /// <param name="left">The first <see cref="INumeric">numeric node</see>.</param>
+            /// <param name="right">The second <see cref="INumeric">numeric node</see>.</param>
             /// <returns>
-            /// A <see cref="IAnalyzable">numeric node</see> that adds
+            /// A <see cref="INumeric">numeric node</see> that adds
             /// <paramref name="left"/> and <paramref name="right"/>
             /// and provides an updated <see cref="RollProbabilityDistribution">probability distribution</see>.
             /// </returns>
-            public static IAnalyzable Add(IAnalyzable left, IAnalyzable right) =>
+            public static INumeric Add(INumeric left, INumeric right) =>
                 new Combination(left, right, CombinationType.Add);
 
             /// <summary>
-            /// Subtracts one arbitrary <see cref="IAnalyzable">numeric node</see> from another
+            /// Subtracts one arbitrary <see cref="INumeric">numeric node</see> from another
             /// and provides an updated <see cref="RollProbabilityDistribution">probability distribution</see>
             /// of the results.
             /// </summary>
-            /// <param name="left">The first <see cref="IAnalyzable">numeric node</see>.</param>
-            /// <param name="right">The second <see cref="IAnalyzable">numeric node</see>.</param>
+            /// <param name="left">The first <see cref="INumeric">numeric node</see>.</param>
+            /// <param name="right">The second <see cref="INumeric">numeric node</see>.</param>
             /// <returns>
-            /// A <see cref="IAnalyzable">numeric node</see> that subtracts
+            /// A <see cref="INumeric">numeric node</see> that subtracts
             /// <paramref name="right"/> from <paramref name="left"/>
             /// and provides an updated <see cref="RollProbabilityDistribution">probability distribution</see>.
             /// </returns>
-            public static IAnalyzable Subtract(IAnalyzable left, IAnalyzable right) =>
+            public static INumeric Subtract(INumeric left, INumeric right) =>
                 new Combination(left, right, CombinationType.Subtract);
             
-            public static IAnalyzable Multiply(IAnalyzable left, IAnalyzable right) =>
+            public static INumeric Multiply(INumeric left, INumeric right) =>
                 new Combination(left, right, CombinationType.Multiply);
             
-            public static IAnalyzable DivideRoundDown(IAnalyzable left, IAnalyzable right) =>
+            public static INumeric DivideRoundDown(INumeric left, INumeric right) =>
                 new Combination(left, right, CombinationType.DivideRoundDownwards);
             
-            public static IAnalyzable DivideRoundUp(IAnalyzable left, IAnalyzable right) =>
+            public static INumeric DivideRoundUp(INumeric left, INumeric right) =>
                 new Combination(left, right, CombinationType.DivideRoundUpwards);
 
             /// <summary>
-            /// Selects the highest evaluation result of two arbitrary <see cref="IAnalyzable">numeric nodes</see>
+            /// Selects the highest evaluation result of two arbitrary <see cref="INumeric">numeric nodes</see>
             /// and provides an updated <see cref="RollProbabilityDistribution">probability distribution</see>
             /// of the results.
             /// </summary>
-            /// <param name="left">The first <see cref="IAnalyzable">numeric node</see>.</param>
-            /// <param name="right">The second <see cref="IAnalyzable">numeric node</see>.</param>
+            /// <param name="left">The first <see cref="INumeric">numeric node</see>.</param>
+            /// <param name="right">The second <see cref="INumeric">numeric node</see>.</param>
             /// <returns>
-            /// A <see cref="IAnalyzable">numeric node</see> that selects the highest evaluation result of
+            /// A <see cref="INumeric">numeric node</see> that selects the highest evaluation result of
             /// <paramref name="left"/> and <paramref name="right"/>
             /// and provides an updated <see cref="RollProbabilityDistribution">probability distribution</see>.
             /// </returns>
-            public static IAnalyzable SelectHighest(IAnalyzable left, IAnalyzable right) =>
+            public static INumeric SelectHighest(INumeric left, INumeric right) =>
                 new Selection(left, right, SelectionType.Highest);
 
             /// <summary>
-            /// Selects the lowest evaluation result of two arbitrary <see cref="IAnalyzable">numeric nodes</see>
+            /// Selects the lowest evaluation result of two arbitrary <see cref="INumeric">numeric nodes</see>
             /// and provides an updated <see cref="RollProbabilityDistribution">probability distribution</see>
             /// of the results.
             /// </summary>
-            /// <param name="left">The first <see cref="IAnalyzable">numeric node</see>.</param>
-            /// <param name="right">The second <see cref="IAnalyzable">numeric node</see>.</param>
+            /// <param name="left">The first <see cref="INumeric">numeric node</see>.</param>
+            /// <param name="right">The second <see cref="INumeric">numeric node</see>.</param>
             /// <returns>
-            /// A <see cref="IAnalyzable">numeric node</see> that selects the lowest evaluation result of
+            /// A <see cref="INumeric">numeric node</see> that selects the lowest evaluation result of
             /// <paramref name="left"/> and <paramref name="right"/>
             /// and provides an updated <see cref="RollProbabilityDistribution">probability distribution</see>.
             /// </returns>
-            public static IAnalyzable SelectLowest(IAnalyzable left, IAnalyzable right) =>
+            public static INumeric SelectLowest(INumeric left, INumeric right) =>
                 new Selection(left, right, SelectionType.Lowest);
 
         }

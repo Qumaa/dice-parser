@@ -3,7 +3,7 @@
 namespace DiceRoll
 {
     /// <summary>
-    /// Merges two arbitrary <see cref="IAnalyzable">numeric nodes</see> by selecting one of their
+    /// Merges two arbitrary <see cref="INumeric">numeric nodes</see> by selecting one of their
     /// <see cref="Outcome"/> and provides an updated
     /// <see cref="RollProbabilityDistribution">probability distribution</see> of the results.
     /// </summary>
@@ -12,12 +12,12 @@ namespace DiceRoll
     {
         private readonly SelectionType _selectionType;
 
-        /// <inheritdoc cref="MergeTransformation(IAnalyzable, IAnalyzable)"/>
+        /// <inheritdoc cref="MergeTransformation(INumeric, INumeric)"/>
         /// <param name="selectionType">The type of selection.</param>
         /// <exception cref="EnumValueNotDefinedException">
         /// When <paramref name="selectionType"/> holds a not defined value.
         /// </exception>
-        public Selection(IAnalyzable source, IAnalyzable other, SelectionType selectionType) : base(source, other)
+        public Selection(INumeric source, INumeric other, SelectionType selectionType) : base(source, other)
         {
             EnumValueNotDefinedException.ThrowIfValueNotDefined(selectionType);
             

@@ -6,7 +6,7 @@
     /// <typeparamref name="T"/>.
     /// </summary>
     /// <typeparam name="T">The result type.</typeparam>
-    public interface INode<out T>
+    public interface INode<out T> : INode
     {
         /// <summary>
         /// <para>
@@ -18,5 +18,10 @@
         /// </summary>
         /// <returns>The evaluation result of type <typeparamref name="T"/>.</returns>
         T Evaluate();
+    }
+
+    public interface INode
+    {
+        void Visit(INodeVisitor visitor);
     }
 }

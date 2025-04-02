@@ -5,12 +5,12 @@ using System.Linq;
 namespace DiceRoll
 {
     /// <summary>
-    /// A <see cref="IAnalyzable">numerical node</see> that combines an arbitrary sequence of
+    /// A <see cref="INumeric">numerical node</see> that combines an arbitrary sequence of
     /// other numerical nodes, using a <see cref="Composer"/> implementation instance.
     /// </summary>
-    public sealed class Composite : IAnalyzable
+    public sealed class Composite : NumericNode
     {
-        private readonly IAnalyzable _composite;
+        private readonly INumeric _composite;
         
         /// <param name="sequence">Nodes to be combined.</param>
         /// <param name="composer">A <see cref="Composer"/> instance that determines how the <paramref name="sequence"/>
@@ -18,7 +18,7 @@ namespace DiceRoll
         /// <exception cref="ArgumentNullException">When either <paramref name="sequence"/> or
         /// <paramref name="composer"/> are null.</exception>
         /// <exception cref="EmptyEnumerableException">When <paramref name="sequence"/> is empty.</exception>
-        public Composite(IEnumerable<IAnalyzable> sequence, Composer composer)
+        public Composite(IEnumerable<INumeric> sequence, Composer composer)
         {
             EmptyEnumerableException.ThrowIfNullOrEmpty(sequence);
             ArgumentNullException.ThrowIfNull(composer);
@@ -26,13 +26,13 @@ namespace DiceRoll
             _composite = composer.Compose(sequence);
         }
 
-        public Composite(IAnalyzable node, int repetitionCount, Composer composer) :
+        public Composite(INumeric node, int repetitionCount, Composer composer) :
             this(Enumerable.Repeat(node, CompositeRepetitionException.ThrowIfBelowTwo(repetitionCount)), composer) { }
 
-        public Outcome Evaluate() =>
+        public override Outcome Evaluate() =>
             _composite.Evaluate();
 
-        public RollProbabilityDistribution GetProbabilityDistribution() =>
+        public override RollProbabilityDistribution GetProbabilityDistribution() =>
             _composite.GetProbabilityDistribution();
     }
 }

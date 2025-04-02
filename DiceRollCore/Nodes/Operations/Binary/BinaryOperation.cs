@@ -2,7 +2,7 @@
 
 namespace DiceRoll
 {
-    public abstract class BinaryOperation : IOperation
+    public abstract class BinaryOperation : Operation
     {
         protected readonly IOperation _left;
         protected readonly IOperation _right;
@@ -16,8 +16,8 @@ namespace DiceRoll
             _right = right;
         }
 
-        public abstract Binary Evaluate();
+        public abstract override Binary Evaluate();
         
-        public abstract LogicalProbabilityDistribution GetProbabilityDistribution();
+        public abstract override LogicalProbabilityDistribution GetProbabilityDistribution();
     }
 }
