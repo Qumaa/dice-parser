@@ -5,7 +5,7 @@ namespace DiceRoll.Input
 {
     public interface IToken
     {
-        bool Matches(ReadOnlySpan<char> token);
+        bool Matches(in ReadOnlySpan<char> token);
 
         IEnumerable<string> EnumerateRawTokens();
     }

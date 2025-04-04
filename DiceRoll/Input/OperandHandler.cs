@@ -1,4 +1,6 @@
-﻿namespace DiceRoll.Input
+﻿using System;
+
+namespace DiceRoll.Input
 {
-    public delegate INumeric OperandHandler(string match);
+    public delegate INumeric OperandHandler(ReadOnlySpan<char> match);
 }

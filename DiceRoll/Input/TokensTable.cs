@@ -21,13 +21,13 @@ namespace DiceRoll.Input
             _operands = operands.ToArray();
         }
 
-        public bool IsOpenParenthesis(string token) =>
+        public bool IsOpenParenthesis(in ReadOnlySpan<char> token) =>
             _openParenthesis.Matches(token);
 
-        public bool IsCloseParenthesis(string token) =>
+        public bool IsCloseParenthesis(in ReadOnlySpan<char> token) =>
             _closeParenthesis.Matches(token);
 
-        public bool IsOperator(string token, out int precedence)
+        public bool IsOperator(in ReadOnlySpan<char> token, out int precedence, out RPNOperatorParser parser)
         {
             for (int i = 0; i < _operators.Length; i++)
             {
@@ -37,19 +37,29 @@ namespace DiceRoll.Input
                     continue;
 
                 precedence = tokenizedOperator.Precedence;
+                parser = tokenizedOperator.Parser;
                 return true;
             }
 
             precedence = 0;
+            parser = null;
             return false;
         }
 
-        public bool IsOperand(string token)
+        public bool IsOperand(in ReadOnlySpan<char> token, out INumeric node)
         {
             for (int i = 0; i < _operands.Length; i++)
-                if (_operands[i].Token.Matches(token))
+            {
+                TokenizedOperand operand = _operands[i];
+                
+                if (operand.Token.Matches(token))
+                {
+                    node = operand.Handler.Invoke(token);
                     return true;
+                }
+            }
 
+            node = null;
             return false;
         }
     }

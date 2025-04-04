@@ -15,7 +15,7 @@ namespace DiceRoll.Input
             _compositionTokens = compositionTokens;
         }
 
-        public INumeric Parse(string expression)
+        public INumeric Parse(ReadOnlySpan<char> expression)
         {
             Helper helper = StartParsing(expression);
 
@@ -28,18 +28,18 @@ namespace DiceRoll.Input
                 helper.CompositionHandler().Invoke(dice, diceCount);
         }
 
-        private Helper StartParsing(string expression) =>
+        private Helper StartParsing(ReadOnlySpan<char> expression) =>
             new(this, expression);
 
         [StructLayout(LayoutKind.Auto)]
         private readonly ref struct Helper
         {
             private readonly DiceCompositionToken[] _compositionTokens;
-            private readonly string _expression;
+            private readonly ReadOnlySpan<char> _expression;
             private readonly int _delimiterIndex;
             private readonly int _diceNotationEnd;
             
-            public Helper(DiceParser context, string expression)
+            public Helper(DiceParser context, ReadOnlySpan<char> expression)
             {
                 _expression = expression;
                 _compositionTokens = context._compositionTokens;
@@ -52,13 +52,13 @@ namespace DiceRoll.Input
                 int diceCount = 1;
             
                 if (_delimiterIndex is not 0)
-                    diceCount = int.Parse(_expression.AsSpan(0, _delimiterIndex));
+                    diceCount = int.Parse(_expression[.._delimiterIndex]);
 
                 return diceCount;
             }
             
             public int FacesCount() =>
-                int.Parse(_expression.AsSpan(_delimiterIndex + 1, _diceNotationEnd - _delimiterIndex - 1));
+                int.Parse(_expression.Slice(_delimiterIndex + 1, _diceNotationEnd - _delimiterIndex - 1));
             
             public DiceCompositionHandler CompositionHandler()
             {
@@ -80,18 +80,18 @@ namespace DiceRoll.Input
                     return false;
                 }
                 
-                compositionToken = _expression.AsSpan(_diceNotationEnd).Trim(' ');
+                compositionToken = _expression[_diceNotationEnd..].Trim(' ');
                 return true;
             }
             
             private DiceCompositionHandler DefaultCompositionHandler() =>
                 _compositionTokens[0].CompositionHandler;
             
-            private static int IndexOfDelimiter(string expression, string[] delimiters)
+            private static int IndexOfDelimiter(ReadOnlySpan<char> expression, string[] delimiters)
             {
                 foreach (string delimiter in delimiters)
                 {
-                    int index = expression.IndexOf(delimiter, StringComparison.OrdinalIgnoreCase);
+                    int index = expression.IndexOf(delimiter.AsSpan(), StringComparison.OrdinalIgnoreCase);
 
                     if (index >= 0)
                         return index;
@@ -100,12 +100,12 @@ namespace DiceRoll.Input
                 return -1;
             }
             
-            private static int IndexOfDiceNotationEnd(string expression, int delimiterIndex)
+            private static int IndexOfDiceNotationEnd(ReadOnlySpan<char> expression, int delimiterIndex)
             {
                 int notationEnd = expression.Length;
             
                 for (int i = delimiterIndex + 1; i < notationEnd; i++)
-                    if (!char.IsDigit(expression, i))
+                    if (!char.IsDigit(expression[i]))
                         notationEnd = i;
 
                 return notationEnd;

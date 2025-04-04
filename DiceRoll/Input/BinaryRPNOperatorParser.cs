@@ -1,0 +1,22 @@
+﻿using System.Collections.Generic;
+
+namespace DiceRoll.Input
+{
+    public sealed class BinaryRPNOperatorParser<TLeft, TRight> : RPNOperatorParser where TLeft : INode where TRight : INode
+    {
+        private readonly BinaryOperatorParseHandler<TLeft, TRight> _handler;
+        
+        public BinaryRPNOperatorParser(BinaryOperatorParseHandler<TLeft, TRight> handler) : base(2)
+        {
+            _handler = handler;
+        }
+
+        public override void TransformOperands(Stack<INode> operands)
+        {
+            TRight right = (TRight) operands.Pop();
+            TLeft left = (TLeft) operands.Pop();
+            
+            operands.Push(_handler.Invoke(left, right));
+        }
+    }
+}
