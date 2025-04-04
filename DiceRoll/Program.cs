@@ -6,21 +6,38 @@ namespace DiceRoll
 {
     public class Program
     {
-        // todo: catch exceptions and highlight the spot that caused it
         // todo: interpret string with multiple tokens inside rather than strict one token per string
         // todo: binary/unary operator with same signature ( x - y & -x - -y) 
         public static void Main(string[] args)
         {
-            args = new[] { "!", "2", ">", "5"};
+            args = new[] { "!", "2", "-", "5"};
             
             RPNExpressionBuilder builder = new(BuildTable());
 
-            foreach (string s in args)
-                builder.Push(s);
-
-            var output = builder.Build();
+            INode output = Parse(builder, args);
             
             output.Visit(new ProbabilityVisitor());
+        }
+
+        private static INode Parse(RPNExpressionBuilder builder, string[] tokens)
+        {
+            for (int i = 0; i < tokens.Length; i++)
+            {
+                string token = tokens[i];
+
+                try
+                {
+                    builder.Push(token);
+                }
+                catch (Exception e)
+                {
+                    ParsingException parsingException = new(e);
+                    Console.WriteLine($"Problematic token: {token} (0-based index: {i}).");
+                    throw parsingException;
+                }
+            }
+
+            return builder.Build();
         }
 
         private static TokensTable BuildTable()

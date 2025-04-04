@@ -2,11 +2,11 @@
 
 namespace DiceRoll.Input
 {
-    public sealed class UnaryRPNOperatorParser<T> : RPNOperatorParser where T : INode
+    public sealed class UnaryOperatorParser<T> : OperatorParser where T : INode
     {
-        private readonly UnaryOperatorParseHandler<T> _handler;
+        private readonly UnaryParsingHandler<T> _handler;
         
-        public UnaryRPNOperatorParser(UnaryOperatorParseHandler<T> handler) : base(1)
+        public UnaryOperatorParser(UnaryParsingHandler<T> handler) : base(1)
         {
             _handler = handler;
         }

@@ -30,7 +30,7 @@ namespace DiceRoll.Input
             if (TryAsOperand(token))
                 return;
 
-            throw new UnknownTokenException();
+            throw new UnknownTokenException(token);
         }
 
         public void Push(string token) =>
@@ -71,7 +71,7 @@ namespace DiceRoll.Input
         
         private bool TryAsOperator(in ReadOnlySpan<char> token)
         {
-            if (!_tokensTable.IsOperator(in token, out int precedence, out RPNOperatorParser parser))
+            if (!_tokensTable.IsOperator(in token, out int precedence, out OperatorParser parser))
                 return false;
 
             while (_operators.TryPeek(out RPNOperatorToken lastOperator) &&
@@ -92,10 +92,10 @@ namespace DiceRoll.Input
             return true;
         }
 
-        private void ApplyOperator(RPNOperatorParser parser)
+        private void ApplyOperator(OperatorParser parser)
         {
             if (_operands.Count < parser.RequiredOperands)
-                throw new Exception(); // todo
+                throw new UnbalancedParenthesisException();
             
             parser.TransformOperands(_operands);
         }

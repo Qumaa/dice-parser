@@ -6,13 +6,13 @@ namespace DiceRoll.Input
     public readonly struct RPNOperatorToken
     {
         public readonly int Precedence;
-        public readonly RPNOperatorParser Parser;
+        public readonly OperatorParser Parser;
 
         public bool IsOpenParenthesis => Parser is null;
         
         public static RPNOperatorToken OpenParenthesis => new();
 
-        public RPNOperatorToken(int precedence, RPNOperatorParser parser)
+        public RPNOperatorToken(int precedence, OperatorParser parser)
         {
             Precedence = precedence;
             Parser = parser;

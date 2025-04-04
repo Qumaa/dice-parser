@@ -27,7 +27,7 @@ namespace DiceRoll.Input
         public bool IsCloseParenthesis(in ReadOnlySpan<char> token) =>
             _closeParenthesis.Matches(token);
 
-        public bool IsOperator(in ReadOnlySpan<char> token, out int precedence, out RPNOperatorParser parser)
+        public bool IsOperator(in ReadOnlySpan<char> token, out int precedence, out OperatorParser parser)
         {
             for (int i = 0; i < _operators.Length; i++)
             {
