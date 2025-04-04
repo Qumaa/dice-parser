@@ -18,15 +18,50 @@ namespace DiceRoll.Input
 
         public RegexToken(Regex pattern) : this(new [] {pattern}) { }
 
-        public bool Matches(in ReadOnlySpan<char> token)
+        public bool Matches(ReadOnlySpan<char> token, out MatchInfo matchInfo)
         {
             // ReSharper disable once LoopCanBeConvertedToQuery
             // ReSharper disable once ForCanBeConvertedToForeach
             for (int i = 0; i < _patterns.Length; i++)
-                if (_patterns[i].IsMatch(token))
+                if (Matches(token, _patterns[i], out matchInfo))
                     return true;
 
+            matchInfo = default;
             return false;
+        }
+
+        private static bool Matches(ReadOnlySpan<char> token, Regex pattern, out MatchInfo matchInfo)
+        {
+            Regex.ValueMatchEnumerator enumerator = pattern.EnumerateMatches(token);
+
+            if (!enumerator.MoveNext())
+            {
+                matchInfo = default;
+                return false;
+            }
+
+            ValueMatch match = enumerator.Current;
+
+            if (match.Index != FirstNonWhiteSpaceIndex(token))
+            {
+                matchInfo = default;
+                return false;
+            }
+            
+            matchInfo = new MatchInfo(token, match.Index, match.Length);
+            return true;
+        }
+
+        private static int FirstNonWhiteSpaceIndex(ReadOnlySpan<char> token)
+        {
+            for (int i = 0; i < token.Length; i++)
+            {
+                char c = token[i];
+                if (!char.IsWhiteSpace(c))
+                    return i;
+            }
+
+            return -1;
         }
 
         public IEnumerable<string> EnumerateRawTokens() =>

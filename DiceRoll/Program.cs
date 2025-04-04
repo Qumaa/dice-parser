@@ -6,11 +6,10 @@ namespace DiceRoll
 {
     public class Program
     {
-        // todo: interpret string with multiple tokens inside rather than strict one token per string
         // todo: binary/unary operator with same signature ( x - y & -x - -y) 
         public static void Main(string[] args)
         {
-            args = new[] { "!", "2", "-", "5"};
+            args = new[] { "2d6 adv >4"};
             
             RPNExpressionBuilder builder = new(BuildTable());
 
@@ -44,8 +43,8 @@ namespace DiceRoll
         {
             TokensTableBuilder builder = new("(", ")");
             
-            builder.AddOperandToken(static x => Node.Value.Constant(int.Parse(x)), new Regex(@"^\d+$"));
             builder.AddOperandToken(DiceOperand.Default);
+            builder.AddOperandToken(static x => Node.Value.Constant(int.Parse(x)), new Regex(@"\d+"));
             
             builder.AddOperatorToken<IOperation>(20, static node => Node.Operation.Not(node),"!", "not");
             // builder.AddOperatorToken(200, "-");

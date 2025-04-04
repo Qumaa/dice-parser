@@ -21,19 +21,17 @@ namespace DiceRoll.Input
             _operands = operands.ToArray();
         }
 
-        public bool IsOpenParenthesis(in ReadOnlySpan<char> token) =>
-            _openParenthesis.Matches(token);
+        public bool IsOpenParenthesis(ReadOnlySpan<char> token, out MatchInfo matchInfo) =>
+            _openParenthesis.Matches(token, out matchInfo);
 
-        public bool IsCloseParenthesis(in ReadOnlySpan<char> token) =>
-            _closeParenthesis.Matches(token);
+        public bool IsCloseParenthesis(ReadOnlySpan<char> token, out MatchInfo matchInfo) =>
+            _closeParenthesis.Matches(token, out matchInfo);
 
-        public bool IsOperator(in ReadOnlySpan<char> token, out int precedence, out OperatorParser parser)
+        public bool IsOperator(ReadOnlySpan<char> token, out int precedence, out OperatorParser parser, out MatchInfo matchInfo)
         {
-            for (int i = 0; i < _operators.Length; i++)
+            foreach (TokenizedOperator tokenizedOperator in _operators)
             {
-                TokenizedOperator tokenizedOperator = _operators[i];
-                
-                if (!tokenizedOperator.Token.Matches(token))
+                if (!tokenizedOperator.Token.Matches(token, out matchInfo))
                     continue;
 
                 precedence = tokenizedOperator.Precedence;
@@ -43,23 +41,23 @@ namespace DiceRoll.Input
 
             precedence = 0;
             parser = null;
+            matchInfo = default;
             return false;
         }
 
-        public bool IsOperand(in ReadOnlySpan<char> token, out INumeric node)
+        public bool IsOperand(ReadOnlySpan<char> token, out INumeric node, out MatchInfo matchInfo)
         {
-            for (int i = 0; i < _operands.Length; i++)
+            foreach (TokenizedOperand operand in _operands)
             {
-                TokenizedOperand operand = _operands[i];
-                
-                if (operand.Token.Matches(token))
-                {
-                    node = operand.Handler.Invoke(token);
-                    return true;
-                }
+                if (!operand.Token.Matches(token, out matchInfo))
+                    continue;
+
+                node = operand.Handler.Invoke(matchInfo.SliceMatch());
+                return true;
             }
 
             node = null;
+            matchInfo = default;
             return false;
         }
     }

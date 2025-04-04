@@ -16,21 +16,26 @@ namespace DiceRoll.Input
             _operands = new Stack<INode>();
         }
 
-        public void Push(in ReadOnlySpan<char> token)
+        public void Push(ReadOnlySpan<char> token)
         {
-            if (TryOpenParenthesis(token))
-                return;
-
-            if (TryCloseParenthesis(token))
-                return;
+            MatchInfo matchInfo = new(token, 0 ,0);
             
-            if (TryAsOperator(token))
-                return;
-            
-            if (TryAsOperand(token))
-                return;
+            do
+            {
+                if (TryOpenParenthesis(matchInfo.SliceRest(), ref matchInfo))
+                    continue;
 
-            throw new UnknownTokenException(token);
+                if (TryCloseParenthesis(matchInfo.SliceRest(), ref matchInfo))
+                    continue;
+            
+                if (TryAsOperator(matchInfo.SliceRest(), ref matchInfo))
+                    continue;
+            
+                if (TryAsOperand(matchInfo.SliceRest(), ref matchInfo))
+                    continue;
+
+                throw new UnknownTokenException(token);
+            } while (!matchInfo.SourceEndsWithThis);
         }
 
         public void Push(string token) =>
@@ -44,34 +49,38 @@ namespace DiceRoll.Input
             return _operands.Pop();
         }
         
-        private bool TryOpenParenthesis(in ReadOnlySpan<char> token)
+        private bool TryOpenParenthesis(ReadOnlySpan<char> token, ref MatchInfo matchInfo)
         {
-            if (!_tokensTable.IsOpenParenthesis(in token))
+            if (!_tokensTable.IsOpenParenthesis(token, out MatchInfo successfulMatchInfo))
                 return false;
-            
+
             _operators.Push(RPNOperatorToken.OpenParenthesis);
+            matchInfo = successfulMatchInfo;
             return true;
         }
         
-        private bool TryCloseParenthesis(in ReadOnlySpan<char> token)
+        private bool TryCloseParenthesis(ReadOnlySpan<char> token, ref MatchInfo matchInfo)
         {
-            if (!_tokensTable.IsCloseParenthesis(token))
+            if (!_tokensTable.IsCloseParenthesis(token, out MatchInfo successfulMatchInfo))
                 return false;
-            
+
             while (_operators.TryPop(out RPNOperatorToken operatorToken))
             {
                 if (operatorToken.IsOpenParenthesis)
+                {
+                    matchInfo = successfulMatchInfo;
                     return true;
-                
+                }
+
                 ApplyOperator(operatorToken.Parser);
             }
             
             throw new UnbalancedParenthesisException();
         }
         
-        private bool TryAsOperator(in ReadOnlySpan<char> token)
+        private bool TryAsOperator(ReadOnlySpan<char> token, ref MatchInfo matchInfo)
         {
-            if (!_tokensTable.IsOperator(in token, out int precedence, out OperatorParser parser))
+            if (!_tokensTable.IsOperator(token, out int precedence, out OperatorParser parser, out MatchInfo successfulMatchInfo))
                 return false;
 
             while (_operators.TryPeek(out RPNOperatorToken lastOperator) &&
@@ -80,15 +89,17 @@ namespace DiceRoll.Input
                 ApplyOperator(_operators.Pop().Parser);
             
             _operators.Push(new RPNOperatorToken(precedence, parser));
+            matchInfo = successfulMatchInfo;
             return true;
         }
         
-        private bool TryAsOperand(in ReadOnlySpan<char> token)
+        private bool TryAsOperand(ReadOnlySpan<char> token, ref MatchInfo matchInfo)
         {
-            if (!_tokensTable.IsOperand(in token, out INumeric node))
+            if (!_tokensTable.IsOperand(token, out INumeric node, out MatchInfo successfulMatchInfo))
                 return false;
             
             _operands.Push(node);
+            matchInfo = successfulMatchInfo;
             return true;
         }
 
