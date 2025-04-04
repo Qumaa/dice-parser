@@ -1,52 +1,68 @@
 ﻿using System;
-using System.Text.RegularExpressions;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace DiceRoll.Input
 {
     public static class DiceOperand
     {
-        public static TokenizedOperand Default => new(
-            new RegexToken(new Regex(@"(?:(\d+)d(\d+)|d(\d+))\s*(sum|adv|dis)?", RegexOptions.IgnoreCase)),
-            static x => ParseDice(x)
-            );
+        public static readonly TokenizedOperand Default = BuildDefault();
+
+        public static DiceOperandBuilder StartBuilding(string defaultDelimiter, IToken defaultComposition,
+            DiceCompositionHandler compositionHandler) =>
+            new(defaultDelimiter, defaultComposition, compositionHandler);
+        public static DiceOperandBuilder StartBuilding(string defaultDelimiter, string defaultComposition,
+            DiceCompositionHandler compositionHandler) =>
+            new(defaultDelimiter, defaultComposition, compositionHandler);
+        public static DiceOperandBuilder StartBuilding(string defaultDelimiter, IEnumerable<string> defaultComposition,
+            DiceCompositionHandler compositionHandler) =>
+            new(defaultDelimiter, defaultComposition, compositionHandler);
+        public static DiceOperandBuilder StartBuilding(IEnumerable<string> defaultDelimiters, IToken defaultComposition,
+            DiceCompositionHandler compositionHandler) =>
+            new(defaultDelimiters, defaultComposition, compositionHandler);
+        public static DiceOperandBuilder StartBuilding(IEnumerable<string> defaultDelimiters, string defaultComposition,
+            DiceCompositionHandler compositionHandler) =>
+            new(defaultDelimiters, defaultComposition, compositionHandler);
+        public static DiceOperandBuilder StartBuilding(IEnumerable<string> defaultDelimiters, IEnumerable<string> defaultComposition,
+            DiceCompositionHandler compositionHandler) =>
+            new(defaultDelimiters, defaultComposition, compositionHandler);
         
-        // todo: refactor
-        private static INumeric ParseDice(string diceExpr)
+        public static DiceOperandBuilder StartBuilding(char defaultDelimiter, string defaultComposition,
+            DiceCompositionHandler compositionHandler) =>
+            StartBuilding(char.ToString(defaultDelimiter), defaultComposition, compositionHandler);
+        public static DiceOperandBuilder StartBuilding(char defaultDelimiter, IToken defaultComposition,
+            DiceCompositionHandler compositionHandler) =>
+            StartBuilding(char.ToString(defaultDelimiter), defaultComposition, compositionHandler);
+        public static DiceOperandBuilder StartBuilding(char defaultDelimiter, IEnumerable<string> defaultComposition,
+            DiceCompositionHandler compositionHandler) =>
+            StartBuilding(char.ToString(defaultDelimiter), defaultComposition, compositionHandler);
+        public static DiceOperandBuilder StartBuilding(IEnumerable<char> defaultDelimiters, string defaultComposition,
+            DiceCompositionHandler compositionHandler) =>
+            StartBuilding(defaultDelimiters.Select(static x => char.ToString(x)), defaultComposition, compositionHandler);
+        public static DiceOperandBuilder StartBuilding(IEnumerable<char> defaultDelimiters, IToken defaultComposition,
+            DiceCompositionHandler compositionHandler) =>
+            StartBuilding(defaultDelimiters.Select(static x => char.ToString(x)), defaultComposition, compositionHandler);
+        public static DiceOperandBuilder StartBuilding(IEnumerable<char> defaultDelimiters, IEnumerable<string> defaultComposition,
+            DiceCompositionHandler compositionHandler) =>
+            StartBuilding(defaultDelimiters.Select(static x => char.ToString(x)), defaultComposition, compositionHandler);
+
+        public static TokenizedOperand DefaultWithInjection(Action<DiceOperandBuilder> injector) =>
+            BuildDefault(injector);
+
+        private static TokenizedOperand BuildDefault(Action<DiceOperandBuilder> injector = null)
         {
-            // XdY
-            int diceCount = 1;
-            int delimiterIndex = diceExpr.IndexOf('d');
-
-            if (delimiterIndex is not 0)
-                diceCount = int.Parse(diceExpr.AsSpan(0, delimiterIndex));
+            DiceOperandBuilder builder =
+                StartBuilding('d', Params("sum", "summation"), static (dice, count) => Node.Value.Summation(dice, count));
             
-            // dY
-            int expressionEnd = diceExpr.Length;
-            for (int i = delimiterIndex + 1; i < expressionEnd; i++)
-                if (!char.IsDigit(diceExpr, i))
-                    expressionEnd = i;
+            builder.AddComposition(Params("adv", "advantage", "highest"), static (dice, count) => Node.Value.Highest(dice, count));
+            builder.AddComposition(Params("dis", "disadvantage", "lowest"), static (dice, count) => Node.Value.Lowest(dice, count));
 
-            int facesCount = int.Parse(diceExpr.AsSpan(delimiterIndex + 1, expressionEnd - delimiterIndex - 1));
-
-            INumeric dice = Node.Value.Dice(facesCount);
-
-            if (diceCount is 1)
-                return dice;
+            injector?.Invoke(builder);
             
-            // sum/adv/dis
-            if (expressionEnd != diceExpr.Length)
-            {
-                ReadOnlySpan<char> compositionExpr = diceExpr.AsSpan(expressionEnd).Trim(' ');
-                
-                if (compositionExpr.Equals("adv".AsSpan(), StringComparison.OrdinalIgnoreCase))
-                    return Node.Value.Highest(dice, diceCount);
-                
-                if (compositionExpr.Equals("dis".AsSpan(), StringComparison.OrdinalIgnoreCase))
-                    return Node.Value.Lowest(dice, diceCount);
-            }
-            
-            return Node.Value.Summation(dice, diceCount);
+            return builder.Build();
         }
 
+        private static T[] Params<T>(params T[] args) =>
+            args;
     }
 }

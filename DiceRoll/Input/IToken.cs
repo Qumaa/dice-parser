@@ -1,7 +1,12 @@
-﻿namespace DiceRoll.Input
+﻿using System;
+using System.Collections.Generic;
+
+namespace DiceRoll.Input
 {
     public interface IToken
     {
-        bool Matches(string token);
+        bool Matches(ReadOnlySpan<char> token);
+
+        IEnumerable<string> EnumerateRawTokens();
     }
 }
