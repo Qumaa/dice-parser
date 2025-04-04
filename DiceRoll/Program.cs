@@ -26,8 +26,8 @@ namespace DiceRoll
         {
             TokensTableBuilder builder = new("(", ")");
             
-            builder.AddOperandToken(new Regex(@"^\d+$"));
-            builder.AddOperandToken(new Regex(@"^(?:\d+d\d+|d\d+)$"));
+            builder.AddOperandToken(static x => Node.Value.Constant(int.Parse(x)), new Regex(@"^\d+$"));
+            builder.AddOperandToken(DiceOperand.Default);
             
             // todo: unary
             // builder.AddOperatorToken(200, "!", "not");

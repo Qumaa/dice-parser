@@ -9,7 +9,7 @@ namespace DiceRoll.Input
         private readonly List<string> _openParenthesis;
         private readonly List<string> _closeParenthesis;
         private readonly List<TokenizedOperator> _operators;
-        private readonly List<IToken> _operands;
+        private readonly List<TokenizedOperand> _operands;
 
         public TokensTableBuilder(string defaultOpenParenthesis, string defaultCloseParenthesis)
         {
@@ -17,7 +17,7 @@ namespace DiceRoll.Input
             _closeParenthesis = new List<string> { defaultCloseParenthesis };
 
             _operators = new List<TokenizedOperator>();
-            _operands = new List<IToken>();
+            _operands = new List<TokenizedOperand>();
         }
 
         public void AddOpenParenthesisPattern(string pattern) =>
@@ -46,12 +46,15 @@ namespace DiceRoll.Input
             AddOperatorToken(precedence, words.Select(static x => ExactIgnoreCase(x)));
         public void AddOperatorToken(int precedence, params string[] words) =>
             AddOperatorToken(precedence, words as IEnumerable<string>);
-        public void AddOperandToken(Regex pattern) =>
-            _operands.Add(new RegexToken(pattern));
-        public void AddOperandToken(IEnumerable<Regex> patterns) =>
-            _operands.Add(new RegexToken(patterns));
-        public void AddOperandToken(params Regex[] patterns) =>
-            AddOperandToken(patterns as IEnumerable<Regex>);
+        
+        public void AddOperandToken(TokenizedOperand operand) =>
+            _operands.Add(operand);
+        public void AddOperandToken(OperandHandler handler, Regex pattern) =>
+            AddOperandToken(new TokenizedOperand(new RegexToken(pattern), handler));
+        public void AddOperandToken(OperandHandler handler, IEnumerable<Regex> patterns) =>
+            AddOperandToken(new TokenizedOperand(new RegexToken(patterns), handler));
+        public void AddOperandToken(OperandHandler handler, params Regex[] patterns) =>
+            AddOperandToken(handler, patterns as IEnumerable<Regex>);
 
         public TokensTable Build() =>
             new(

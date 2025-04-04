@@ -9,10 +9,10 @@ namespace DiceRoll.Input
         private readonly IToken _openParenthesis;
         private readonly IToken _closeParenthesis;
         private readonly TokenizedOperator[] _operators;
-        private readonly IToken[] _operands;
+        private readonly TokenizedOperand[] _operands;
 
         public TokensTable(IToken openParenthesis, IToken closeParenthesis, IEnumerable<TokenizedOperator> operators,
-            IEnumerable<IToken> operands)
+            IEnumerable<TokenizedOperand> operands)
         {
             _openParenthesis = openParenthesis;
             _closeParenthesis = closeParenthesis;
@@ -47,7 +47,7 @@ namespace DiceRoll.Input
         public bool IsOperand(string token)
         {
             for (int i = 0; i < _operands.Length; i++)
-                if (_operands[i].Matches(token))
+                if (_operands[i].Token.Matches(token))
                     return true;
 
             return false;
