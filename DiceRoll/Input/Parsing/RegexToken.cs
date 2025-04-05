@@ -20,6 +20,8 @@ namespace DiceRoll.Input
 
         public bool Matches(ReadOnlySpan<char> token, out MatchInfo matchInfo)
         {
+            token = token.Trim();
+            
             // ReSharper disable once LoopCanBeConvertedToQuery
             // ReSharper disable once ForCanBeConvertedToForeach
             for (int i = 0; i < _patterns.Length; i++)
@@ -42,7 +44,7 @@ namespace DiceRoll.Input
 
             ValueMatch match = enumerator.Current;
 
-            if (match.Index != FirstNonWhiteSpaceIndex(token))
+            if (match.Index is not 0)
             {
                 matchInfo = default;
                 return false;
@@ -50,18 +52,6 @@ namespace DiceRoll.Input
             
             matchInfo = new MatchInfo(token, match.Index, match.Length);
             return true;
-        }
-
-        private static int FirstNonWhiteSpaceIndex(ReadOnlySpan<char> token)
-        {
-            for (int i = 0; i < token.Length; i++)
-            {
-                char c = token[i];
-                if (!char.IsWhiteSpace(c))
-                    return i;
-            }
-
-            return -1;
         }
 
         public IEnumerable<string> EnumerateRawTokens() =>

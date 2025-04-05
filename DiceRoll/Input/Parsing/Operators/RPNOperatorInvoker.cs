@@ -2,15 +2,15 @@
 
 namespace DiceRoll.Input
 {
-    public abstract class OperatorParser
+    public abstract class RPNOperatorInvoker
     {
         public readonly int RequiredOperands;
 
-        protected OperatorParser(int requiredOperands)
+        protected RPNOperatorInvoker(int requiredOperands)
         {
             RequiredOperands = requiredOperands;
         }
 
-        public abstract void TransformOperands(Stack<INode> operands);
+        public abstract void Invoke(Stack<INode> operands);
     }
 }

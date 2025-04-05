@@ -9,37 +9,16 @@ namespace DiceRoll
         // todo: binary/unary operator with same signature ( x - y & -x - -y) 
         public static void Main(string[] args)
         {
-            args = new[] { "2d6 adv >4"};
+            args = new[] { "(2d6 adv<) + + 4"};
             
-            RPNExpressionBuilder builder = new(BuildTable());
+            RPNExpressionParser parser = new(BuildTable());
 
-            INode output = Parse(builder, args);
+            INode output = parser.Parse(string.Concat(args));
             
             output.Visit(new ProbabilityVisitor());
         }
 
-        private static INode Parse(RPNExpressionBuilder builder, string[] tokens)
-        {
-            for (int i = 0; i < tokens.Length; i++)
-            {
-                string token = tokens[i];
-
-                try
-                {
-                    builder.Push(token);
-                }
-                catch (Exception e)
-                {
-                    ParsingException parsingException = new(e);
-                    Console.WriteLine($"Problematic token: {token} (0-based index: {i}).");
-                    throw parsingException;
-                }
-            }
-
-            return builder.Build();
-        }
-
-        private static TokensTable BuildTable()
+        private static RPNTokensTable BuildTable()
         {
             TokensTableBuilder builder = new("(", ")");
             

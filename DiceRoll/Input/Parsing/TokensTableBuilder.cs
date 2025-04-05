@@ -35,45 +35,45 @@ namespace DiceRoll.Input
         public void AddCloseParenthesisPattern(params string[] patterns) =>
             _closeParenthesis.AddRange(patterns);
 
-        public void AddOperatorToken<TLeft, TRight>(int precedence, BinaryParsingHandler<TLeft, TRight> handler,
+        public void AddOperatorToken<TLeft, TRight>(int precedence, BinaryInvocationHandler<TLeft, TRight> handler,
             Regex pattern) where TLeft : INode where TRight : INode =>
             _operators.Add(new TokenizedOperator(new RegexToken(pattern), precedence,
-                new BinaryOperatorParser<TLeft, TRight>(handler)));
-        public void AddOperatorToken<TLeft, TRight>(int precedence, BinaryParsingHandler<TLeft, TRight> handler,
+                new BinaryOperatorInvoker<TLeft, TRight>(handler)));
+        public void AddOperatorToken<TLeft, TRight>(int precedence, BinaryInvocationHandler<TLeft, TRight> handler,
             IEnumerable<Regex> patterns) where TLeft : INode where TRight : INode =>
             _operators.Add(new TokenizedOperator(new RegexToken(patterns), precedence,
-                new BinaryOperatorParser<TLeft, TRight>(handler)));
-        public void AddOperatorToken<TLeft, TRight>(int precedence, BinaryParsingHandler<TLeft, TRight> handler,
+                new BinaryOperatorInvoker<TLeft, TRight>(handler)));
+        public void AddOperatorToken<TLeft, TRight>(int precedence, BinaryInvocationHandler<TLeft, TRight> handler,
             params Regex[] patterns) where TLeft : INode where TRight : INode =>
             AddOperatorToken(precedence, handler, patterns as IEnumerable<Regex>);
-        public void AddOperatorToken<TLeft, TRight>(int precedence, BinaryParsingHandler<TLeft, TRight> handler,
+        public void AddOperatorToken<TLeft, TRight>(int precedence, BinaryInvocationHandler<TLeft, TRight> handler,
             string word) where TLeft : INode where TRight : INode =>
             AddOperatorToken(precedence, handler, ExactIgnoreCase(word));
-        public void AddOperatorToken<TLeft, TRight>(int precedence, BinaryParsingHandler<TLeft, TRight> handler,
+        public void AddOperatorToken<TLeft, TRight>(int precedence, BinaryInvocationHandler<TLeft, TRight> handler,
             IEnumerable<string> words) where TLeft : INode where TRight : INode =>
             AddOperatorToken(precedence, handler, words.Select(static x => ExactIgnoreCase(x)));
-        public void AddOperatorToken<TLeft, TRight>(int precedence, BinaryParsingHandler<TLeft, TRight> handler,
+        public void AddOperatorToken<TLeft, TRight>(int precedence, BinaryInvocationHandler<TLeft, TRight> handler,
             params string[] words) where TLeft : INode where TRight : INode =>
             AddOperatorToken(precedence, handler, words as IEnumerable<string>);
         
-        public void AddOperatorToken<T>(int precedence, UnaryParsingHandler<T> handler,
+        public void AddOperatorToken<T>(int precedence, UnaryInvocationHandler<T> handler,
             Regex pattern) where T : INode =>
             _operators.Add(new TokenizedOperator(new RegexToken(pattern), precedence,
-                new UnaryOperatorParser<T>(handler)));
-        public void AddOperatorToken<T>(int precedence, UnaryParsingHandler<T> handler,
+                new UnaryOperatorInvoker<T>(handler)));
+        public void AddOperatorToken<T>(int precedence, UnaryInvocationHandler<T> handler,
             IEnumerable<Regex> patterns) where T : INode =>
             _operators.Add(new TokenizedOperator(new RegexToken(patterns), precedence,
-                new UnaryOperatorParser<T>(handler)));
-        public void AddOperatorToken<T>(int precedence, UnaryParsingHandler<T> handler,
+                new UnaryOperatorInvoker<T>(handler)));
+        public void AddOperatorToken<T>(int precedence, UnaryInvocationHandler<T> handler,
             params Regex[] patterns) where T : INode =>
             AddOperatorToken(precedence, handler, patterns as IEnumerable<Regex>);
-        public void AddOperatorToken<T>(int precedence, UnaryParsingHandler<T> handler,
+        public void AddOperatorToken<T>(int precedence, UnaryInvocationHandler<T> handler,
             string word) where T : INode =>
             AddOperatorToken(precedence, handler, ExactIgnoreCase(word));
-        public void AddOperatorToken<T>(int precedence, UnaryParsingHandler<T> handler,
+        public void AddOperatorToken<T>(int precedence, UnaryInvocationHandler<T> handler,
             IEnumerable<string> words) where T : INode =>
             AddOperatorToken(precedence, handler, words.Select(static x => ExactIgnoreCase(x)));
-        public void AddOperatorToken<T>(int precedence, UnaryParsingHandler<T> handler,
+        public void AddOperatorToken<T>(int precedence, UnaryInvocationHandler<T> handler,
             params string[] words) where T : INode =>
             AddOperatorToken(precedence, handler, words as IEnumerable<string>);
 
@@ -87,7 +87,7 @@ namespace DiceRoll.Input
         public void AddOperandToken(OperandHandler handler, params Regex[] patterns) =>
             AddOperandToken(handler, patterns as IEnumerable<Regex>);
 
-        public TokensTable Build() =>
+        public RPNTokensTable Build() =>
             new(
                 RegexToken.ExactIgnoreCase(_openParenthesis),
                 RegexToken.ExactIgnoreCase(_closeParenthesis),
