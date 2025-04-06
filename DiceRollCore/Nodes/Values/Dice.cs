@@ -37,6 +37,6 @@ namespace DiceRoll
         }
 
         public override Outcome Evaluate() =>
-            new(_random.Next(1, _faces));
+            new(_random.Next(0, _faces) + 1);
     }
 }
