@@ -44,7 +44,7 @@ namespace DiceRoll.Input
             try
             {
                 MatchInfo tokenMatch = _tokensTable.Visit(new TableVisitor(this), notParsed.SliceMatch());
-                return notParsed.MoveStart(tokenMatch.Length);
+                return notParsed.MoveStart(tokenMatch.End);
             }
             catch (Exception e)
             {

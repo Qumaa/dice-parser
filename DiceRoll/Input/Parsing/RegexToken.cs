@@ -20,8 +20,6 @@ namespace DiceRoll.Input
 
         public bool Matches(ReadOnlySpan<char> token, out MatchInfo matchInfo)
         {
-            token = token.Trim();
-            
             // ReSharper disable once LoopCanBeConvertedToQuery
             // ReSharper disable once ForCanBeConvertedToForeach
             for (int i = 0; i < _patterns.Length; i++)
@@ -34,7 +32,8 @@ namespace DiceRoll.Input
 
         private static bool Matches(ReadOnlySpan<char> token, Regex pattern, out MatchInfo matchInfo)
         {
-            Regex.ValueMatchEnumerator enumerator = pattern.EnumerateMatches(token);
+            int firstNonWhitespaceIndex = GetFirstNonWhitespaceIndex(token);
+            Regex.ValueMatchEnumerator enumerator = pattern.EnumerateMatches(token, firstNonWhitespaceIndex);
 
             if (!enumerator.MoveNext())
             {
@@ -44,7 +43,7 @@ namespace DiceRoll.Input
 
             ValueMatch match = enumerator.Current;
 
-            if (match.Index is not 0)
+            if (match.Index != firstNonWhitespaceIndex)
             {
                 matchInfo = default;
                 return false;
@@ -52,6 +51,21 @@ namespace DiceRoll.Input
             
             matchInfo = new MatchInfo(token, match.Index, match.Length);
             return true;
+        }
+
+        private static int GetFirstNonWhitespaceIndex(ReadOnlySpan<char> token)
+        {
+            int whitespaces = 0;
+
+            foreach (char c in token)
+            {
+                if (!char.IsWhiteSpace(c))
+                    break;
+
+                whitespaces++;
+            }
+
+            return whitespaces;
         }
 
         public IEnumerable<string> EnumerateRawTokens() =>
@@ -67,6 +81,7 @@ namespace DiceRoll.Input
             ExactIgnoreCase(words as IEnumerable<string>);
 
         public static Regex CreateExactIgnoreCaseRegex(string word) =>
-            new(Regex.Escape(word), RegexOptions.IgnoreCase);
+            new(Regex.Escape(word),
+                RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace | RegexOptions.Singleline);
     }
 }
