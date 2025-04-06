@@ -1,4 +1,4 @@
 ﻿namespace DiceRoll
 {
-    public interface IConditional : INode<Optional<Outcome>>, IDistributable<RollProbabilityDistribution, Roll> { }
+    public interface IConditional : INode<Optional<Outcome>>, IDistributable<OptionalRollProbabilityDistribution, OptionalRoll> { }
 }

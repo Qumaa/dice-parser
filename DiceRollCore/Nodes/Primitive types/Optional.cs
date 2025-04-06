@@ -1,5 +1,8 @@
-﻿namespace DiceRoll
+﻿using System.Runtime.InteropServices;
+
+namespace DiceRoll
 {
+    [StructLayout(LayoutKind.Auto)]
     public readonly struct Optional<T>
     {
         private readonly bool _exists;

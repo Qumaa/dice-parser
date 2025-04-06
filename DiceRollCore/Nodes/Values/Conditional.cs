@@ -16,13 +16,15 @@ namespace DiceRoll
         public Optional<Outcome> Evaluate() =>
             _condition.Evaluate() ? new Optional<Outcome>(_value.Evaluate()) : Optional<Outcome>.Empty;
 
-        public RollProbabilityDistribution GetProbabilityDistribution()
+        public OptionalRollProbabilityDistribution GetProbabilityDistribution()
         {
             Probability ofTrue = _condition.GetProbabilityDistribution().True;
 
-            return _value.GetProbabilityDistribution()
-                .Select(x => new Roll(x.Outcome, x.Probability * ofTrue))
-                .ToRollProbabilityDistribution();
+            return new OptionalRollProbabilityDistribution(_value.GetProbabilityDistribution()
+                .Select(x => new OptionalRoll(x.Outcome, x.Probability * ofTrue))
+                .Prepend(new OptionalRoll(ofTrue.Inversed())
+                )
+            );
         }
 
         public void Visit(INodeVisitor visitor) =>
