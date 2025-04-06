@@ -9,13 +9,13 @@ namespace DiceRoll
         // todo: binary/unary operator with same signature ( x - y & -x - -y) 
         public static void Main(string[] args)
         {
-            args = new[] { "not (4 > 5) and 4 > 3"};
+            args = new[] { "1d20 > 10 ? 1d6"};
             
             DiceExpressionParser parser = new(BuildTable());
 
             INode output = parser.Parse(string.Concat(args));
             
-            output.Visit(new RollVisitor());
+            output.Visit(new ProbabilityVisitor());
         }
 
         private static TokensTable BuildTable()
@@ -26,7 +26,7 @@ namespace DiceRoll
             builder.AddOperandToken(static x => Node.Value.Constant(int.Parse(x)), new Regex(@"-?\d+"));
             
             builder.AddOperatorToken<IOperation>(110, static node => Node.Operation.Not(node),"!", "not");
-            builder.AddOperatorToken<INumeric>(110, static node => Node.Transformation.Subtract(Node.Value.Constant(0), node), "-");
+            builder.AddOperatorToken<INumeric>(110, static node => Node.Transformation.Negate(node), "-");
             
             builder.AddOperatorToken<INumeric, INumeric>(100, static (left, right) => Node.Transformation.Multiply(left, right), "*", "x");
             // builder.AddOperatorToken(100, "/");
@@ -44,6 +44,8 @@ namespace DiceRoll
             //
             builder.AddOperatorToken<IOperation, IOperation>(60, static (left, right) => Node.Operation.And(left, right), "&", "&&", "and");
             builder.AddOperatorToken<IOperation, IOperation>(60, static (left, right) => Node.Operation.Or(left, right), "|", "||", "or");
+            
+            builder.AddOperatorToken<IOperation, INumeric>(50, static (left, right) => Node.Value.Conditional(right, left), "?");
 
             return builder.Build();
         }
@@ -73,7 +75,7 @@ namespace DiceRoll
 
             public void ForConditional(IConditional conditional) =>
                 Print(conditional.GetProbabilityDistribution(),
-                    roll => $"Probability of {roll.Outcome.Value} is {ProbabilityToString(roll.Probability)}");
+                    roll => $"Probability of {OptionalRollToString(roll.Outcome)} is {ProbabilityToString(roll.Probability)}");
 
             private static void Print<T>(ProbabilityDistribution<T> distribution, Func<T, string> selector)
             {
@@ -83,6 +85,9 @@ namespace DiceRoll
             
             private static string ProbabilityToString(Probability probability) =>
                 $"{probability.Value * 100d:f2}%";
+            
+            private static string OptionalRollToString(Optional<Outcome> optional) =>
+            optional.Exists(out Outcome value) ? value.Value.ToString() : "-";
         } 
     }
 }
