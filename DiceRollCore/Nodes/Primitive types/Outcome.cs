@@ -66,6 +66,18 @@ namespace DiceRoll
         public override int GetHashCode() =>
             Value.GetHashCode();
 
+        public override string ToString() =>
+            Value.ToString();
+        
+        public string ToString(IFormatProvider formatProvider) =>
+            Value.ToString(formatProvider);
+
+        public string ToString(string format) =>
+            Value.ToString(format);
+
+        public string ToString(string format, IFormatProvider formatProvider) =>
+            Value.ToString(format, formatProvider);
+
         public static Outcome operator ++(Outcome self) =>
             new(self.Value + 1);
         public static Outcome operator +(Outcome left, Outcome right) =>
