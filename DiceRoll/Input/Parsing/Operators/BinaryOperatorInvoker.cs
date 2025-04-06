@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace DiceRoll.Input
+﻿namespace DiceRoll.Input
 {
     public sealed class BinaryOperatorInvoker<TLeft, TRight> : RPNOperatorInvoker where TLeft : INode where TRight : INode
     {
@@ -11,10 +9,10 @@ namespace DiceRoll.Input
             _handler = handler;
         }
 
-        public override void Invoke(Stack<INode> operands)
+        public override void Invoke(DiceExpressionParser.OperandsStackAccess operands)
         {
-            TRight right = (TRight) operands.Pop();
-            TLeft left = (TLeft) operands.Pop();
+            TRight right = operands.Pop<TRight>();
+            TLeft left = operands.Pop<TLeft>();
             
             operands.Push(_handler.Invoke(left, right));
         }

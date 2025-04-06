@@ -9,24 +9,24 @@ namespace DiceRoll
         // todo: binary/unary operator with same signature ( x - y & -x - -y) 
         public static void Main(string[] args)
         {
-            args = new[] { "(2d6 adv<) + + 4"};
+            args = new[] { "not (4 > 5) and 4 > 3"};
             
-            RPNExpressionParser parser = new(BuildTable());
+            DiceExpressionParser parser = new(BuildTable());
 
             INode output = parser.Parse(string.Concat(args));
             
-            output.Visit(new ProbabilityVisitor());
+            output.Visit(new RollVisitor());
         }
 
-        private static RPNTokensTable BuildTable()
+        private static TokensTable BuildTable()
         {
             TokensTableBuilder builder = new("(", ")");
             
             builder.AddOperandToken(DiceOperand.Default);
-            builder.AddOperandToken(static x => Node.Value.Constant(int.Parse(x)), new Regex(@"\d+"));
+            builder.AddOperandToken(static x => Node.Value.Constant(int.Parse(x)), new Regex(@"-?\d+"));
             
-            builder.AddOperatorToken<IOperation>(20, static node => Node.Operation.Not(node),"!", "not");
-            // builder.AddOperatorToken(200, "-");
+            builder.AddOperatorToken<IOperation>(110, static node => Node.Operation.Not(node),"!", "not");
+            builder.AddOperatorToken<INumeric>(110, static node => Node.Transformation.Subtract(Node.Value.Constant(0), node), "-");
             
             builder.AddOperatorToken<INumeric, INumeric>(100, static (left, right) => Node.Transformation.Multiply(left, right), "*", "x");
             // builder.AddOperatorToken(100, "/");
@@ -42,8 +42,8 @@ namespace DiceRoll
             // builder.AddOperatorToken(70, "=", "==");
             // builder.AddOperatorToken(70, "!=", "=/=");
             //
-            // builder.AddOperatorToken(60, "&", "&&", "and");
-            // builder.AddOperatorToken(60, "|", "||", "or");
+            builder.AddOperatorToken<IOperation, IOperation>(60, static (left, right) => Node.Operation.And(left, right), "&", "&&", "and");
+            builder.AddOperatorToken<IOperation, IOperation>(60, static (left, right) => Node.Operation.Or(left, right), "|", "||", "or");
 
             return builder.Build();
         }

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace DiceRoll.Input
+﻿namespace DiceRoll.Input
 {
     public abstract class RPNOperatorInvoker
     {
@@ -11,6 +9,6 @@ namespace DiceRoll.Input
             RequiredOperands = requiredOperands;
         }
 
-        public abstract void Invoke(Stack<INode> operands);
+        public abstract void Invoke(DiceExpressionParser.OperandsStackAccess operands);
     }
 }

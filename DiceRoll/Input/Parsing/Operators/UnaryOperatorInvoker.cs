@@ -1,17 +1,15 @@
-﻿using System.Collections.Generic;
-
-namespace DiceRoll.Input
+﻿namespace DiceRoll.Input
 {
     public sealed class UnaryOperatorInvoker<T> : RPNOperatorInvoker where T : INode
     {
-        private readonly UnaryInvocationHandler<T> _handler;
+        private readonly ReversedUnaryOperatorInvoker<T> _delayedInvoker;
         
-        public UnaryOperatorInvoker(UnaryInvocationHandler<T> handler) : base(1)
+        public UnaryOperatorInvoker(UnaryInvocationHandler<T> handler) : base(0)
         {
-            _handler = handler;
+            _delayedInvoker = new ReversedUnaryOperatorInvoker<T>(handler);
         }
 
-        public override void Invoke(Stack<INode> operands) =>
-            operands.Push(_handler.Invoke((T) operands.Pop()));
+        public override void Invoke(DiceExpressionParser.OperandsStackAccess operands) =>
+            operands.ForNextOperand(_delayedInvoker);
     }
 }

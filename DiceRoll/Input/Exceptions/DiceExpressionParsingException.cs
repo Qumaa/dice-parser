@@ -3,18 +3,14 @@ using System.Text;
 
 namespace DiceRoll.Input
 {
-    public sealed class RPNParserException : Exception
+    public sealed class DiceExpressionParsingException : Exception
     {
-        private const char _HIGHLIGHT_BACKGROUND_SUCCESSFUL = '.';
-        private const char _HIGHLIGHT_BACKGROUND_FAILED = '/';
-        private const char _HIGHLIGHT_EXCEPTION_CAUSE = '?';
+        public DiceExpressionParsingException(in MatchInfo context, string message) : base(GetMessage(in context, message)) { }
 
-        public RPNParserException(in MatchInfo context, string message) : base(GetMessage(in context, message)) { }
-
-        public RPNParserException(Exception innerException) :
+        public DiceExpressionParsingException(Exception innerException) :
             base(GetMessage(innerException), innerException) { }
 
-        public RPNParserException(in MatchInfo context, Exception innerException) :
+        public DiceExpressionParsingException(in MatchInfo context, Exception innerException) :
             base(GetMessage(in context, innerException), innerException) { }
 
         private static string GetMessage(string message) =>
@@ -48,8 +44,8 @@ namespace DiceRoll.Input
             
             stringBuilder.Append('>');
             stringBuilder.Append(' ', 1 + context.Start);
-            stringBuilder.Append('\u2514');
-            stringBuilder.Append('\u2500', context.UntilSourceEnd);
+            stringBuilder.Append('\u2514'); // └
+            stringBuilder.Append('\u2500', context.UntilSourceEnd); // ─
             stringBuilder.Append(' ');
 
             stringBuilder.Append('[');
@@ -58,17 +54,6 @@ namespace DiceRoll.Input
             stringBuilder.Append(' ');
             stringBuilder.Append(']');
             stringBuilder.AppendLine();
-
-            // const string in_expression = "In expression ";
-            // stringBuilder.Append(in_expression);
-            // stringBuilder.AppendLine(context.Source.ToString());
-            //
-            // const string position = "Position:";
-            // stringBuilder.Append(position);
-            // stringBuilder.Append(' ', in_expression.Length - position.Length);
-            // stringBuilder.Append(_HIGHLIGHT_BACKGROUND_SUCCESSFUL, context.Start);
-            // stringBuilder.Append(_HIGHLIGHT_EXCEPTION_CAUSE, context.Length);
-            // stringBuilder.Append(_HIGHLIGHT_BACKGROUND_FAILED, context.Source.Length - (context.Start + context.Length));
             
             return stringBuilder.ToString();
         }

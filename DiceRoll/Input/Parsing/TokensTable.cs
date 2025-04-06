@@ -4,14 +4,14 @@ using System.Linq;
 
 namespace DiceRoll.Input
 {
-    public class RPNTokensTable
+    public class TokensTable
     {
         private readonly IToken _openParenthesis;
         private readonly IToken _closeParenthesis;
         private readonly TokenizedOperator[] _operators;
         private readonly TokenizedOperand[] _operands;
 
-        public RPNTokensTable(IToken openParenthesis, IToken closeParenthesis, IEnumerable<TokenizedOperator> operators,
+        public TokensTable(IToken openParenthesis, IToken closeParenthesis, IEnumerable<TokenizedOperator> operators,
             IEnumerable<TokenizedOperand> operands)
         {
             _openParenthesis = openParenthesis;
@@ -21,7 +21,7 @@ namespace DiceRoll.Input
             _operands = operands.ToArray();
         }
 
-        public MatchInfo Visit(RPNExpressionParser.TableVisitor visitor, ReadOnlySpan<char> expression)
+        public MatchInfo Visit(DiceExpressionParser.TableVisitor visitor, ReadOnlySpan<char> expression)
         {
             if (StartsWithOpenParenthesis(expression, out MatchInfo tokenMatch))
             {
@@ -34,16 +34,16 @@ namespace DiceRoll.Input
                 visitor.CloseParenthesis();
                 return tokenMatch;
             }
+            
+            if (StartsWithOperand(expression, out tokenMatch, out INumeric operand))
+            {
+                visitor.Operand(operand);
+                return tokenMatch;
+            }
 
             if (StartsWithOperator(expression, out tokenMatch, out int precedence, out RPNOperatorInvoker invoker))
             {
                 visitor.Operator(precedence, invoker);
-                return tokenMatch;
-            }
-
-            if (StartsWithOperand(expression, out tokenMatch, out INumeric operand))
-            {
-                visitor.Operand(operand);
                 return tokenMatch;
             }
 

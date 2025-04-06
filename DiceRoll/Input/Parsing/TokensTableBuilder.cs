@@ -87,7 +87,7 @@ namespace DiceRoll.Input
         public void AddOperandToken(OperandHandler handler, params Regex[] patterns) =>
             AddOperandToken(handler, patterns as IEnumerable<Regex>);
 
-        public RPNTokensTable Build() =>
+        public TokensTable Build() =>
             new(
                 RegexToken.ExactIgnoreCase(_openParenthesis),
                 RegexToken.ExactIgnoreCase(_closeParenthesis),

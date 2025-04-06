@@ -3,17 +3,19 @@ using System.Collections.Generic;
 
 namespace DiceRoll.Input
 {
-    public sealed class RPNExpressionParser
+    public sealed class DiceExpressionParser
     {
-        private readonly RPNTokensTable _tokensTable;
+        private readonly TokensTable _tokensTable;
         private readonly Stack<RPNOperatorToken> _operators;
         private readonly Stack<INode> _operands;
+        private readonly Stack<RPNOperatorInvoker> _delayedInvokers;
         
-        public RPNExpressionParser(RPNTokensTable rpnTokensTable) 
+        public DiceExpressionParser(TokensTable tokensTable) 
         {
-            _tokensTable = rpnTokensTable;
+            _tokensTable = tokensTable;
             _operators = new Stack<RPNOperatorToken>();
             _operands = new Stack<INode>();
+            _delayedInvokers = new Stack<RPNOperatorInvoker>();
         }
 
         public INode Parse(ReadOnlySpan<char> expression)
@@ -36,6 +38,8 @@ namespace DiceRoll.Input
             while(_operators.TryPop(out RPNOperatorToken token))
                 InvokeOperator(token.Invoker);
             
+            InvokeDelayedOperators();
+            
             return _operands.Pop();
         }
 
@@ -48,7 +52,7 @@ namespace DiceRoll.Input
             }
             catch (Exception e)
             {
-                throw new RPNParserException(notParsed.MoveEnd(notParsed.Length - 1), e);
+                throw new DiceExpressionParsingException(notParsed.MoveEnd(notParsed.Length - 1), e);
             }
         }
 
@@ -57,14 +61,26 @@ namespace DiceRoll.Input
             if (_operands.Count < invoker.RequiredOperands)
                 throw new OperatorInvocationException(invoker.RequiredOperands, _operands.Count);
             
-            invoker.Invoke(_operands);
+            invoker.Invoke(new OperandsStackAccess(this));
+        }
+
+        private void InvokeDelayedOperators()
+        {
+            while(_delayedInvokers.TryPop(out RPNOperatorInvoker invoker))
+                InvokeOperator(invoker);
+        }
+
+        private void InvokeDelayedOperatorsAfter(RPNOperatorInvoker invoker)
+        {
+            InvokeOperator(invoker);
+            InvokeDelayedOperators();
         }
 
         public readonly struct TableVisitor
         {
-            private readonly RPNExpressionParser _parser;
+            private readonly DiceExpressionParser _parser;
             
-            public TableVisitor(RPNExpressionParser parser) 
+            public TableVisitor(DiceExpressionParser parser) 
             {
                 _parser = parser;
             }
@@ -79,7 +95,7 @@ namespace DiceRoll.Input
                     if (operatorToken.IsOpenParenthesis)
                         return;
 
-                    _parser.InvokeOperator(operatorToken.Invoker);
+                    _parser.InvokeDelayedOperatorsAfter(operatorToken.Invoker);
                 }
             
                 throw new UnbalancedParenthesisException();
@@ -89,14 +105,43 @@ namespace DiceRoll.Input
             {
                 while (_parser._operators.TryPeek(out RPNOperatorToken lastOperator) &&
                        !lastOperator.IsOpenParenthesis &&
-                       precedence <= lastOperator.Precedence)
-                    _parser.InvokeOperator(_parser._operators.Pop().Invoker);
+                       precedence < lastOperator.Precedence)
+                    _parser.InvokeDelayedOperatorsAfter(_parser._operators.Pop().Invoker);
 
                 _parser._operators.Push(new RPNOperatorToken(precedence, invoker));
             }
 
-            public void Operand(INumeric operand) =>
+            public void Operand(INumeric operand)
+            {
                 _parser._operands.Push(operand);
+                
+                _parser.InvokeDelayedOperators();
+            }
+        }
+
+        public readonly struct OperandsStackAccess
+        {
+            private readonly DiceExpressionParser _parser;
+
+            public OperandsStackAccess(DiceExpressionParser parser) 
+            {
+                _parser = parser;
+            }
+
+            public T Pop<T>() where T : INode
+            {
+                INode node = _parser._operands.Pop();
+                
+                return node is T operand ?
+                    operand :
+                    throw new OperatorInvocationException(typeof(T), node.GetType());
+            }
+
+            public void Push(INode operand) =>
+                _parser._operands.Push(operand);
+
+            public void ForNextOperand(RPNOperatorInvoker invoker) =>
+                _parser._delayedInvokers.Push(invoker);
         }
     }
 }
