@@ -21,5 +21,11 @@ namespace DiceRoll
             value = _value;
             return _exists;
         }
+
+        public override string ToString() =>
+            ToString("-");
+        
+        public string ToString(string noValue) =>
+            _exists ? _value.ToString() : noValue;
     }
 }
