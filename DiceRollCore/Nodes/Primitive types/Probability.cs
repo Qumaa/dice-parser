@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace DiceRoll
 {
@@ -9,6 +10,7 @@ namespace DiceRoll
     /// </summary>
     public readonly struct Probability : IEquatable<Probability>, IComparable<Probability>, IComparable
     {
+        private const string _FORMAT = "f2";
         public readonly double Value;
         
         public static Probability Hundred => new(1d);
@@ -72,6 +74,18 @@ namespace DiceRoll
         
         public override int GetHashCode() =>
             Value.GetHashCode();
+
+        public override string ToString() =>
+            ToString(_FORMAT);
+
+        public string ToString(string format) =>
+            ToString(format, CultureInfo.CurrentCulture);
+        
+        public string ToString(IFormatProvider formatProvider) =>
+            ToString(_FORMAT, formatProvider);
+        
+        public string ToString(string format, IFormatProvider formatProvider) =>
+            (Value * 100d).ToString(format, formatProvider) + '%';
 
         public static Probability operator +(Probability left, Probability right) =>
             new(left.Value + right.Value);

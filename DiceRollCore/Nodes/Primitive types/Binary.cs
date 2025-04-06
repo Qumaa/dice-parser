@@ -1,4 +1,6 @@
-﻿namespace DiceRoll
+﻿using System;
+
+namespace DiceRoll
 {
     /// <summary>
     /// A <see cref="bool">boolean</see> value wrapper.
@@ -25,5 +27,11 @@
             self.Value;
         public static bool operator false(Binary self) =>
             !self.Value;
+
+        public override string ToString() =>
+            Value.ToString();
+        
+        public string ToString(IFormatProvider formatProvider) =>
+            Value.ToString(formatProvider);
     }
 }
