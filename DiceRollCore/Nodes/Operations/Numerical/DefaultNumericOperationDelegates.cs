@@ -111,24 +111,116 @@ namespace DiceRoll
         public static class RollsProbability
         {
             public static NumericOperationOptionalRollsDelegate Get(NumericOperationType operationType) =>
-                (left, right) => FromEvaluationDelegate(left, right, Evaluation.Get(operationType));
+                operationType switch
+                {
+                    NumericOperationType.Equal => Equal,
+                    NumericOperationType.NotEqual => NotEqual,
+                    NumericOperationType.GreaterThan => GreaterThan,
+                    NumericOperationType.GreaterThanOrEqual => GreaterThanOrEqual,
+                    NumericOperationType.LessThan => LessThan,
+                    NumericOperationType.LessThanOrEqual => LessThanOrEqual,
+                };
 
-            private static OptionalRollProbabilityDistribution FromEvaluationDelegate(RollProbabilityDistribution left,
-                RollProbabilityDistribution right, NumericOperationEvaluationDelegate evaluationDelegate) =>
-                left.SelectMany(_ => right, (l, r) => (l, r))
-                    .Where(x => evaluationDelegate(x.l.Outcome, x.r.Outcome).Value)
-                    .Select(x => (l: new Roll(x.l.Outcome, x.l.Probability * x.r.Probability), x.r))
-                    .GroupBy(
-                        x => x.l.Outcome,
-                        (o, x) =>
-                            new Roll(
-                                o,
-                                x.Aggregate(
-                                    Probability.Zero,
-                                    (probability, tuple) => probability + tuple.l.Probability)
+            private static OptionalRollProbabilityDistribution Equal(RollProbabilityDistribution left,
+                RollProbabilityDistribution right)
+            {
+                CDFTable leftTable = new(left);
+                CDFTable rightTable = new(right);
+
+                return left
+                    .Where(x => x.Outcome >= right.Min && x.Outcome <= right.Max)
+                    .Select(
+                        x => new Roll(x.Outcome, leftTable.EqualTo(x.Outcome) * rightTable.EqualTo(x.Outcome)))
+                    .ToOptionalRollProbabilityDistribution();
+            }
+            
+            private static OptionalRollProbabilityDistribution NotEqual(RollProbabilityDistribution left,
+                RollProbabilityDistribution right)
+            {
+                CDFTable leftTable = new(left);
+                CDFTable rightTable = new(right);
+
+                return left
+                    .Select(
+                        x => new Roll(x.Outcome, leftTable.EqualTo(x.Outcome) * rightTable.NotEqualTo(x.Outcome)))
+                    .ToOptionalRollProbabilityDistribution();
+            }
+            
+            private static OptionalRollProbabilityDistribution GreaterThan(RollProbabilityDistribution left,
+                RollProbabilityDistribution right)
+            {
+                CDFTable leftTable = new(left);
+                CDFTable rightTable = new(right);
+
+                return left
+                    .Where(x => x.Outcome > right.Min)
+                    .Select(
+                        x => new Roll(
+                            x.Outcome,
+                            x.Outcome > right.Max ?
+                                leftTable.EqualTo(x.Outcome) :
+                                leftTable.EqualTo(x.Outcome) * rightTable.LessThan(x.Outcome)
                                 )
                         )
                     .ToOptionalRollProbabilityDistribution();
+            }
+
+            private static OptionalRollProbabilityDistribution GreaterThanOrEqual(RollProbabilityDistribution left,
+                RollProbabilityDistribution right)
+            {
+                CDFTable leftTable = new(left);
+                CDFTable rightTable = new(right);
+
+                return left
+                    .Where(x => x.Outcome >= right.Min)
+                    .Select(
+                        x => new Roll(
+                            x.Outcome,
+                            x.Outcome >= right.Max ?
+                                leftTable.EqualTo(x.Outcome) :
+                                leftTable.EqualTo(x.Outcome) * rightTable.LessThanOrEqualTo(x.Outcome)
+                            )
+                        )
+                    .ToOptionalRollProbabilityDistribution();
+            }
+
+            private static OptionalRollProbabilityDistribution LessThan(RollProbabilityDistribution left,
+                RollProbabilityDistribution right)
+            {
+                CDFTable leftTable = new(left);
+                CDFTable rightTable = new(right);
+
+                return left
+                    .Where(x => x.Outcome < right.Max)
+                    .Select(
+                        x => new Roll(
+                            x.Outcome,
+                            x.Outcome < right.Min ?
+                                leftTable.EqualTo(x.Outcome) :
+                                leftTable.EqualTo(x.Outcome) * rightTable.GreaterThan(x.Outcome)
+                                )
+                        )
+                    .ToOptionalRollProbabilityDistribution();
+            }
+            
+            private static OptionalRollProbabilityDistribution LessThanOrEqual(RollProbabilityDistribution left,
+                RollProbabilityDistribution right)
+            {
+                CDFTable leftTable = new(left);
+                CDFTable rightTable = new(right);
+
+                return left
+                    .Where(x => x.Outcome <= right.Max)
+                    .Select(
+                        x => new Roll(
+                            x.Outcome,
+                            x.Outcome <= right.Min ?
+                                leftTable.EqualTo(x.Outcome) :
+                                leftTable.EqualTo(x.Outcome) * rightTable.GreaterThanOrEqualTo(x.Outcome)
+                                )
+                        )
+                    .ToOptionalRollProbabilityDistribution();
+            }
         }
     }
 }
