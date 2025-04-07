@@ -14,5 +14,8 @@
 
         public override LogicalProbabilityDistribution GetProbabilityDistribution() =>
             new(_delegates.Probability.Invoke(_left.GetProbabilityDistribution(), _right.GetProbabilityDistribution()));
+
+        public override OptionalRollProbabilityDistribution GetOptionalRollsProbabilityDistribution() =>
+            throw new System.NotImplementedException();
     }
 }

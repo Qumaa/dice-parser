@@ -18,11 +18,12 @@ namespace DiceRoll
 
         public OptionalRollProbabilityDistribution GetProbabilityDistribution()
         {
-            Probability ofTrue = _condition.GetProbabilityDistribution().True;
+            return _condition.GetOptionalRollsProbabilityDistribution();
+            
+            Probability ofFalse = _condition.GetProbabilityDistribution().False;
 
-            return new OptionalRollProbabilityDistribution(_value.GetProbabilityDistribution()
-                .Select(x => new OptionalRoll(x.Outcome, x.Probability * ofTrue))
-                .Prepend(new OptionalRoll(ofTrue.Inversed())
+            return new OptionalRollProbabilityDistribution(_condition.GetOptionalRollsProbabilityDistribution()
+                .Prepend(new OptionalRoll(ofFalse)
                 )
             );
         }

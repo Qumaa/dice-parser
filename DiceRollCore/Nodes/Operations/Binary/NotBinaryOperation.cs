@@ -18,5 +18,8 @@ namespace DiceRoll
 
         public override LogicalProbabilityDistribution GetProbabilityDistribution() =>
             new(_operation.GetProbabilityDistribution().False);
+
+        public override OptionalRollProbabilityDistribution GetOptionalRollsProbabilityDistribution() =>
+            throw new NotImplementedException();
     }
 }

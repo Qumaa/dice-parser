@@ -12,5 +12,8 @@
     /// and provide a <see cref="RollProbabilityDistribution">probability distribution</see> of true and false.
     /// </para>
     /// </summary>
-    public interface IOperation : INode<Binary>, IDistributable<LogicalProbabilityDistribution, Logical> { }
+    public interface IOperation : INode<Binary>, IDistributable<LogicalProbabilityDistribution, Logical>
+    {
+        OptionalRollProbabilityDistribution GetOptionalRollsProbabilityDistribution();
+    }
 }

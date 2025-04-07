@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace DiceRoll
 {
@@ -40,6 +41,25 @@ namespace DiceRoll
                 if (current > max)
                     max = current;
             }
+        }
+    }
+
+    public static class OptionalRollProbabilityDistributionExtensions
+    {
+        public static OptionalRollProbabilityDistribution ToOptionalRollProbabilityDistribution(this IEnumerable<OptionalRoll> rolls) =>
+            new(rolls);
+
+        public static OptionalRollProbabilityDistribution ToOptionalRollProbabilityDistribution(this IEnumerable<Roll> rolls)
+        {
+            Roll[] enumeratedRolls = rolls as Roll[] ?? rolls.ToArray();
+
+            return new OptionalRollProbabilityDistribution(enumeratedRolls
+                .Select(x => new OptionalRoll(x.Outcome, x.Probability))
+                .Prepend(new OptionalRoll(enumeratedRolls.Aggregate(Probability.Hundred,
+                    (probability, roll) => probability - roll.Probability)
+                    )
+                )
+            );
         }
     }
 }

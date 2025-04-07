@@ -10,7 +10,10 @@
         }
 
         public override LogicalProbabilityDistribution GetProbabilityDistribution() =>
-            new(_delegates.Probability.Invoke(_left.GetProbabilityDistribution(), _right.GetProbabilityDistribution()));
+            new(_delegates.Probability(_left.GetProbabilityDistribution(), _right.GetProbabilityDistribution()));
+
+        public override OptionalRollProbabilityDistribution GetOptionalRollsProbabilityDistribution() =>
+            _delegates.OptionalRolls(_left.GetProbabilityDistribution(), _right.GetProbabilityDistribution());
 
         public override Binary Evaluate() =>
             _delegates.Evaluation(_left.Evaluate(), _right.Evaluate());

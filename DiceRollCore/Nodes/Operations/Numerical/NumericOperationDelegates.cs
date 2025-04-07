@@ -7,11 +7,13 @@ namespace DiceRoll
     {
         public readonly NumericOperationEvaluationDelegate Evaluation;
         public readonly NumericOperationProbabilityDelegate Probability;
+        public readonly NumericOperationOptionalRollsDelegate OptionalRolls;
         
-        public NumericOperationDelegates(NumericOperationEvaluationDelegate evaluation, NumericOperationProbabilityDelegate probability)
+        public NumericOperationDelegates(NumericOperationEvaluationDelegate evaluation, NumericOperationProbabilityDelegate probability, NumericOperationOptionalRollsDelegate optionalRolls)
         {
             Evaluation = evaluation;
             Probability = probability;
+            OptionalRolls = optionalRolls;
         }
     }
 }
