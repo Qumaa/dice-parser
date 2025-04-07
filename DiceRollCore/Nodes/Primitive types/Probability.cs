@@ -85,7 +85,7 @@ namespace DiceRoll
             ToString(_FORMAT, formatProvider);
         
         public string ToString(string format, IFormatProvider formatProvider) =>
-            Value.ToString(format, formatProvider);
+            (Value * 100d).ToString(format, formatProvider);
 
         public static Probability operator +(Probability left, Probability right) =>
             new(left.Value + right.Value);
