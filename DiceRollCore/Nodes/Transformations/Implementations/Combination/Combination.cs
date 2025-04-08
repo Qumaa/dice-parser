@@ -9,11 +9,11 @@ namespace DiceRoll
     /// <see cref="RollProbabilityDistribution">probability distribution</see> of the results.
     /// </summary>
     /// <seealso cref="CombinationType"/>
-    public sealed class Combination : MergeTransformation
+    public sealed class Combination : BinaryTransformation
     {
         private readonly CombinationType _combinationType;
 
-        /// <inheritdoc cref="MergeTransformation(INumeric, INumeric)"/>
+        /// <inheritdoc cref="BinaryTransformation(DiceRoll.INumeric,DiceRoll.INumeric)"/>
         /// <param name="combinationType">The type of combination.</param>
         /// <exception cref="EnumValueNotDefinedException">
         /// When <paramref name="combinationType"/> holds a not defined value.

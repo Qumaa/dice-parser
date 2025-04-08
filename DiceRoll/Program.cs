@@ -12,19 +12,11 @@ namespace DiceRoll
 
             const OperationType operation_type = OperationType.Equal;
 
-            var dist = new DefaultOperation(left, right, operation_type).GetProbabilityDistribution();
+            IOperation operation = new DefaultBinaryOperation(left, right, operation_type);
 
-            foreach (OptionalRoll roll in dist)
-            {
-                Console.Write("Probability of ");
-                Console.Write(roll.Outcome.ToString());
-                Console.Write(" is ");
-                Console.WriteLine(roll.Probability.ToString());
-            }
-
-            var dist2 = dist.AsLogicalProbabilityDistribution();
+            IAssertion assertion = (IAssertion) operation;
             
-            foreach (Logical logical in dist2)
+            foreach (Logical logical in assertion.GetProbabilityDistribution())
             {
                 Console.Write("Probability of ");
                 Console.Write(logical.Outcome.ToString());

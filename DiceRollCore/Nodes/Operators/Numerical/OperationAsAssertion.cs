@@ -13,6 +13,6 @@
             _operation.Evaluate().AsBinary();
 
         protected override LogicalProbabilityDistribution CreateProbabilityDistribution() =>
-            _operation.GetProbabilityDistribution().AsLogicalProbabilityDistribution();
+            _operation.GetProbabilityDistribution().AsLogical();
     }
 }

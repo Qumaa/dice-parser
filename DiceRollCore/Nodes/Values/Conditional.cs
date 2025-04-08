@@ -2,7 +2,7 @@
 
 namespace DiceRoll
 {
-    public sealed class Conditional : IOperation
+    public sealed class Conditional : Operation
     {
         private readonly IAssertion _assertion;
         private readonly INumeric _value;
@@ -13,18 +13,12 @@ namespace DiceRoll
             _value = value;
         }
 
-        public OptionalRollProbabilityDistribution GetProbabilityDistribution() =>
+        public override OptionalRollProbabilityDistribution GetProbabilityDistribution() =>
             _value.GetProbabilityDistribution()
                 .Select(x => new Roll(x.Outcome, x.Probability * _assertion.True))
                 .ToOptionalRollProbabilityDistribution();
 
-        public IAssertion AsAssertion() =>
-            _assertion;
-
-        public void Visit(INodeVisitor visitor) =>
-            visitor.ForOperation(this);
-
-        public Optional<Outcome> Evaluate() =>
+        public override Optional<Outcome> Evaluate() =>
             _assertion.Evaluate() ? new Optional<Outcome>(_value.Evaluate()) : Optional<Outcome>.Empty;
     }
 }

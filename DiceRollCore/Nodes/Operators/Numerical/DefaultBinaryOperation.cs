@@ -1,10 +1,10 @@
 ﻿namespace DiceRoll
 {
-    public sealed class DefaultOperation : Operation
+    public sealed class DefaultBinaryOperation : BinaryOperation
     {
         private readonly OperationDelegates _delegates;
 
-        public DefaultOperation(INumeric left, INumeric right, OperationType operationType) : base(left, right)
+        public DefaultBinaryOperation(INumeric left, INumeric right, OperationType operationType) : base(left, right)
         {
             _delegates = DefaultOperationDelegates.Get(operationType);
         }
@@ -23,9 +23,9 @@
 
         private class AsAssertionWrapper : Assertion
         {
-            private readonly DefaultOperation _operation;
+            private readonly DefaultBinaryOperation _operation;
             
-            public AsAssertionWrapper(DefaultOperation operation) 
+            public AsAssertionWrapper(DefaultBinaryOperation operation) 
             {
                 _operation = operation;
             }

@@ -8,11 +8,11 @@ namespace DiceRoll
     /// <see cref="RollProbabilityDistribution">probability distribution</see> of the results.
     /// </summary>
     /// <seealso cref="SelectionType"/>
-    public sealed class Selection : MergeTransformation
+    public sealed class Selection : BinaryTransformation
     {
         private readonly SelectionType _selectionType;
 
-        /// <inheritdoc cref="MergeTransformation(INumeric, INumeric)"/>
+        /// <inheritdoc cref="BinaryTransformation(DiceRoll.INumeric,DiceRoll.INumeric)"/>
         /// <param name="selectionType">The type of selection.</param>
         /// <exception cref="EnumValueNotDefinedException">
         /// When <paramref name="selectionType"/> holds a not defined value.

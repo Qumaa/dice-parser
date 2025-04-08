@@ -90,8 +90,7 @@ namespace DiceRoll
             );
         }
 
-        public static LogicalProbabilityDistribution AsLogicalProbabilityDistribution(
-            this OptionalRollProbabilityDistribution distribution) =>
+        public static LogicalProbabilityDistribution AsLogical(this OptionalRollProbabilityDistribution distribution) =>
             new(distribution.False.Inversed());
     }
 }
