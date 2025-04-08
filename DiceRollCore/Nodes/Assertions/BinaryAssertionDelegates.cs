@@ -1,22 +1,22 @@
 ﻿namespace DiceRoll
 {
-    public static class DefaultBinaryOperationDelegates
+    public static class BinaryAssertionDelegates
     {
-        public static BinaryOperationDelegates Get(BinaryOperationType operationType)
+        public static BinaryOperationDelegates Get(BinaryAssertionType assertionType)
         {
-            EnumValueNotDefinedException.ThrowIfValueNotDefined(operationType);
+            EnumValueNotDefinedException.ThrowIfValueNotDefined(assertionType);
             
-            return new BinaryOperationDelegates(Evaluation.Get(operationType), ProbabilityEvaluation.Get(operationType));
+            return new BinaryOperationDelegates(Evaluation.Get(assertionType), ProbabilityEvaluation.Get(assertionType));
         }
 
         private static class Evaluation
         {
-            public static BinaryOperationEvaluationDelegate Get(BinaryOperationType operationType) =>
-                operationType switch
+            public static BinaryAssertionEvaluationDelegate Get(BinaryAssertionType assertionType) =>
+                assertionType switch
                 {
-                    BinaryOperationType.And => And,
-                    BinaryOperationType.Or => Or,
-                    BinaryOperationType.Equal => Equal
+                    BinaryAssertionType.And => And,
+                    BinaryAssertionType.Or => Or,
+                    BinaryAssertionType.Equal => Equal
                 };
 
             private static Binary And(Binary left, Binary right) =>
@@ -31,12 +31,12 @@
 
         private static class ProbabilityEvaluation
         {
-            public static BinaryOperationProbabilityDelegate Get(BinaryOperationType operationType) =>
-                operationType switch
+            public static BinaryAssertionProbabilityDelegate Get(BinaryAssertionType assertionType) =>
+                assertionType switch
                 {
-                    BinaryOperationType.And => And,
-                    BinaryOperationType.Or => Or,
-                    BinaryOperationType.Equal => Equal
+                    BinaryAssertionType.And => And,
+                    BinaryAssertionType.Or => Or,
+                    BinaryAssertionType.Equal => Equal
                 };
 
             private static Probability And(LogicalProbabilityDistribution left, LogicalProbabilityDistribution right) =>

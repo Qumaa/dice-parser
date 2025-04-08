@@ -22,8 +22,11 @@ namespace DiceRoll
             return _exists;
         }
 
+        public Binary AsBinary() =>
+            new(_exists);
+
         public override string ToString() =>
-            ToString("-");
+            ToString(false.ToString());
         
         public string ToString(string noValue) =>
             _exists ? _value.ToString() : noValue;

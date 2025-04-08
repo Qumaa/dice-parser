@@ -1,6 +1,6 @@
 ﻿namespace DiceRoll
 {
-    public enum BinaryOperationType
+    public enum BinaryAssertionType
     {
         And = 0,
         Or = 1,

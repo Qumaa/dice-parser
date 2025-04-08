@@ -3,7 +3,7 @@
     public interface INodeVisitor
     {
         void ForNumeric(INumeric numeric);
+        void ForAssertion(IAssertion assertion);
         void ForOperation(IOperation operation);
-        void ForConditional(IConditional conditional);
     }
 }

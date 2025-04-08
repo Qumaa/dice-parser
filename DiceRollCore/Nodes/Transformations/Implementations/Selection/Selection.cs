@@ -56,8 +56,8 @@ namespace DiceRoll
 
         private Probability GetSecondCDFValue(CDFTable cdfTable, Outcome outcome) =>
             _selectionType is SelectionType.Highest ?
-                cdfTable.LessThanOrEqualTo(outcome) :
-                cdfTable.GreaterThanOrEqualTo(outcome);
+                cdfTable.LessThanOrEqual(outcome) :
+                cdfTable.GreaterThanOrEqual(outcome);
 
         private static Probability CDFToProbability(CDF source, CDF other) =>
             source.Equal * other.EqualOr +

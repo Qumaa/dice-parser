@@ -10,7 +10,7 @@ namespace DiceRoll
     /// </summary>
     public readonly struct Probability : IEquatable<Probability>, IComparable<Probability>, IComparable
     {
-        private const string _FORMAT = "f2";
+        private const string _FORMAT = "p";
         public readonly double Value;
         
         public static Probability Hundred => new(1d);
@@ -85,7 +85,7 @@ namespace DiceRoll
             ToString(_FORMAT, formatProvider);
         
         public string ToString(string format, IFormatProvider formatProvider) =>
-            (Value * 100d).ToString(format, formatProvider) + '%';
+            Value.ToString(format, formatProvider);
 
         public static Probability operator +(Probability left, Probability right) =>
             new(left.Value + right.Value);
