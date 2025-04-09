@@ -111,6 +111,13 @@ namespace DiceRoll
             new(left / right.Value);
         public static Outcome operator /(Outcome left, int right) =>
             new(left.Value / right);
+        
+        public static Outcome operator %(Outcome left, Outcome right) =>
+            new(left.Value % right.Value);
+        public static Outcome operator %(int left, Outcome right) =>
+            new(left % right.Value);
+        public static Outcome operator %(Outcome left, int right) =>
+            new(left.Value % right);
 
         public static bool operator >(Outcome left, Outcome right) =>
             left.Value > right.Value;
