@@ -63,13 +63,13 @@ namespace DiceRoll
 
             if (index < 0)
             {
-                index = ~index - 1;
+                index = ~index;
 
-                if (index is -1)
+                if (index is 0)
                     return Probability.Hundred;
             }
 
-            index = _outcomeProbabilities.Count - index;
+            index = _outcomeProbabilities.Count - 1 - index;
 
             return _outcomeProbabilities.GetValueAtIndex(index).Accumulated;
         }
