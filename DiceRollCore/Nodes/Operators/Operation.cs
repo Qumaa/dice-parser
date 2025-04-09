@@ -8,31 +8,34 @@ namespace DiceRoll
 
         protected Operation()
         {
-            _asAssertion = AsAssertionSafe();
+            _asAssertion = CreateAssertionWrapperSafe();
         }
 
         public abstract Optional<Outcome> Evaluate();
         public abstract OptionalRollProbabilityDistribution GetProbabilityDistribution();
 
         public virtual IAssertion AsAssertion() =>
-            DefaultAsAssertion();
+            _asAssertion;
 
         public void Visit(INodeVisitor visitor) =>
             visitor.ForOperation(this);
 
-        private IAssertion AsAssertionSafe()
+        protected virtual IAssertion CreateAssertionWrapper() =>
+            DefaultAssertionFactory();
+
+        private IAssertion CreateAssertionWrapperSafe()
         {
             try
             {
-                return AsAssertion();
+                return CreateAssertionWrapper();
             }
             catch (Exception)
             {
-                return DefaultAsAssertion();
+                return DefaultAssertionFactory();
             }
         }
 
-        private OperationAsAssertion DefaultAsAssertion() =>
+        private OperationAsAssertion DefaultAssertionFactory() =>
             new(this);
 
         Probability IAssertion.True => _asAssertion.True;
