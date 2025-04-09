@@ -7,7 +7,7 @@
         public DefaultBinaryAssertion(IAssertion left, IAssertion right, BinaryAssertionType assertionType) :
             base(left, right)
         {
-            _delegates = BinaryAssertionDelegates.Get(assertionType);
+            _delegates = DefaultAssertionDelegates.Get(assertionType);
         }
 
         public override Binary Evaluate() =>

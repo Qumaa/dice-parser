@@ -198,12 +198,12 @@ namespace DiceRoll
             public static OperationDistributionDelegate Get(OperationType operationType) =>
                 operationType switch
                 {
-                    OperationType.Equal => Equal,
-                    OperationType.NotEqual => NotEqual,
-                    OperationType.GreaterThan => GreaterThan,
-                    OperationType.GreaterThanOrEqual => GreaterThanOrEqual,
-                    OperationType.LessThan => LessThan,
-                    OperationType.LessThanOrEqual => LessThanOrEqual,
+                    OperationType.Equal => static (left, right) => Equal(left, right),
+                    OperationType.NotEqual => static (left, right) => NotEqual(left, right),
+                    OperationType.GreaterThan => static (left, right) => GreaterThan(left, right),
+                    OperationType.GreaterThanOrEqual => static (left, right) => GreaterThanOrEqual(left, right),
+                    OperationType.LessThan => static (left, right) => LessThan(left, right),
+                    OperationType.LessThanOrEqual => static (left, right) => LessThanOrEqual(left, right)
                 };
 
             private static OptionalRollProbabilityDistribution Equal(RollProbabilityDistribution left,
@@ -214,8 +214,7 @@ namespace DiceRoll
 
                 return left
                     .Where(x => x.Outcome >= right.Min && x.Outcome <= right.Max)
-                    .Select(
-                        x => new Roll(x.Outcome, leftTable.EqualTo(x.Outcome) * rightTable.EqualTo(x.Outcome)))
+                    .Select(x => new Roll(x.Outcome, leftTable.EqualTo(x.Outcome) * rightTable.EqualTo(x.Outcome)))
                     .Where(x => x.Probability > Probability.Zero)
                     .ToOptionalRollProbabilityDistribution();
             }
@@ -227,8 +226,8 @@ namespace DiceRoll
                 CDFTable rightTable = new(right);
 
                 return left
-                    .Select(
-                        x => new Roll(x.Outcome, leftTable.EqualTo(x.Outcome) * rightTable.NotEqualTo(x.Outcome)))
+                    .Select(x => new Roll(x.Outcome, leftTable.EqualTo(x.Outcome) * rightTable.NotEqualTo(x.Outcome)))
+                    .Where(x => x.Probability > Probability.Zero)
                     .ToOptionalRollProbabilityDistribution();
             }
             
@@ -248,6 +247,7 @@ namespace DiceRoll
                                 leftTable.EqualTo(x.Outcome) * rightTable.LessThan(x.Outcome)
                                 )
                         )
+                    .Where(x => x.Probability > Probability.Zero)
                     .ToOptionalRollProbabilityDistribution();
             }
 
@@ -267,6 +267,7 @@ namespace DiceRoll
                                 leftTable.EqualTo(x.Outcome) * rightTable.LessThanOrEqual(x.Outcome)
                             )
                         )
+                    .Where(x => x.Probability > Probability.Zero)
                     .ToOptionalRollProbabilityDistribution();
             }
 
@@ -286,6 +287,7 @@ namespace DiceRoll
                                 leftTable.EqualTo(x.Outcome) * rightTable.GreaterThan(x.Outcome)
                             )
                         )
+                    .Where(x => x.Probability > Probability.Zero)
                     .ToOptionalRollProbabilityDistribution();
             }
             
@@ -305,6 +307,7 @@ namespace DiceRoll
                                 leftTable.EqualTo(x.Outcome) * rightTable.GreaterThanOrEqual(x.Outcome)
                                 )
                         )
+                    .Where(x => x.Probability > Probability.Zero)
                     .ToOptionalRollProbabilityDistribution();
             }
         }
