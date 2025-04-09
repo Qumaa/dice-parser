@@ -5,7 +5,7 @@
         /// <summary>
         /// Contains nodes that represent binary operations on numeric values.
         /// </summary>
-        public static partial class Operation
+        public static partial class Operator
         {
             /// <summary>
             /// Checks two arbitrary <see cref="INumeric">numeric nodes</see> to be equal.
@@ -13,10 +13,10 @@
             /// <param name="left">The first <see cref="INumeric">numeric node</see>.</param>
             /// <param name="right">The second <see cref="INumeric">numeric node</see>.</param>
             /// <returns>
-            /// An <see cref="IOperation">operation</see> that checks two <see cref="INumeric">numeric nodes</see>.
+            /// An <see cref="IAssertion">assertion</see> that checks two <see cref="INumeric">numeric nodes</see>.
             /// </returns>
             public static IOperation Equal(INumeric left, INumeric right) =>
-                new DefaultNumericOperation(left, right, NumericOperationType.Equal);
+                new DefaultBinaryOperation(left, right, OperationType.Equal);
 
             /// <summary>
             /// Checks two arbitrary <see cref="INumeric">numeric nodes</see> to not be equal.
@@ -24,10 +24,10 @@
             /// <param name="left">The first <see cref="INumeric">numeric node</see>.</param>
             /// <param name="right">The second <see cref="INumeric">numeric node</see>.</param>
             /// <returns>
-            /// An <see cref="IOperation">operation</see> that checks two <see cref="INumeric">numeric nodes</see>.
+            /// An <see cref="IAssertion">assertion</see> that checks two <see cref="INumeric">numeric nodes</see>.
             /// </returns>
             public static IOperation NotEqual(INumeric left, INumeric right) =>
-                new DefaultNumericOperation(left, right, NumericOperationType.NotEqual);
+                new DefaultBinaryOperation(left, right, OperationType.NotEqual);
 
             /// <summary>
             /// Checks two arbitrary <see cref="INumeric">numeric nodes</see> so that one is larger than the other.
@@ -35,10 +35,10 @@
             /// <param name="left">The first <see cref="INumeric">numeric node</see>.</param>
             /// <param name="right">The second <see cref="INumeric">numeric node</see>.</param>
             /// <returns>
-            /// An <see cref="IOperation">operation</see> that checks two <see cref="INumeric">numeric nodes</see>.
+            /// An <see cref="IAssertion">assertion</see> that checks two <see cref="INumeric">numeric nodes</see>.
             /// </returns>
             public static IOperation GreaterThan(INumeric left, INumeric right) =>
-                new DefaultNumericOperation(left, right, NumericOperationType.GreaterThan);
+                new DefaultBinaryOperation(left, right, OperationType.GreaterThan);
 
             /// <summary>
             /// Checks two arbitrary <see cref="INumeric">numeric nodes</see> so that one is greater than or equal to
@@ -47,10 +47,10 @@
             /// <param name="left">The first <see cref="INumeric">numeric node</see>.</param>
             /// <param name="right">The second <see cref="INumeric">numeric node</see>.</param>
             /// <returns>
-            /// An <see cref="IOperation">operation</see> that checks two <see cref="INumeric">numeric nodes</see>.
+            /// An <see cref="IAssertion">assertion</see> that checks two <see cref="INumeric">numeric nodes</see>.
             /// </returns>
             public static IOperation GreaterThanOrEqual(INumeric left, INumeric right) =>
-                new DefaultNumericOperation(left, right, NumericOperationType.GreaterThanOrEqual);
+                new DefaultBinaryOperation(left, right, OperationType.GreaterThanOrEqual);
 
             /// <summary>
             /// Checks two arbitrary <see cref="INumeric">numeric nodes</see> so that one is smaller than the other.
@@ -58,10 +58,10 @@
             /// <param name="left">The first <see cref="INumeric">numeric node</see>.</param>
             /// <param name="right">The second <see cref="INumeric">numeric node</see>.</param>
             /// <returns>
-            /// An <see cref="IOperation">operation</see> that checks two <see cref="INumeric">numeric nodes</see>.
+            /// An <see cref="IAssertion">assertion</see> that checks two <see cref="INumeric">numeric nodes</see>.
             /// </returns>
             public static IOperation LessThan(INumeric left, INumeric right) =>
-                new DefaultNumericOperation(left, right, NumericOperationType.LessThan);
+                new DefaultBinaryOperation(left, right, OperationType.LessThan);
 
             /// <summary>
             /// Checks two arbitrary <see cref="INumeric">numeric nodes</see> so that one is smaller than or equal to
@@ -70,22 +70,22 @@
             /// <param name="left">The first <see cref="INumeric">numeric node</see>.</param>
             /// <param name="right">The second <see cref="INumeric">numeric node</see>.</param>
             /// <returns>
-            /// An <see cref="IOperation">operation</see> that checks two <see cref="INumeric">numeric nodes</see>.
+            /// An <see cref="IAssertion">assertion</see> that checks two <see cref="INumeric">numeric nodes</see>.
             /// </returns>
             public static IOperation LessThanOrEqual(INumeric left, INumeric right) =>
-                new DefaultNumericOperation(left, right, NumericOperationType.LessThanOrEqual);
+                new DefaultBinaryOperation(left, right, OperationType.LessThanOrEqual);
 
-            public static IOperation And(IOperation left, IOperation right) =>
-                new DefaultBinaryOperation(left, right, BinaryOperationType.And);
+            public static IAssertion And(IAssertion left, IAssertion right) =>
+                new DefaultBinaryAssertion(left, right, BinaryAssertionType.And);
             
-            public static IOperation Or(IOperation left, IOperation right) =>
-                new DefaultBinaryOperation(left, right, BinaryOperationType.Or);
+            public static IAssertion Or(IAssertion left, IAssertion right) =>
+                new DefaultBinaryAssertion(left, right, BinaryAssertionType.Or);
             
-            public static IOperation Equal(IOperation left, IOperation right) =>
-                new DefaultBinaryOperation(left, right, BinaryOperationType.Equal);
+            public static IAssertion Equal(IAssertion left, IAssertion right) =>
+                new DefaultBinaryAssertion(left, right, BinaryAssertionType.Equal);
             
-            public static IOperation Not(IOperation operation) =>
-                new NotBinaryOperation(operation);
+            public static IAssertion Not(IAssertion assertion) =>
+                new NotAssertion(assertion);
         }
     }
 }

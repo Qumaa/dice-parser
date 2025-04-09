@@ -1,5 +1,6 @@
 ﻿using System;
-using System.Linq;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace DiceRoll
 {
@@ -7,18 +8,16 @@ namespace DiceRoll
     {
         private readonly Outcome _min;
         private readonly Outcome _max;
-        private readonly Probability[] _probabilities;
-        private readonly Probability[] _cdfProbabilities;
+        private readonly SortedList<Outcome, OutcomeProbabilities> _outcomeProbabilities;
 
         public CDFTable(RollProbabilityDistribution distribution)
         {
             ArgumentNullException.ThrowIfNull(distribution);
-            
+
             _min = distribution.Min;
             _max = distribution.Max;
-                
-            _probabilities = distribution.Select(x => x.Probability).ToArray();
-            _cdfProbabilities = BuildCDF(_probabilities);
+
+            _outcomeProbabilities = BuildProbabilities(distribution);
         }
 
         public Probability EqualTo(Outcome outcome)
@@ -26,45 +25,115 @@ namespace DiceRoll
             if (outcome < _min || outcome > _max)
                 return Probability.Zero;
 
-            return _probabilities[OutcomeToIndex(outcome)];
+            return _outcomeProbabilities.TryGetValue(outcome, out OutcomeProbabilities probabilities) ?
+                probabilities.Raw :
+                Probability.Zero;
         }
 
-        public Probability LessThanOrEqualTo(Outcome outcome)
+        public Probability LessThanOrEqual(Outcome outcome)
         {
             if (outcome > _max)
                 return Probability.Zero;
-            
+
             if (outcome < _min)
                 return Probability.Hundred;
 
-            return _cdfProbabilities[OutcomeToIndex(outcome)];
+            int index = BinarySearch(outcome);
+
+            if (index < 0)
+            {
+                index = ~index - 1;
+
+                if (index is -1)
+                    return Probability.Zero;
+            }
+
+            return _outcomeProbabilities.GetValueAtIndex(index).Accumulated;
         }
 
-        public Probability GreaterThanOrEqualTo(Outcome outcome)
+        public Probability GreaterThanOrEqual(Outcome outcome)
         {
             if (outcome > _max)
                 return Probability.Hundred;
-            
+
             if (outcome < _min)
                 return Probability.Zero;
 
-            return _cdfProbabilities[OutcomeToIndex(outcome, true)];
-        }
-        
-        private Index OutcomeToIndex(Outcome outcome, bool inverse = false) =>
-            inverse ? 
-                new Index(outcome.Value - _min.Value + 1, true) :
-                new Index(outcome.Value - _min.Value);
+            int index = BinarySearch(outcome);
 
-        private static Probability[] BuildCDF(Probability[] probabilities)
+            if (index < 0)
+            {
+                index = ~index - 1;
+
+                if (index is -1)
+                    return Probability.Hundred;
+            }
+
+            index = _outcomeProbabilities.Count - index;
+
+            return _outcomeProbabilities.GetValueAtIndex(index).Accumulated;
+        }
+
+        private int BinarySearch(Outcome outcome)
         {
-            Probability[] cdf = new Probability[probabilities.Length];
-            cdf[0] = probabilities[0];
-                
-            for (int i = 1; i < cdf.Length; i++)
-                cdf[i] = probabilities[i] + cdf[i - 1];
-                
-            return cdf;
+            IComparer<Outcome> comparer = _outcomeProbabilities.Comparer;
+
+            int lower = 0;
+            int upper = _outcomeProbabilities.Count - 1;
+
+            while (lower <= upper)
+            {
+                int anchor = lower + ((upper - lower) / 2);
+
+                switch (comparer.Compare(_outcomeProbabilities.GetKeyAtIndex(anchor), outcome))
+                {
+                    case 0:
+                        return anchor;
+
+                    case < 0:
+                        lower = anchor + 1;
+                        break;
+
+                    case > 0:
+                        upper = anchor - 1;
+                        break;
+                }
+            }
+
+            return ~lower;
+        }
+
+        private static SortedList<Outcome, OutcomeProbabilities> BuildProbabilities(
+            RollProbabilityDistribution distribution)
+        {
+            SortedList<Outcome, OutcomeProbabilities> outcomeProbabilities = new(Outcome.RelationalComparer);
+
+            Probability accumulatedProbability = Probability.Zero;
+
+            foreach (Roll roll in distribution)
+            {
+                Probability probability = roll.Probability;
+                accumulatedProbability += probability;
+
+                OutcomeProbabilities probabilities = new(probability, accumulatedProbability);
+
+                outcomeProbabilities.Add(roll.Outcome, probabilities);
+            }
+
+            return outcomeProbabilities;
+        }
+
+        [StructLayout(LayoutKind.Auto)]
+        private readonly struct OutcomeProbabilities
+        {
+            public readonly Probability Raw;
+            public readonly Probability Accumulated;
+
+            public OutcomeProbabilities(Probability raw, Probability accumulated)
+            {
+                Raw = raw;
+                Accumulated = accumulated;
+            }
         }
     }
 
@@ -74,9 +143,9 @@ namespace DiceRoll
             cdfTable.EqualTo(outcome).Inversed();
 
         public static Probability GreaterThan(this CDFTable cdfTable, Outcome outcome) =>
-            cdfTable.LessThanOrEqualTo(outcome).Inversed();
-        
+            cdfTable.LessThanOrEqual(outcome).Inversed();
+
         public static Probability LessThan(this CDFTable cdfTable, Outcome outcome) =>
-            cdfTable.GreaterThanOrEqualTo(outcome).Inversed();
+            cdfTable.GreaterThanOrEqual(outcome).Inversed();
     }
 }

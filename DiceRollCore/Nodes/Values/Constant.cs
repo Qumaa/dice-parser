@@ -1,11 +1,9 @@
-﻿using System.Linq;
-
-namespace DiceRoll
+﻿namespace DiceRoll
 {
     /// <summary>
     /// A <see cref="INumeric">numerical node</see> that represents a singular <see cref="int">integer</see> number.
     /// </summary>
-    public sealed class Constant : NumericNode
+    public sealed class Constant : Numeric
     {
         private readonly int _value;
         
@@ -18,7 +16,7 @@ namespace DiceRoll
         public override Outcome Evaluate() =>
             new(_value);
 
-        public override RollProbabilityDistribution GetProbabilityDistribution() =>
-            new(Enumerable.Repeat(new Roll(_value, Probability.Hundred), 1));
+        protected override RollProbabilityDistribution CreateProbabilityDistribution() =>
+            new(new Outcome(_value));
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace DiceRoll
 {
-    public enum NumericOperationType
+    public enum OperationType
     {
         Equal = 0,
         NotEqual = 1,

@@ -8,7 +8,7 @@ namespace DiceRoll
     /// A <see cref="INumeric">numerical node</see> that combines an arbitrary sequence of
     /// other numerical nodes, using a <see cref="Composer"/> implementation instance.
     /// </summary>
-    public sealed class Composite : NumericNode
+    public sealed class Composite : Numeric
     {
         private readonly INumeric _composite;
         
@@ -32,7 +32,7 @@ namespace DiceRoll
         public override Outcome Evaluate() =>
             _composite.Evaluate();
 
-        public override RollProbabilityDistribution GetProbabilityDistribution() =>
+        protected override RollProbabilityDistribution CreateProbabilityDistribution() =>
             _composite.GetProbabilityDistribution();
     }
 }
