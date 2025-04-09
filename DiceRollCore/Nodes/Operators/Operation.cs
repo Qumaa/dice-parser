@@ -20,7 +20,7 @@ namespace DiceRoll
         public void Visit(INodeVisitor visitor) =>
             visitor.ForOperation(this);
 
-        protected virtual IAssertion CreateAssertionWrapper() =>
+        protected virtual Assertion CreateAssertionWrapper() =>
             DefaultAssertionFactory();
 
         private IAssertion CreateAssertionWrapperSafe()

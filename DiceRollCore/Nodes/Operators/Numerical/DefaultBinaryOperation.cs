@@ -15,7 +15,7 @@
         public override OptionalRollProbabilityDistribution GetProbabilityDistribution() =>
             new(_delegates.Distribution(_left.GetProbabilityDistribution(), _right.GetProbabilityDistribution()));
 
-        protected override IAssertion CreateAssertionWrapper() =>
+        protected override Assertion CreateAssertionWrapper() =>
             new AsAssertionWrapper(this);
 
         private LogicalProbabilityDistribution GetLogicalProbabilityDistribution() =>

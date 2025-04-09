@@ -10,19 +10,28 @@ namespace DiceRoll
             left = Node.Value.Summation(left, left);
             var right = Node.Value.Dice(6);
 
-            const OperationType operation_type = OperationType.Equal;
+            IOperation operation = Node.Operator.Equal(left, right);
 
-            IOperation operation = new DefaultBinaryOperation(left, right, operation_type);
+            IAssertion explicitAssertion = operation.AsAssertion();
 
-            IAssertion assertion = (IAssertion) operation;
+            IAssertion implicitAssertion = (IAssertion) operation;
+
+            TestVisitor visitor = new();
             
-            foreach (Logical logical in assertion.GetProbabilityDistribution())
-            {
-                Console.Write("Probability of ");
-                Console.Write(logical.Outcome.ToString());
-                Console.Write(" is ");
-                Console.WriteLine(logical.Probability.ToString());
-            }
+            explicitAssertion.Visit(visitor); // Assertion
+            implicitAssertion.Visit(visitor); // Operation
+        }
+        
+        private class TestVisitor : INodeVisitor
+        {
+            public void ForNumeric(INumeric numeric) =>
+                throw new InvalidOperationException();
+
+            public void ForAssertion(IAssertion assertion) =>
+                Console.WriteLine("Assertion");
+
+            public void ForOperation(IOperation operation) =>
+                Console.WriteLine("Operation");
         }
     }
 }
