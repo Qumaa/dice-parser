@@ -1,4 +1,5 @@
 ﻿namespace DiceRoll
 {
-    public delegate LogicalProbabilityDistribution AssertionEvaluationDelegate(RollProbabilityDistribution left, RollProbabilityDistribution right);
+    public delegate LogicalProbabilityDistribution AssertionEvaluationDelegate(RollProbabilityDistribution left,
+        RollProbabilityDistribution right);
 }

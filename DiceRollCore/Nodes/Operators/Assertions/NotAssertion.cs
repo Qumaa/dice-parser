@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace DiceRoll
+﻿namespace DiceRoll
 {
     public sealed class NotAssertion : UnaryAssertion
     {

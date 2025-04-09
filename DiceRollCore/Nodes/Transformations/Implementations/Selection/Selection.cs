@@ -29,7 +29,7 @@ namespace DiceRoll
                 Outcome.Max(_source.Evaluate(), _other.Evaluate()) : 
                 Outcome.Min(_source.Evaluate(), _other.Evaluate());
 
-        public override RollProbabilityDistribution GetProbabilityDistribution()
+        protected override RollProbabilityDistribution CreateProbabilityDistribution()
         {
             RollProbabilityDistribution source = _source.GetProbabilityDistribution();
             RollProbabilityDistribution other = _other.GetProbabilityDistribution();
@@ -37,18 +37,19 @@ namespace DiceRoll
             CDFTable sourceTable = new(source);
             CDFTable otherTable = new(other);
 
-            return new RollProbabilityDistribution(source
+            return source
                 .Union(other)
-                .Select(outcome =>
-                    new Roll(
-                        outcome,
-                        CDFToProbability(
-                            CDFForOutcome(sourceTable, outcome), 
-                            CDFForOutcome(otherTable, outcome)
+                .Select(
+                    outcome =>
+                        new Roll(
+                            outcome,
+                            CDFToProbability(
+                                CDFForOutcome(sourceTable, outcome),
+                                CDFForOutcome(otherTable, outcome)
+                                )
                             )
-                        )
-                )
-            );
+                    )
+                .ToRollProbabilityDistribution();
         }
 
         private CDF CDFForOutcome(CDFTable cdfTable, Outcome outcome) =>

@@ -1,4 +1,5 @@
 ﻿namespace DiceRoll
 {
-    public delegate Probability BinaryAssertionProbabilityDelegate(LogicalProbabilityDistribution left, LogicalProbabilityDistribution right);
+    public delegate Probability BinaryAssertionProbabilityDelegate(LogicalProbabilityDistribution left,
+        LogicalProbabilityDistribution right);
 }

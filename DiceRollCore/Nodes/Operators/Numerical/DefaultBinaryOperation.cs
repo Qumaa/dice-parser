@@ -12,7 +12,7 @@
         public override Optional<Outcome> Evaluate() =>
             _delegates.Evaluation(_left.Evaluate(), _right.Evaluate());
 
-        public override OptionalRollProbabilityDistribution GetProbabilityDistribution() =>
+        protected override OptionalRollProbabilityDistribution CreateProbabilityDistribution() =>
             new(_delegates.Distribution(_left.GetProbabilityDistribution(), _right.GetProbabilityDistribution()));
 
         protected override Assertion CreateAssertionWrapper() =>
@@ -24,12 +24,12 @@
         private class AsAssertionWrapper : Assertion
         {
             private readonly DefaultBinaryOperation _operation;
-            
-            public AsAssertionWrapper(DefaultBinaryOperation operation) 
+
+            public AsAssertionWrapper(DefaultBinaryOperation operation)
             {
                 _operation = operation;
             }
-            
+
             public override Binary Evaluate() =>
                 _operation.Evaluate().AsBinary();
 

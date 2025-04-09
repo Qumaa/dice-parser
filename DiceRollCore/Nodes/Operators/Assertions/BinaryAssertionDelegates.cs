@@ -5,8 +5,11 @@
         public static BinaryOperationDelegates Get(BinaryAssertionType assertionType)
         {
             EnumValueNotDefinedException.ThrowIfValueNotDefined(assertionType);
-            
-            return new BinaryOperationDelegates(Evaluation.Get(assertionType), ProbabilityEvaluation.Get(assertionType));
+
+            return new BinaryOperationDelegates(
+                Evaluation.Get(assertionType),
+                ProbabilityEvaluation.Get(assertionType)
+                );
         }
 
         private static class Evaluation
@@ -14,9 +17,9 @@
             public static BinaryAssertionEvaluationDelegate Get(BinaryAssertionType assertionType) =>
                 assertionType switch
                 {
-                    BinaryAssertionType.And => And,
-                    BinaryAssertionType.Or => Or,
-                    BinaryAssertionType.Equal => Equal
+                    BinaryAssertionType.And => static (left, right) => And(left, right),
+                    BinaryAssertionType.Or => static (left, right) => Or(left, right),
+                    BinaryAssertionType.Equal => static (left, right) => Equal(left, right)
                 };
 
             private static Binary And(Binary left, Binary right) =>
@@ -43,10 +46,11 @@
                 left.True * right.True;
 
             private static Probability Or(LogicalProbabilityDistribution left, LogicalProbabilityDistribution right) =>
-                left.True + right.True - And(left, right);
+                (left.True + right.True) - And(left, right);
 
-            private static Probability Equal(LogicalProbabilityDistribution left, LogicalProbabilityDistribution right) =>
-                (left.True + right.True - And(left, right) * 2).Inversed();
+            private static Probability Equal(LogicalProbabilityDistribution left,
+                LogicalProbabilityDistribution right) =>
+                ((left.True + right.True) - (And(left, right) * 2)).Inversed();
         }
     }
 }

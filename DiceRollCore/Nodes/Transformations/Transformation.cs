@@ -7,7 +7,7 @@ namespace DiceRoll
     /// <see cref="Outcome"/> and <see cref="RollProbabilityDistribution">probability distribution</see>
     /// of the results.
     /// </summary>
-    public abstract class Transformation : NumericNode
+    public abstract class Transformation : Numeric
     {
         /// <summary>
         /// The main <see cref="INumeric">numeric node</see>.
@@ -24,7 +24,7 @@ namespace DiceRoll
         }
 
         public abstract override Outcome Evaluate();
-        
-        public abstract override RollProbabilityDistribution GetProbabilityDistribution();
+
+        protected abstract override RollProbabilityDistribution CreateProbabilityDistribution();
     }
 }

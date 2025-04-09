@@ -4,7 +4,8 @@
     {
         private readonly BinaryOperationDelegates _delegates;
 
-        public DefaultBinaryAssertion(IAssertion left, IAssertion right, BinaryAssertionType assertionType) : base(left, right)
+        public DefaultBinaryAssertion(IAssertion left, IAssertion right, BinaryAssertionType assertionType) :
+            base(left, right)
         {
             _delegates = BinaryAssertionDelegates.Get(assertionType);
         }

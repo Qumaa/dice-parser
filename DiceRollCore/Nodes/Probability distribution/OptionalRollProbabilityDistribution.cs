@@ -74,10 +74,12 @@ namespace DiceRoll
 
     public static class OptionalRollProbabilityDistributionExtensions
     {
-        public static OptionalRollProbabilityDistribution ToOptionalRollProbabilityDistribution(this IEnumerable<OptionalRoll> rolls) =>
+        public static OptionalRollProbabilityDistribution ToOptionalRollProbabilityDistribution(
+            this IEnumerable<OptionalRoll> rolls) =>
             new(rolls);
 
-        public static OptionalRollProbabilityDistribution ToOptionalRollProbabilityDistribution(this IEnumerable<Roll> rolls)
+        public static OptionalRollProbabilityDistribution ToOptionalRollProbabilityDistribution(
+            this IEnumerable<Roll> rolls)
         {
             Roll[] enumeratedRolls = rolls as Roll[] ?? rolls.ToArray();
 

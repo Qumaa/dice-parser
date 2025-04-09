@@ -17,6 +17,6 @@
         Subtract = 1,
         Multiply = 2,
         DivideRoundDownwards = 3,
-        DivideRoundUpwards = 4,
+        DivideRoundUpwards = 4
     }
 }

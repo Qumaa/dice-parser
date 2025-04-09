@@ -13,7 +13,7 @@ namespace DiceRoll
         public CDFTable(RollProbabilityDistribution distribution)
         {
             ArgumentNullException.ThrowIfNull(distribution);
-            
+
             _min = distribution.Min;
             _max = distribution.Max;
 
@@ -24,17 +24,17 @@ namespace DiceRoll
         {
             if (outcome < _min || outcome > _max)
                 return Probability.Zero;
-            
+
             return _outcomeProbabilities.TryGetValue(outcome, out OutcomeProbabilities probabilities) ?
-                    probabilities.Raw :
-                    Probability.Zero;
+                probabilities.Raw :
+                Probability.Zero;
         }
 
         public Probability LessThanOrEqual(Outcome outcome)
         {
             if (outcome > _max)
                 return Probability.Zero;
-            
+
             if (outcome < _min)
                 return Probability.Hundred;
 
@@ -43,7 +43,7 @@ namespace DiceRoll
             if (index < 0)
             {
                 index = ~index - 1;
-                
+
                 if (index is -1)
                     return Probability.Zero;
             }
@@ -55,7 +55,7 @@ namespace DiceRoll
         {
             if (outcome > _max)
                 return Probability.Hundred;
-            
+
             if (outcome < _min)
                 return Probability.Zero;
 
@@ -64,7 +64,7 @@ namespace DiceRoll
             if (index < 0)
             {
                 index = ~index - 1;
-                
+
                 if (index is -1)
                     return Probability.Hundred;
             }
@@ -83,7 +83,7 @@ namespace DiceRoll
 
             while (lower <= upper)
             {
-                int anchor = lower + (upper - lower) / 2;
+                int anchor = lower + ((upper - lower) / 2);
 
                 switch (comparer.Compare(_outcomeProbabilities.GetKeyAtIndex(anchor), outcome))
                 {
@@ -103,10 +103,11 @@ namespace DiceRoll
             return ~lower;
         }
 
-        private static SortedList<Outcome, OutcomeProbabilities> BuildProbabilities(RollProbabilityDistribution distribution)
+        private static SortedList<Outcome, OutcomeProbabilities> BuildProbabilities(
+            RollProbabilityDistribution distribution)
         {
             SortedList<Outcome, OutcomeProbabilities> outcomeProbabilities = new(Outcome.RelationalComparer);
-            
+
             Probability accumulatedProbability = Probability.Zero;
 
             foreach (Roll roll in distribution)
@@ -115,7 +116,7 @@ namespace DiceRoll
                 accumulatedProbability += probability;
 
                 OutcomeProbabilities probabilities = new(probability, accumulatedProbability);
-                
+
                 outcomeProbabilities.Add(roll.Outcome, probabilities);
             }
 
@@ -127,7 +128,7 @@ namespace DiceRoll
         {
             public readonly Probability Raw;
             public readonly Probability Accumulated;
-            
+
             public OutcomeProbabilities(Probability raw, Probability accumulated)
             {
                 Raw = raw;
@@ -143,7 +144,7 @@ namespace DiceRoll
 
         public static Probability GreaterThan(this CDFTable cdfTable, Outcome outcome) =>
             cdfTable.LessThanOrEqual(outcome).Inversed();
-        
+
         public static Probability LessThan(this CDFTable cdfTable, Outcome outcome) =>
             cdfTable.GreaterThanOrEqual(outcome).Inversed();
     }

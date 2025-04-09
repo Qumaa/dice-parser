@@ -54,7 +54,7 @@ namespace DiceRoll
         {
             private static readonly LogicalProbabilityDistribution _zero = new(Probability.Zero);
             private static readonly LogicalProbabilityDistribution _hundred = new(Probability.Hundred);
-            
+
             public static AssertionEvaluationDelegate Get(OperationType operationType) =>
                 operationType switch
                 {
@@ -66,7 +66,8 @@ namespace DiceRoll
                     OperationType.LessThanOrEqual => static (left, right) => LessThanOrEqual(left, right)
                 };
 
-            private static LogicalProbabilityDistribution Equal(RollProbabilityDistribution left, RollProbabilityDistribution right)
+            private static LogicalProbabilityDistribution Equal(RollProbabilityDistribution left,
+                RollProbabilityDistribution right)
             {
                 if (left.Max < right.Min || left.Min > right.Max)
                     return _zero;
@@ -83,8 +84,9 @@ namespace DiceRoll
                             )
                     );
             }
-            
-            private static LogicalProbabilityDistribution NotEqual(RollProbabilityDistribution left, RollProbabilityDistribution right)
+
+            private static LogicalProbabilityDistribution NotEqual(RollProbabilityDistribution left,
+                RollProbabilityDistribution right)
             {
                 if (left.Max < right.Min || left.Min > right.Max)
                     return _hundred;
@@ -102,7 +104,8 @@ namespace DiceRoll
                     );
             }
 
-            private static LogicalProbabilityDistribution GreaterThan(RollProbabilityDistribution left, RollProbabilityDistribution right)
+            private static LogicalProbabilityDistribution GreaterThan(RollProbabilityDistribution left,
+                RollProbabilityDistribution right)
             {
                 if (left.Max <= right.Min)
                     return _zero;
@@ -122,8 +125,9 @@ namespace DiceRoll
                             )
                     );
             }
-            
-            private static LogicalProbabilityDistribution GreaterThanOrEqual(RollProbabilityDistribution left, RollProbabilityDistribution right)
+
+            private static LogicalProbabilityDistribution GreaterThanOrEqual(RollProbabilityDistribution left,
+                RollProbabilityDistribution right)
             {
                 if (left.Max < right.Min)
                     return _zero;
@@ -144,7 +148,8 @@ namespace DiceRoll
                     );
             }
 
-            private static LogicalProbabilityDistribution LessThan(RollProbabilityDistribution left, RollProbabilityDistribution right)
+            private static LogicalProbabilityDistribution LessThan(RollProbabilityDistribution left,
+                RollProbabilityDistribution right)
             {
                 if (left.Min >= right.Max)
                     return _zero;
@@ -164,8 +169,9 @@ namespace DiceRoll
                             )
                     );
             }
-            
-            private static LogicalProbabilityDistribution LessThanOrEqual(RollProbabilityDistribution left, RollProbabilityDistribution right)
+
+            private static LogicalProbabilityDistribution LessThanOrEqual(RollProbabilityDistribution left,
+                RollProbabilityDistribution right)
             {
                 if (left.Min > right.Max)
                     return _zero;
@@ -278,7 +284,7 @@ namespace DiceRoll
                             x.Outcome < right.Min ?
                                 leftTable.EqualTo(x.Outcome) :
                                 leftTable.EqualTo(x.Outcome) * rightTable.GreaterThan(x.Outcome)
-                                )
+                            )
                         )
                     .ToOptionalRollProbabilityDistribution();
             }

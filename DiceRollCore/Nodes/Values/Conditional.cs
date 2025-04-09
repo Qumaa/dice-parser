@@ -13,7 +13,7 @@ namespace DiceRoll
             _value = value;
         }
 
-        public override OptionalRollProbabilityDistribution GetProbabilityDistribution() =>
+        protected override OptionalRollProbabilityDistribution CreateProbabilityDistribution() =>
             _value.GetProbabilityDistribution()
                 .Select(x => new Roll(x.Outcome, x.Probability * _assertion.True))
                 .ToOptionalRollProbabilityDistribution();

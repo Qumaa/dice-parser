@@ -30,12 +30,12 @@ namespace DiceRoll
         public override Outcome Evaluate() =>
             Combine(_source.Evaluate(), _other.Evaluate());
 
-        public override RollProbabilityDistribution GetProbabilityDistribution()
+        protected override RollProbabilityDistribution CreateProbabilityDistribution()
         {
             RollProbabilityDistribution source = _source.GetProbabilityDistribution();
             RollProbabilityDistribution other = _other.GetProbabilityDistribution();
 
-            Dictionary<Outcome, Probability> probabilities = new();
+            SortedList<Outcome, Probability> probabilities = new(Outcome.RelationalComparer);
             
             foreach (Roll sourceRoll in source)
             foreach (Roll otherRoll in other)
@@ -47,10 +47,9 @@ namespace DiceRoll
                     probabilities[outcome] += probability;
             }
 
-            return new RollProbabilityDistribution(probabilities
+            return probabilities
                 .Select(x => new Roll(x.Key, x.Value))
-                .OrderBy(x => x.Outcome)
-            );
+                .ToRollProbabilityDistribution();
         }
 
         private Outcome Combine(Outcome left, Outcome right) =>

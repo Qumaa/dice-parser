@@ -12,14 +12,14 @@ namespace DiceRoll
         public DiceFacesException() { }
         public DiceFacesException(int facesNumber) : base(GetErrorMessage(facesNumber)) { }
 
-        public DiceFacesException(int facesNumber, Exception innerException) : base(
-            GetErrorMessage(facesNumber), innerException) { }
+        public DiceFacesException(int facesNumber, Exception innerException) : 
+            base(GetErrorMessage(facesNumber), innerException) { }
 
-        public DiceFacesException(int facesNumber, string paramName) : base(GetErrorMessage(facesNumber),
-            paramName) { }
+        public DiceFacesException(int facesNumber, string paramName) : 
+            base(GetErrorMessage(facesNumber), paramName) { }
 
-        public DiceFacesException(int facesNumber, string paramName, Exception innerException) : base(
-            GetErrorMessage(facesNumber), paramName, innerException) { }
+        public DiceFacesException(int facesNumber, string paramName, Exception innerException) : 
+            base(GetErrorMessage(facesNumber), paramName, innerException) { }
 
         /// <summary>
         /// Throws an <see cref="DiceFacesException"/> if <paramref name="facesNumber"/> is 0 or negative.
