@@ -5,7 +5,7 @@
         /// <summary>
         /// Contains nodes that represent transformations of numeric values and their probability distribution.
         /// </summary>
-        public static partial class Transformation
+        public static partial class Operator
         {
             /// <summary>
             /// Adds two arbitrary <see cref="INumeric">numeric nodes</see>
