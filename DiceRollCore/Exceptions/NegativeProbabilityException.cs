@@ -32,14 +32,16 @@ namespace DiceRoll
         /// <exception cref="NegativeProbabilityException">
         /// When if <paramref name="probability"/> is negative.
         /// </exception>
-        public static void ThrowIfNegative(
+        public static double ThrowIfNegative(
             double probability,
             [CallerArgumentExpression("probability")]
             string paramName = null
         )
         {
-            if (probability < 0)
+            if (probability < -Probability.TOLERANCE)
                 throw new NegativeProbabilityException(probability, paramName);
+
+            return probability < 0d ? 0d : probability;
         }
 
         private static string GetErrorMessage(double probability) =>

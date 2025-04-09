@@ -10,7 +10,8 @@ namespace DiceRoll
     /// </summary>
     public readonly struct Probability : IEquatable<Probability>, IComparable<Probability>, IComparable
     {
-        private const string _FORMAT = "p";
+        private const string _FORMAT = "P";
+        public const double TOLERANCE = 2.22044604925031E-16d;
         public readonly double Value;
         
         public static Probability Hundred => new(1d);
@@ -22,8 +23,7 @@ namespace DiceRoll
         /// <exception cref="NegativeProbabilityException">When <paramref name="probability"/> is below 0.</exception>
         public Probability(double probability) 
         {
-            NegativeProbabilityException.ThrowIfNegative(probability);
-            Value = probability;
+            Value = NegativeProbabilityException.ThrowIfNegative(probability);
         }
 
         public Probability Inversed() =>
@@ -126,7 +126,7 @@ namespace DiceRoll
         public static bool operator <=(Probability left, Probability right) =>
             left.Value <= right.Value;
         public static bool operator ==(Probability left, Probability right) =>
-            Math.Abs(left.Value - right.Value) <= double.Epsilon * 10;
+            Math.Abs(left.Value - right.Value) <= TOLERANCE;
         public static bool operator !=(Probability left, Probability right) =>
             !(left == right);
 
