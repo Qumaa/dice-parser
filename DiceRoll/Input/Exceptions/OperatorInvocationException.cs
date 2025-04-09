@@ -8,7 +8,7 @@ namespace DiceRoll.Input
         private const string _MESSAGE_EXPECTED_OPERANDS = "Couldn't invoke operator: expected {0} operands, received {1}.";
         private const string _MESSAGE_TYPE_MISMATCH = "Couldn't invoke operator: the operand evaluates to {0} (expected {1}).";
 
-        private static readonly Type[] _types = { typeof(INumeric), typeof(IOperation), typeof(IConditional) };
+        private static readonly Type[] _types = { typeof(INumeric), typeof(IOperation), typeof(IAssertion) };
 
         public OperatorInvocationException(Type expectedOperandType, Type actualOperandType) : 
             base(FormatMessage(expectedOperandType, actualOperandType)) { }
