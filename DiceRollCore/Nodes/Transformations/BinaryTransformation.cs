@@ -6,7 +6,7 @@ namespace DiceRoll
     /// A base class for any <see cref="Transformation"/> that merges two arbitrary
     /// <see cref="INumeric">numeric nodes</see> instead of transforming a single node.
     /// </summary>
-    public abstract class MergeTransformation : Transformation
+    public abstract class BinaryTransformation : Transformation
     {
         /// <summary>
         /// The second <see cref="INumeric">numeric node</see> to be merged with.
@@ -20,7 +20,7 @@ namespace DiceRoll
         /// <exception cref="ArgumentNullException">
         /// When either <paramref name="source"/> or <paramref name="other"/> is null.
         /// </exception>
-        protected MergeTransformation(INumeric source, INumeric other) : base(source)
+        protected BinaryTransformation(INumeric source, INumeric other) : base(source)
         {
             ArgumentNullException.ThrowIfNull(other);
             

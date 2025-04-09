@@ -151,7 +151,7 @@ namespace DiceRoll
             public static INumeric Lowest(INumeric node, int repetitionCount) =>
                 Composite<KeepLowest>(node, repetitionCount);
 
-            public static IConditional Conditional(INumeric value, IOperation condition) =>
+            public static IOperation Conditional(INumeric value, IAssertion condition) =>
                 new Conditional(condition, value);
         }
     }

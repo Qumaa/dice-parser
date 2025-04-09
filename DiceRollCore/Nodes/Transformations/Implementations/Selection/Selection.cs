@@ -8,11 +8,11 @@ namespace DiceRoll
     /// <see cref="RollProbabilityDistribution">probability distribution</see> of the results.
     /// </summary>
     /// <seealso cref="SelectionType"/>
-    public sealed class Selection : MergeTransformation
+    public sealed class Selection : BinaryTransformation
     {
         private readonly SelectionType _selectionType;
 
-        /// <inheritdoc cref="MergeTransformation(INumeric, INumeric)"/>
+        /// <inheritdoc cref="BinaryTransformation(DiceRoll.INumeric,DiceRoll.INumeric)"/>
         /// <param name="selectionType">The type of selection.</param>
         /// <exception cref="EnumValueNotDefinedException">
         /// When <paramref name="selectionType"/> holds a not defined value.
@@ -29,7 +29,7 @@ namespace DiceRoll
                 Outcome.Max(_source.Evaluate(), _other.Evaluate()) : 
                 Outcome.Min(_source.Evaluate(), _other.Evaluate());
 
-        public override RollProbabilityDistribution GetProbabilityDistribution()
+        protected override RollProbabilityDistribution CreateProbabilityDistribution()
         {
             RollProbabilityDistribution source = _source.GetProbabilityDistribution();
             RollProbabilityDistribution other = _other.GetProbabilityDistribution();
@@ -37,18 +37,19 @@ namespace DiceRoll
             CDFTable sourceTable = new(source);
             CDFTable otherTable = new(other);
 
-            return new RollProbabilityDistribution(source
+            return source
                 .Union(other)
-                .Select(outcome =>
-                    new Roll(
-                        outcome,
-                        CDFToProbability(
-                            CDFForOutcome(sourceTable, outcome), 
-                            CDFForOutcome(otherTable, outcome)
+                .Select(
+                    outcome =>
+                        new Roll(
+                            outcome,
+                            CDFToProbability(
+                                CDFForOutcome(sourceTable, outcome),
+                                CDFForOutcome(otherTable, outcome)
+                                )
                             )
-                        )
-                )
-            );
+                    )
+                .ToRollProbabilityDistribution();
         }
 
         private CDF CDFForOutcome(CDFTable cdfTable, Outcome outcome) =>
@@ -56,8 +57,8 @@ namespace DiceRoll
 
         private Probability GetSecondCDFValue(CDFTable cdfTable, Outcome outcome) =>
             _selectionType is SelectionType.Highest ?
-                cdfTable.LessThanOrEqualTo(outcome) :
-                cdfTable.GreaterThanOrEqualTo(outcome);
+                cdfTable.LessThanOrEqual(outcome) :
+                cdfTable.GreaterThanOrEqual(outcome);
 
         private static Probability CDFToProbability(CDF source, CDF other) =>
             source.Equal * other.EqualOr +

@@ -15,7 +15,9 @@ namespace DiceRoll
         public EmptyEnumerableException(string message) : base(message) { }
         public EmptyEnumerableException(string message, Exception innerException) : base(message, innerException) { }
         public EmptyEnumerableException(string message, string paramName) : base(message, paramName) { }
-        public EmptyEnumerableException(string message, string paramName, Exception innerException) : base(message, paramName, innerException) { }
+
+        public EmptyEnumerableException(string message, string paramName, Exception innerException) :
+            base(message, paramName, innerException) { }
 
         /// <summary>
         /// Throws an <see cref="ArgumentNullException"/> if <paramref name="enumerable"/> is null or
@@ -33,8 +35,9 @@ namespace DiceRoll
         /// <exception cref="EmptyEnumerableException">
         /// When <paramref name="enumerable"/> has no elements to enumerate.
         /// </exception>
-        public static void ThrowIfNullOrEmpty<T>(IEnumerable<T> enumerable, 
-            [CallerArgumentExpression("enumerable")] string paramName = null)
+        public static void ThrowIfNullOrEmpty<T>(IEnumerable<T> enumerable,
+            [CallerArgumentExpression("enumerable")] string paramName = null
+        )
         {
             ArgumentNullException.ThrowIfNull(enumerable, paramName);
 
@@ -46,7 +49,7 @@ namespace DiceRoll
         {
             if (enumerable.TryGetNonEnumeratedCount(out int count) && count is not 0)
                 return true;
-            
+
             using IEnumerator<T> enumerator = enumerable.GetEnumerator();
             return enumerator.MoveNext();
         }

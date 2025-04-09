@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 
 namespace DiceRoll
 {
@@ -7,7 +6,7 @@ namespace DiceRoll
     /// A <see cref="INumeric">numerical node</see> that represents a singular N-sided die.
     /// Produces random results from 1 to number specified in the <see cref="Dice(Random, int)">constructor</see>.
     /// </summary>
-    public sealed class Dice : NumericNode
+    public sealed class Dice : Numeric
     {
         private readonly Random _random;
         private readonly int _faces;
@@ -25,15 +24,16 @@ namespace DiceRoll
             _faces = faces;
         }
 
-        public override RollProbabilityDistribution GetProbabilityDistribution()
+        protected override RollProbabilityDistribution CreateProbabilityDistribution()
         {
+            Roll[] rolls = new Roll[_faces];
+            
             Probability eachOutcomeProbability = new(1d / _faces);
 
-            RollProbabilityDistribution distribution = new(Enumerable.Range(1, _faces)
-                .Select(faceValue => new Outcome(faceValue))
-                .Select(outcome => new Roll(outcome, eachOutcomeProbability)));
+            for (int i = 0; i < rolls.Length; i++)
+                rolls[i] = new Roll(i + 1, eachOutcomeProbability);
 
-            return distribution;
+            return rolls.ToRollProbabilityDistribution();
         }
 
         public override Outcome Evaluate() =>

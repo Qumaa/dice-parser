@@ -9,11 +9,11 @@ namespace DiceRoll
     /// <see cref="RollProbabilityDistribution">probability distribution</see> of the results.
     /// </summary>
     /// <seealso cref="CombinationType"/>
-    public sealed class Combination : MergeTransformation
+    public sealed class Combination : BinaryTransformation
     {
         private readonly CombinationType _combinationType;
 
-        /// <inheritdoc cref="MergeTransformation(INumeric, INumeric)"/>
+        /// <inheritdoc cref="BinaryTransformation(DiceRoll.INumeric,DiceRoll.INumeric)"/>
         /// <param name="combinationType">The type of combination.</param>
         /// <exception cref="EnumValueNotDefinedException">
         /// When <paramref name="combinationType"/> holds a not defined value.
@@ -30,12 +30,12 @@ namespace DiceRoll
         public override Outcome Evaluate() =>
             Combine(_source.Evaluate(), _other.Evaluate());
 
-        public override RollProbabilityDistribution GetProbabilityDistribution()
+        protected override RollProbabilityDistribution CreateProbabilityDistribution()
         {
             RollProbabilityDistribution source = _source.GetProbabilityDistribution();
             RollProbabilityDistribution other = _other.GetProbabilityDistribution();
 
-            Dictionary<Outcome, Probability> probabilities = new();
+            SortedList<Outcome, Probability> probabilities = new(Outcome.RelationalComparer);
             
             foreach (Roll sourceRoll in source)
             foreach (Roll otherRoll in other)
@@ -47,10 +47,9 @@ namespace DiceRoll
                     probabilities[outcome] += probability;
             }
 
-            return new RollProbabilityDistribution(probabilities
+            return probabilities
                 .Select(x => new Roll(x.Key, x.Value))
-                .OrderBy(x => x.Outcome)
-            );
+                .ToRollProbabilityDistribution();
         }
 
         private Outcome Combine(Outcome left, Outcome right) =>

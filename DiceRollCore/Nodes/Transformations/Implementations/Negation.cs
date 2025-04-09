@@ -9,9 +9,9 @@ namespace DiceRoll
         public override Outcome Evaluate() =>
             -_source.Evaluate();
 
-        public override RollProbabilityDistribution GetProbabilityDistribution() =>
+        protected override RollProbabilityDistribution CreateProbabilityDistribution() =>
             _source.GetProbabilityDistribution()
-                .Select(static x => new Roll(-x.Outcome, x.Probability))
+                .Select(x => new Roll(-x.Outcome, x.Probability))
                 .ToRollProbabilityDistribution();
     }
 }

@@ -8,6 +8,8 @@ namespace DiceRoll
         public readonly Optional<Outcome> Outcome;
         public readonly Probability Probability;
         
+        public OptionalRoll(Roll roll) : this (roll.Outcome, roll.Probability) { }
+        
         public OptionalRoll(Outcome outcome, Probability probability)
         {
             Outcome = new Optional<Outcome>(outcome);
