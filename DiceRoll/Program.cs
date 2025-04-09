@@ -9,11 +9,11 @@ namespace DiceRoll
         // todo: binary/unary operator with same signature ( x - y & -x - -y) 
         public static void Main(string[] args)
         {
-            args = new[] { "1d20 > 10 ? 1d6"};
+            const string arg = "2 > 2 | 2 > 1 ? 2d6";
             
             DiceExpressionParser parser = new(BuildTable());
 
-            INode output = parser.Parse(string.Concat(args));
+            INode output = parser.Parse(arg);
             
             output.Visit(new ProbabilityVisitor());
         }
@@ -23,29 +23,30 @@ namespace DiceRoll
             TokensTableBuilder builder = new("(", ")");
             
             builder.AddOperandToken(DiceOperand.Default);
-            builder.AddOperandToken(static x => Node.Value.Constant(int.Parse(x)), new Regex(@"-?\d+"));
-            
-            builder.AddOperatorToken<IAssertion>(110, static node => Node.Operator.Not(node),"!", "not");
-            builder.AddOperatorToken<INumeric>(110, static node => Node.Operator.Negate(node), "-");
+            builder.AddOperandToken(x => Node.Value.Constant(int.Parse(x)), new Regex(@"-?\d+"));
             
             builder.AddOperatorToken<INumeric, INumeric>(100, static (left, right) => Node.Operator.Multiply(left, right), "*", "x");
-            // builder.AddOperatorToken(100, "/");
+            builder.AddOperatorToken<INumeric, INumeric>(100, static (left, right) => Node.Operator.DivideRoundUp(left, right), "//");
+            builder.AddOperatorToken<INumeric, INumeric>(100, static (left, right) => Node.Operator.DivideRoundDown(left, right), "/");
             
             builder.AddOperatorToken<INumeric, INumeric>(90, static (left, right) => Node.Operator.Add(left, right), "+");
-            // builder.AddOperatorToken(90, "-");
-            //
+            // builder.AddOperatorToken(90, "-"); // todo
+            
+            builder.AddOperatorToken<INumeric, INumeric>(80, static (left, right) => Node.Operator.GreaterThanOrEqual(left, right), ">=");
+            builder.AddOperatorToken<INumeric, INumeric>(80, static (left, right) => Node.Operator.LessThanOrEqual(left, right), "<=");
             builder.AddOperatorToken<INumeric, INumeric>(80, static (left, right) => Node.Operator.GreaterThan(left, right), ">");
-            // builder.AddOperatorToken(80, ">=");
-            // builder.AddOperatorToken(80, "<");
-            // builder.AddOperatorToken(80, "<=");
-            //
-            // builder.AddOperatorToken(70, "=", "==");
-            // builder.AddOperatorToken(70, "!=", "=/=");
-            //
-            builder.AddOperatorToken<IAssertion, IAssertion>(60, static (left, right) => Node.Operator.And(left, right), "&", "&&", "and");
-            builder.AddOperatorToken<IAssertion, IAssertion>(60, static (left, right) => Node.Operator.Or(left, right), "|", "||", "or");
+            builder.AddOperatorToken<INumeric, INumeric>(80, static (left, right) => Node.Operator.LessThan(left, right), "<");
+            
+            builder.AddOperatorToken<INumeric, INumeric>(70, static (left, right) => Node.Operator.Equal(left, right), "==", "=", "is");
+            builder.AddOperatorToken<INumeric, INumeric>(70, static (left, right) => Node.Operator.NotEqual(left, right), "!=", "=/=");
+            
+            builder.AddOperatorToken<IAssertion, IAssertion>(60, static (left, right) => Node.Operator.And(left, right), "&&", "&", "and");
+            builder.AddOperatorToken<IAssertion, IAssertion>(60, static (left, right) => Node.Operator.Or(left, right), "||", "|", "or");
             
             builder.AddOperatorToken<IAssertion, INumeric>(50, static (left, right) => Node.Value.Conditional(right, left), "?");
+            
+            builder.AddOperatorToken<IAssertion>(110, static node => Node.Operator.Not(node), "!", "not");
+            builder.AddOperatorToken<INumeric>(110, static node => Node.Operator.Negate(node), "-");
 
             return builder.Build();
         }
@@ -73,11 +74,35 @@ namespace DiceRoll
                     roll => $"Probability of {roll.Outcome.Value} is {roll.Probability}"
                     );
 
-            public void ForOperation(IOperation operation) =>
-                Print(
-                    operation.GetProbabilityDistribution(),
-                    roll => $"Probability of {roll.Outcome} is {roll.Probability}"
-                    );
+            public void ForOperation(IOperation operation)
+            {
+                OptionalRollProbabilityDistribution distribution = operation.GetProbabilityDistribution();
+
+                int rolls = 0;
+                foreach (OptionalRoll roll in distribution)
+                {
+                    Console.Write("Probability of ");
+
+                    if (roll.Outcome.Exists(out Outcome outcome))
+                    {
+                        Console.Write("rolling ");
+                        Console.Write(outcome.Value);
+                        rolls++;
+                    }
+                    else
+                        Console.Write("failing");
+                    
+                    Console.Write(" is ");
+
+                    Console.WriteLine(roll.Probability.ToString());
+                }
+                
+                if (rolls <= 1)
+                    return;
+                
+                Console.Write("Cumulative probability of succeeding is ");
+                Console.WriteLine(distribution.False.Inversed().ToString());
+            }
 
             public void ForAssertion(IAssertion assertion) =>
                 Print(
