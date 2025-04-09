@@ -210,6 +210,7 @@ namespace DiceRoll
                     .Where(x => x.Outcome >= right.Min && x.Outcome <= right.Max)
                     .Select(
                         x => new Roll(x.Outcome, leftTable.EqualTo(x.Outcome) * rightTable.EqualTo(x.Outcome)))
+                    .Where(x => x.Probability > Probability.Zero)
                     .ToOptionalRollProbabilityDistribution();
             }
             
