@@ -118,13 +118,13 @@ namespace DiceRoll
             new(left.Value / right);
 
         public static bool operator >(Probability left, Probability right) =>
-            left.Value > right.Value;
+            left.Value > right.Value - TOLERANCE;
         public static bool operator >=(Probability left, Probability right) =>
-            left.Value >= right.Value;
+            left.Value >= right.Value - TOLERANCE;
         public static bool operator <(Probability left, Probability right) =>
-            left.Value < right.Value;
+            left.Value < right.Value + TOLERANCE;
         public static bool operator <=(Probability left, Probability right) =>
-            left.Value <= right.Value;
+            left.Value <= right.Value + TOLERANCE;
         public static bool operator ==(Probability left, Probability right) =>
             Math.Abs(left.Value - right.Value) <= TOLERANCE;
         public static bool operator !=(Probability left, Probability right) =>
