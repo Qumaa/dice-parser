@@ -53,7 +53,7 @@ namespace DiceRoll.Input
 
         public MatchInfo TrimStart()
         {
-            int trim = -Start;
+            int trim = 0;
             
             for (int i = 0; i < Length; i++)
             {
@@ -68,7 +68,7 @@ namespace DiceRoll.Input
 
         public MatchInfo TrimEnd()
         {
-            int trim = -UntilSourceEnd;
+            int trim = 0;
             
             for (int i = Length - 1; i >= 0; i--)
             {

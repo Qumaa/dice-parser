@@ -55,7 +55,7 @@ namespace DiceRoll.Input
             }
             catch (Exception e)
             {
-                throw new DiceExpressionParsingException(notParsed.MoveEnd(notParsed.Length - 1), e);
+                throw new DiceExpressionParsingException(notParsed.TrimStart().MoveEnd(notParsed.Length - 1), e);
             }
         }
 
