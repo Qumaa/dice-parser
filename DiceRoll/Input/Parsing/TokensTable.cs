@@ -21,7 +21,7 @@ namespace DiceRoll.Input
             _operands = operands.ToArray();
         }
 
-        public MatchInfo Visit(DiceExpressionParser.TableVisitor visitor, ReadOnlySpan<char> expression)
+        public MatchInfo Visit(IVisitor visitor, ReadOnlySpan<char> expression)
         {
             if (StartsWithOpenParenthesis(expression, out MatchInfo tokenMatch))
             {
@@ -47,7 +47,11 @@ namespace DiceRoll.Input
                 return tokenMatch;
             }
 
-            throw new UnknownTokenException(ExtractUnknownToken(expression).Trim());
+            int length = GetUnknownTokenLength(expression);
+            tokenMatch = new MatchInfo(expression, 0, length).Trim();
+            
+            visitor.UnknownToken(in tokenMatch);
+            return tokenMatch;
         }
 
         private bool StartsWithOpenParenthesis(ReadOnlySpan<char> expression, out MatchInfo tokenMatch) =>
@@ -91,17 +95,13 @@ namespace DiceRoll.Input
             return false;
         }
 
-        private MatchInfo ExtractUnknownToken(in ReadOnlySpan<char> expression)
+        private int GetUnknownTokenLength(in ReadOnlySpan<char> expression)
         {
             for (int i = 0; i < expression.Length; i++)
-            {
-                ReadOnlySpan<char> slicedExpression = expression[i..];
+                if (_MatchesAnyToken(expression[i..]))
+                    return i;
 
-                if (_MatchesAnyToken(slicedExpression))
-                    return new MatchInfo(expression, 0, i);
-            }
-            
-            return MatchInfo.All(expression);
+            return expression.Length;
 
             bool _MatchesAnyToken(ReadOnlySpan<char> expression)
             {
@@ -121,6 +121,19 @@ namespace DiceRoll.Input
 
                 return false;
             }
+        }
+
+        public interface IVisitor
+        { 
+            void OpenParenthesis();
+
+            void CloseParenthesis();
+
+            void Operator(int precedence, RPNOperatorInvoker invoker);
+
+            void Operand(INumeric operand);
+
+            void UnknownToken(in MatchInfo tokenMatch);
         }
     }
 }

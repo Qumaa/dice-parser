@@ -6,6 +6,7 @@ namespace DiceRoll.Input
     public sealed class DiceExpressionParser
     {
         private readonly TokensTable _tokensTable;
+        private readonly TableVisitor _tableVisitor;
         private readonly Stack<RPNOperatorToken> _operators;
         private readonly Stack<INode> _operands;
         private readonly Stack<RPNOperatorInvoker> _delayedInvokers;
@@ -13,6 +14,8 @@ namespace DiceRoll.Input
         public DiceExpressionParser(TokensTable tokensTable) 
         {
             _tokensTable = tokensTable;
+            _tableVisitor = new TableVisitor(this);
+            
             _operators = new Stack<RPNOperatorToken>();
             _operands = new Stack<INode>();
             _delayedInvokers = new Stack<RPNOperatorInvoker>();
@@ -47,7 +50,7 @@ namespace DiceRoll.Input
         {
             try
             {
-                MatchInfo tokenMatch = _tokensTable.Visit(new TableVisitor(this), notParsed.SliceMatch());
+                MatchInfo tokenMatch = _tokensTable.Visit(_tableVisitor, notParsed.SliceMatch());
                 return notParsed.MoveStart(tokenMatch.End);
             }
             catch (Exception e)
@@ -76,7 +79,7 @@ namespace DiceRoll.Input
             InvokeDelayedOperators();
         }
 
-        public readonly struct TableVisitor
+        private sealed class TableVisitor : TokensTable.IVisitor
         {
             private readonly DiceExpressionParser _parser;
             
@@ -117,6 +120,9 @@ namespace DiceRoll.Input
                 
                 _parser.InvokeDelayedOperators();
             }
+
+            public void UnknownToken(in MatchInfo tokenMatch) =>
+                throw new UnknownTokenException(in tokenMatch);
         }
 
         public readonly struct OperandsStackAccess
