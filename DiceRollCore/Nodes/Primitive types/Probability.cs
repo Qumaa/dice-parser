@@ -11,7 +11,8 @@ namespace DiceRoll
     public readonly struct Probability : IEquatable<Probability>, IComparable<Probability>, IComparable
     {
         private const string _FORMAT = "P";
-        public const double TOLERANCE = 2.22044604925031E-16d;
+        private const double _MACHINE_EPSILON = 2.220446049250313E-16d;
+        private const double _CONSTRUCTOR_TOLERANCE = -8.326672684688674E-16d;
         public readonly double Value;
         
         public static Probability Hundred => new(1d);
@@ -23,7 +24,15 @@ namespace DiceRoll
         /// <exception cref="NegativeProbabilityException">When <paramref name="probability"/> is below 0.</exception>
         public Probability(double probability) 
         {
-            Value = NegativeProbabilityException.ThrowIfNegative(probability);
+            if (probability < 0)
+            {
+                if (probability < _CONSTRUCTOR_TOLERANCE)
+                    throw new NegativeProbabilityException(probability);
+
+                Value = 0;
+            }
+            
+            Value = probability;
         }
 
         public Probability Inversed() =>
@@ -31,6 +40,17 @@ namespace DiceRoll
         
         public Probability Normalized() =>
             new(double.Min(Value, 1d));
+
+        private static bool Approximates(double left, double right)
+        {
+            if (left.Equals(right))
+                return true;
+
+            double tolerance = Math.Abs(left) * _MACHINE_EPSILON + Math.Abs(right) * _MACHINE_EPSILON;
+            double difference = left - right;
+
+            return -tolerance < difference && tolerance > difference;
+        }
 
     #region Members and operators
 
@@ -54,7 +74,7 @@ namespace DiceRoll
         }
 
         public int CompareTo(Probability other) =>
-            Value.CompareTo(other.Value);
+            Equals(other) ? 0 : Value.CompareTo(other.Value);
 
         public int CompareTo(object obj)
         {
@@ -67,8 +87,8 @@ namespace DiceRoll
         }
 
         public bool Equals(Probability other) =>
-            Value.Equals(other.Value);
-        
+            Approximates(Value, other.Value);
+
         public override bool Equals(object obj) =>
             obj is Probability other && Equals(other);
         
@@ -118,15 +138,15 @@ namespace DiceRoll
             new(left.Value / right);
 
         public static bool operator >(Probability left, Probability right) =>
-            left.Value > right.Value - TOLERANCE;
+            left.Value > right.Value;
         public static bool operator >=(Probability left, Probability right) =>
-            left.Value >= right.Value - TOLERANCE;
+            left.Equals(right) || left.Value > right.Value;
         public static bool operator <(Probability left, Probability right) =>
-            left.Value < right.Value + TOLERANCE;
+            left.Value < right.Value;
         public static bool operator <=(Probability left, Probability right) =>
-            left.Value <= right.Value + TOLERANCE;
+            left.Equals(right) || left.Value < right.Value;
         public static bool operator ==(Probability left, Probability right) =>
-            Math.Abs(left.Value - right.Value) <= TOLERANCE;
+            left.Equals(right);
         public static bool operator !=(Probability left, Probability right) =>
             !(left == right);
 
