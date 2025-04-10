@@ -10,11 +10,13 @@ namespace DiceRoll.Input
 
         private static readonly Type[] _types = { typeof(INumeric), typeof(IOperation), typeof(IAssertion) };
 
+        public OperatorInvocationException(string message) : base(message) { }
+        
         public OperatorInvocationException(Type expectedOperandType, Type actualOperandType) : 
-            base(FormatMessage(expectedOperandType, actualOperandType)) { }
+            this(FormatMessage(expectedOperandType, actualOperandType)) { }
 
         public OperatorInvocationException(int operandsExpected, int operandsReceived) : 
-            base(FormatMessage(operandsExpected, operandsReceived)) { }
+            this(FormatMessage(operandsExpected, operandsReceived)) { }
 
         private static string FormatMessage(Type expectedOperandType, Type actualOperandType) =>
             string.Format(_MESSAGE_TYPE_MISMATCH, FormatTypeName(actualOperandType), FormatTypeName(expectedOperandType));

@@ -9,13 +9,13 @@ namespace DiceRoll
         // todo: binary/unary operator with same signature ( x - y & -x - -y) 
         public static void Main(string[] args)
         {
-            const string arg = "(2 > 1) & !(2 > 2)";
+            const string arg = "-(5 + -2)";
             
             ExpressionParser parser = new(BuildTable());
 
             INode output = parser.Parse(arg);
             
-            output.Visit(new ProbabilityVisitor());
+            output.Visit(new EvaluationVisitor());
         }
 
         private static TokensTable BuildTable()

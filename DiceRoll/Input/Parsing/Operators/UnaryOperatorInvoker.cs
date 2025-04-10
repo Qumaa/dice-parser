@@ -2,14 +2,14 @@
 {
     public sealed class UnaryOperatorInvoker<T> : ShuntingYard.OperatorInvoker where T : INode
     {
-        private readonly ReversedUnaryOperatorInvoker<T> _delayedInvoker;
+        private readonly UnaryInvocationHandler<T> _handler;
         
-        public UnaryOperatorInvoker(UnaryInvocationHandler<T> handler) : base(0)
+        public UnaryOperatorInvoker(UnaryInvocationHandler<T> handler) : base(1, Associativity.Right)
         {
-            _delayedInvoker = new ReversedUnaryOperatorInvoker<T>(handler);
+            _handler = handler;
         }
 
         public override void Invoke(ShuntingYard.OperandsStackAccess operands) =>
-            operands.ForNextOperand(_delayedInvoker);
+            operands.Push(_handler.Invoke(operands.Pop<T>()));
     }
 }
