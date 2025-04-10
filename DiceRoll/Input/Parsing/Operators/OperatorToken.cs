@@ -3,16 +3,16 @@
 namespace DiceRoll.Input
 {
     [StructLayout(LayoutKind.Auto)]
-    public readonly struct RPNOperatorToken
+    public readonly struct OperatorToken
     {
         public readonly int Precedence;
-        public readonly RPNOperatorInvoker Invoker;
+        public readonly OperatorInvoker Invoker;
 
         public bool IsOpenParenthesis => Invoker is null;
         
-        public static RPNOperatorToken OpenParenthesis => new();
+        public static OperatorToken OpenParenthesis => new();
 
-        public RPNOperatorToken(int precedence, RPNOperatorInvoker invoker)
+        public OperatorToken(int precedence, OperatorInvoker invoker)
         {
             Precedence = precedence;
             Invoker = invoker;

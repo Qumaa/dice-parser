@@ -1,6 +1,6 @@
 ﻿namespace DiceRoll.Input
 {
-    public sealed class UnaryOperatorInvoker<T> : RPNOperatorInvoker where T : INode
+    public sealed class UnaryOperatorInvoker<T> : OperatorInvoker where T : INode
     {
         private readonly ReversedUnaryOperatorInvoker<T> _delayedInvoker;
         
@@ -9,7 +9,7 @@
             _delayedInvoker = new ReversedUnaryOperatorInvoker<T>(handler);
         }
 
-        public override void Invoke(DiceExpressionParser.OperandsStackAccess operands) =>
+        public override void Invoke(ShuntingYard.OperandsStackAccess operands) =>
             operands.ForNextOperand(_delayedInvoker);
     }
 }

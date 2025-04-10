@@ -9,9 +9,9 @@ namespace DiceRoll
         // todo: binary/unary operator with same signature ( x - y & -x - -y) 
         public static void Main(string[] args)
         {
-            const string arg = "2 > 2 ^";
+            const string arg = "2 > 2 !";
             
-            DiceExpressionParser parser = new(BuildTable());
+            ExpressionParser parser = new(BuildTable());
 
             INode output = parser.Parse(arg);
             

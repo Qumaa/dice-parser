@@ -3,31 +3,31 @@ using System.Collections.Generic;
 
 namespace DiceRoll.Input
 {
-    public sealed class DiceExpressionParser
+    public sealed class ShuntingYard
     {
         private readonly TokensTable _tokensTable;
         private readonly TableVisitor _tableVisitor;
-        private readonly Stack<RPNOperatorToken> _operators;
-        private readonly Stack<INode> _operands;
-        private readonly Stack<RPNOperatorInvoker> _delayedInvokers;
         
-        public DiceExpressionParser(TokensTable tokensTable) 
+        private readonly Stack<OperatorToken> _operators;
+        private readonly Stack<INode> _operands;
+        private readonly Stack<OperatorInvoker> _delayedInvokers;
+
+        public ShuntingYard(TokensTable tokensTable)
         {
             _tokensTable = tokensTable;
             _tableVisitor = new TableVisitor(this);
             
-            _operators = new Stack<RPNOperatorToken>();
+            _operators = new Stack<OperatorToken>();
             _operands = new Stack<INode>();
-            _delayedInvokers = new Stack<RPNOperatorInvoker>();
+            _delayedInvokers = new Stack<OperatorInvoker>();
         }
 
-        public INode Parse(ReadOnlySpan<char> expression)
-        {
-            VisitTableIteratively(expression);
+        public void Push(string expression) =>
+            VisitTableIteratively(expression.AsSpan());
 
-            return CollapseParsedStack();
-        }
-
+        public INode Build() =>
+            CollapseParsedStack();
+        
         private void VisitTableIteratively(ReadOnlySpan<char> expression)
         {
             MatchInfo notParsed = MatchInfo.All(expression);
@@ -38,14 +38,14 @@ namespace DiceRoll.Input
 
         private INode CollapseParsedStack()
         {
-            while(_operators.TryPop(out RPNOperatorToken token))
+            while(_operators.TryPop(out OperatorToken token))
                 InvokeOperator(token.Invoker);
             
             InvokeDelayedOperators();
             
             return _operands.Pop();
         }
-
+        
         private MatchInfo VisitTableOrThrow(MatchInfo notParsed)
         {
             try
@@ -59,7 +59,7 @@ namespace DiceRoll.Input
             }
         }
 
-        private void InvokeOperator(RPNOperatorInvoker invoker)
+        private void InvokeOperator(OperatorInvoker invoker)
         {
             if (_operands.Count < invoker.RequiredOperands)
                 throw new OperatorInvocationException(invoker.RequiredOperands, _operands.Count);
@@ -69,11 +69,11 @@ namespace DiceRoll.Input
 
         private void InvokeDelayedOperators()
         {
-            while(_delayedInvokers.TryPop(out RPNOperatorInvoker invoker))
+            while(_delayedInvokers.TryPop(out OperatorInvoker invoker))
                 InvokeOperator(invoker);
         }
 
-        private void InvokeDelayedOperatorsAfter(RPNOperatorInvoker invoker)
+        private void InvokeDelayedOperatorsAfter(OperatorInvoker invoker)
         {
             InvokeOperator(invoker);
             InvokeDelayedOperators();
@@ -81,44 +81,44 @@ namespace DiceRoll.Input
 
         private sealed class TableVisitor : TokensTable.IVisitor
         {
-            private readonly DiceExpressionParser _parser;
+            private readonly ShuntingYard _context;
             
-            public TableVisitor(DiceExpressionParser parser) 
+            public TableVisitor(ShuntingYard context) 
             {
-                _parser = parser;
+                _context = context;
             }
 
             public void OpenParenthesis() =>
-                _parser._operators.Push(RPNOperatorToken.OpenParenthesis);
+                _context._operators.Push(OperatorToken.OpenParenthesis);
 
             public void CloseParenthesis()
             {
-                while (_parser._operators.TryPop(out RPNOperatorToken operatorToken))
+                while (_context._operators.TryPop(out OperatorToken operatorToken))
                 {
                     if (operatorToken.IsOpenParenthesis)
                         return;
 
-                    _parser.InvokeDelayedOperatorsAfter(operatorToken.Invoker);
+                    _context.InvokeDelayedOperatorsAfter(operatorToken.Invoker);
                 }
             
                 throw new UnbalancedParenthesisException();
             }
 
-            public void Operator(int precedence, RPNOperatorInvoker invoker)
+            public void Operator(int precedence, OperatorInvoker invoker)
             {
-                while (_parser._operators.TryPeek(out RPNOperatorToken lastOperator) &&
+                while (_context._operators.TryPeek(out OperatorToken lastOperator) &&
                        !lastOperator.IsOpenParenthesis &&
                        precedence < lastOperator.Precedence)
-                    _parser.InvokeDelayedOperatorsAfter(_parser._operators.Pop().Invoker);
+                    _context.InvokeDelayedOperatorsAfter(_context._operators.Pop().Invoker);
 
-                _parser._operators.Push(new RPNOperatorToken(precedence, invoker));
+                _context._operators.Push(new OperatorToken(precedence, invoker));
             }
 
             public void Operand(INumeric operand)
             {
-                _parser._operands.Push(operand);
+                _context._operands.Push(operand);
                 
-                _parser.InvokeDelayedOperators();
+                _context.InvokeDelayedOperators();
             }
 
             public void UnknownToken(in MatchInfo tokenMatch) =>
@@ -127,16 +127,16 @@ namespace DiceRoll.Input
 
         public readonly struct OperandsStackAccess
         {
-            private readonly DiceExpressionParser _parser;
+            private readonly ShuntingYard _context;
 
-            public OperandsStackAccess(DiceExpressionParser parser) 
+            public OperandsStackAccess(ShuntingYard context) 
             {
-                _parser = parser;
+                _context = context;
             }
 
             public T Pop<T>() where T : INode
             {
-                INode node = _parser._operands.Pop();
+                INode node = _context._operands.Pop();
                 
                 return node is T operand ?
                     operand :
@@ -144,10 +144,10 @@ namespace DiceRoll.Input
             }
 
             public void Push(INode operand) =>
-                _parser._operands.Push(operand);
+                _context._operands.Push(operand);
 
-            public void ForNextOperand(RPNOperatorInvoker invoker) =>
-                _parser._delayedInvokers.Push(invoker);
+            public void ForNextOperand(OperatorInvoker invoker) =>
+                _context._delayedInvokers.Push(invoker);
         }
     }
 }

@@ -7,9 +7,9 @@ namespace DiceRoll.Input
     {
         public readonly IToken Token;
         public readonly int Precedence;
-        public readonly RPNOperatorInvoker Invoker;
+        public readonly OperatorInvoker Invoker;
             
-        public TokenizedOperator(IToken token, int precedence, RPNOperatorInvoker invoker)
+        public TokenizedOperator(IToken token, int precedence, OperatorInvoker invoker)
         {
             Token = token;
             Precedence = precedence;

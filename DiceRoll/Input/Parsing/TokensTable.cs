@@ -41,7 +41,7 @@ namespace DiceRoll.Input
                 return tokenMatch;
             }
 
-            if (StartsWithOperator(expression, out tokenMatch, out int precedence, out RPNOperatorInvoker invoker))
+            if (StartsWithOperator(expression, out tokenMatch, out int precedence, out OperatorInvoker invoker))
             {
                 visitor.Operator(precedence, invoker);
                 return tokenMatch;
@@ -61,7 +61,7 @@ namespace DiceRoll.Input
             _closeParenthesis.Matches(expression, out tokenMatch);
 
         private bool StartsWithOperator(ReadOnlySpan<char> expression, out MatchInfo tokenMatch, out int precedence,
-            out RPNOperatorInvoker invoker)
+            out OperatorInvoker invoker)
         {
             foreach (TokenizedOperator tokenizedOperator in _operators)
             {
@@ -129,7 +129,7 @@ namespace DiceRoll.Input
 
             void CloseParenthesis();
 
-            void Operator(int precedence, RPNOperatorInvoker invoker);
+            void Operator(int precedence, OperatorInvoker invoker);
 
             void Operand(INumeric operand);
 
