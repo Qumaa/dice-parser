@@ -27,6 +27,17 @@ namespace DiceRoll
             /// <param name="faces">A number of faces the virtual dice will have.</param>
             public static INumeric Dice(int faces) =>
                 new Dice(_allDiceRandom, faces);
+            public static INumeric Dice(int faces, int dice) =>
+                Dice<Summarize>(faces, dice);
+            public static INumeric Dice<T>(int faces, int dice) where T : Composer, new()
+            {
+                INumeric die = Dice(faces);
+
+                if (dice > 1)
+                    die = Composite<T>(die, dice);
+                
+                return die;
+            }
 
             /// <summary>
             /// Creates a <see cref="DiceRoll.Composite"/> node that evaluates all composed nodes
