@@ -1,6 +1,6 @@
 ﻿namespace DiceRoll.Input
 {
-    public sealed class ReversedUnaryOperatorInvoker<T> : OperatorInvoker where T : INode
+    public sealed class ReversedUnaryOperatorInvoker<T> : ShuntingYard.OperatorInvoker where T : INode
     {
         private readonly UnaryInvocationHandler<T> _handler;
         

@@ -1,6 +1,7 @@
 ﻿namespace DiceRoll.Input
 {
-    public sealed class BinaryOperatorInvoker<TLeft, TRight> : OperatorInvoker where TLeft : INode where TRight : INode
+    public sealed class BinaryOperatorInvoker<TLeft, TRight> : ShuntingYard.OperatorInvoker
+        where TLeft : INode where TRight : INode
     {
         private readonly BinaryInvocationHandler<TLeft, TRight> _handler;
         

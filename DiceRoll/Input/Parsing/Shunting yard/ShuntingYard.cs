@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace DiceRoll.Input
 {
@@ -61,8 +62,8 @@ namespace DiceRoll.Input
 
         private void InvokeOperator(OperatorInvoker invoker)
         {
-            if (_operands.Count < invoker.RequiredOperands)
-                throw new OperatorInvocationException(invoker.RequiredOperands, _operands.Count);
+            if (_operands.Count < invoker.OperandsRequired)
+                throw new OperatorInvocationException(invoker.OperandsRequired, _operands.Count);
             
             invoker.Invoke(new OperandsStackAccess(this));
         }
@@ -148,6 +149,35 @@ namespace DiceRoll.Input
 
             public void ForNextOperand(OperatorInvoker invoker) =>
                 _context._delayedInvokers.Push(invoker);
+        }
+        
+        public abstract class OperatorInvoker
+        {
+            public readonly int OperandsRequired;
+
+            protected OperatorInvoker(int operandsRequired)
+            {
+                OperandsRequired = operandsRequired;
+            }
+
+            public abstract void Invoke(OperandsStackAccess operands);
+        }
+        
+        [StructLayout(LayoutKind.Auto)]
+        private readonly struct OperatorToken
+        {
+            public readonly int Precedence;
+            public readonly OperatorInvoker Invoker;
+
+            public bool IsOpenParenthesis => Invoker is null;
+        
+            public static OperatorToken OpenParenthesis => new();
+
+            public OperatorToken(int precedence, OperatorInvoker invoker)
+            {
+                Precedence = precedence;
+                Invoker = invoker;
+            }
         }
     }
 }
