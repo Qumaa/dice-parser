@@ -68,8 +68,10 @@ namespace DiceRoll
         private static Outcome DivideRoundUpwards(Outcome left, Outcome right)
         {
             Outcome outcome = left / right;
-            
-            return outcome * right < left ? outcome + 1 : outcome;
+            if (((left ^ right) >= 0) && (left % right != 0))
+                outcome++;
+
+            return outcome;
         }
     }
 }
