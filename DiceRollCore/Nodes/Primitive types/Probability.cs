@@ -30,6 +30,7 @@ namespace DiceRoll
                     throw new NegativeProbabilityException(probability);
 
                 Value = 0;
+                return;
             }
             
             Value = probability;
