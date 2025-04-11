@@ -9,7 +9,7 @@ namespace DiceRoll
         // todo: binary/unary operator with same signature ( x - y & -x - -y) 
         public static void Main(string[] args)
         {
-            const string arg = "-(5 + -2)";
+            const string arg = "2 2 + 2";
             
             ExpressionParser parser = new(BuildTable());
 

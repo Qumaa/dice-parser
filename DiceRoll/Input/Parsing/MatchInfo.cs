@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace DiceRoll.Input
 {
+    // todo: rename to SubstringPointer & covert Source to string
     [StructLayout(LayoutKind.Auto)]
     public readonly ref struct MatchInfo
     {

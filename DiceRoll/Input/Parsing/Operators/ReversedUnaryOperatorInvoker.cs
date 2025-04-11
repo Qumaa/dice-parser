@@ -9,7 +9,7 @@
             _handler = handler;
         }
 
-        public override void Invoke(ShuntingYard.OperandsStackAccess operands) =>
+        public override void Invoke(in ShuntingYard.OperandsStackAccess operands) =>
             operands.Push(_handler.Invoke(operands.Pop<T>()));
     }
 }

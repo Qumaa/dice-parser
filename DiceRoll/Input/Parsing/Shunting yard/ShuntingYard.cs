@@ -6,6 +6,8 @@ namespace DiceRoll.Input
 {
     public sealed class ShuntingYard
     {
+        private const string _TRAILING_DELAYED_OPERATORS_MESSAGE = "This operator didn't receive enough right-side operands.";
+
         private readonly TokensTable _tokensTable;
         private readonly TableVisitor _tableVisitor;
         
@@ -43,10 +45,14 @@ namespace DiceRoll.Input
         private INode CollapseOperatorsStack()
         {
             if (_delayedOperators.Count > 0)
-                throw new OperatorInvocationException("One or multiple right associative operators didn't receive their input.");
+                throw new OperatorInvocationException(_TRAILING_DELAYED_OPERATORS_MESSAGE);
             
             while(_operators.TryPop(out OperatorToken token))
                 InvokeOperator(token.Invoker);
+
+            // todo
+            if (_operands.Count is not 1)
+                throw new Exception("trailing operands");
             
             return _operands.Pop();
         }
@@ -66,19 +72,21 @@ namespace DiceRoll.Input
 
         private void InvokeOperator(OperatorInvoker invoker)
         {
-            int operandsRequired = invoker.RequiredOperands;
+            int arity = invoker.Arity;
             
-            if (_operands.Count < operandsRequired)
-                throw new OperatorInvocationException(operandsRequired, _operands.Count);
+            if (_operands.Count < arity)
+                throw new OperatorInvocationException(arity, _operands.Count);
+
+            OperandsStackAccess stackAccess = new(this, arity);
             
-            invoker.Invoke(new OperandsStackAccess(this));
+            invoker.Invoke(in stackAccess);
         }
 
         private void InvokeDelayedOperators()
         {
             while (_delayedOperators.TryPeek(out DelayedOperatorToken token) &&
                    token.CapturedParenthesisLevel >= _parenthesisLevel &&
-                   token.CapturedOperands + token.Invoker.RequiredOperands <= _operands.Count)
+                   token.CapturedOperands + token.Invoker.Arity <= _operands.Count)
                 InvokeOperator(_delayedOperators.Pop().Invoker);
         }
 
@@ -91,6 +99,7 @@ namespace DiceRoll.Input
         private void DelayOperatorInvocation(OperatorInvoker invoker) =>
             _delayedOperators.Push(new DelayedOperatorToken(invoker, _parenthesisLevel, _operands.Count));
 
+        // todo: ditch (return to the previous approach with 4 methods on the table class). Will make notParsed always contain the actual info
         private sealed class TableVisitor : TokensTable.IVisitor
         {
             private readonly ShuntingYard _context;
@@ -133,7 +142,7 @@ namespace DiceRoll.Input
                        precedence < lastOperator.Precedence)
                     _context.InvokeAfterDelayedOperators(_context._operators.Pop().Invoker);
 
-                if (invoker.IsRightAssociative)
+                if (invoker.ExpectsRightOperands)
                     _context.DelayOperatorInvocation(invoker);
                 else
                     _context._operators.Push(new OperatorToken(precedence, invoker));
@@ -156,17 +165,30 @@ namespace DiceRoll.Input
                 _context._parenthesisLevel--;
         }
 
+        [StructLayout(LayoutKind.Auto)]
         public readonly struct OperandsStackAccess
         {
-            private readonly ShuntingYard _context;
+            private const string _EXCESSIVE_POPPING_MESSAGE_FORMAT =
+                "An attempt to work on more operands than the arity of the operator was intercepted. The operator's arity ({0}) is faulty.";
+            private const string _PREMATURE_PUSH_MESSAGE = 
+                "An attempt to return the result of working on fewer operands than the declared arity was intercepted.";
 
-            public OperandsStackAccess(ShuntingYard context)
+            private readonly ShuntingYard _context;
+            private readonly int _arity;
+            private readonly int _popLimit;
+
+            public OperandsStackAccess(ShuntingYard context, int arity)
             {
                 _context = context;
+                _arity = arity;
+                _popLimit = _context._operands.Count - arity;
             }
 
             public T Pop<T>() where T : INode
             {
+                if (_context._operands.Count - 1 < _popLimit)
+                    throw new OperatorInvocationException(ExcessivePoppingMessage());
+                
                 INode node = _context._operands.Pop();
                 
                 return node is T operand ?
@@ -174,34 +196,50 @@ namespace DiceRoll.Input
                     throw new OperatorInvocationException(typeof(T), node.GetType());
             }
 
-            public void Push(INode operand) =>
+            private string ExcessivePoppingMessage() =>
+                string.Format(_EXCESSIVE_POPPING_MESSAGE_FORMAT, _arity.ToString());
+
+            public void Push(INode operand)
+            {
+                if (_context._operands.Count != _popLimit)
+                    throw new OperatorInvocationException(_PREMATURE_PUSH_MESSAGE);
+                
                 _context._operands.Push(operand);
+            }
         }
 
         public abstract class OperatorInvoker
         {
-            private readonly int _operandsRequired;
+            // positive = straight
+            // negative = takes parameters from the right; converted to positive by negating and adding 1
+            private readonly int _arity;
 
-            public bool IsRightAssociative => _operandsRequired <= 0;
+            public bool ExpectsRightOperands => _arity <= 0;
 
-            public int RequiredOperands => IsRightAssociative ? -_operandsRequired + 1 : _operandsRequired;
+            public int Arity => ExpectsRightOperands ? DecodeArityFromRightFlowDirection() : _arity;
 
-            protected OperatorInvoker(int operandsRequired, Associativity associativity = Associativity.Left)
+            protected OperatorInvoker(int arity, FlowDirection flowDirection = FlowDirection.Left)
             {
-                _operandsRequired = associativity is Associativity.Left ?
-                    operandsRequired :
-                    EncodeAsRightAssociative(operandsRequired);
+                _arity = flowDirection is FlowDirection.Left ?
+                    arity :
+                    EncodeRightFlowDirectionArity(arity);
             }
 
-            public abstract void Invoke(OperandsStackAccess operands);
+            public abstract void Invoke(in OperandsStackAccess operands);
 
-            private static int EncodeAsRightAssociative(int operandsRequired) =>
-                -(operandsRequired - 1);
+            private int DecodeArityFromRightFlowDirection() =>
+                -_arity + 1;
 
-            protected enum Associativity
+            private static int EncodeRightFlowDirectionArity(int arity) =>
+                -(arity - 1);
+
+            protected enum FlowDirection
             {
+                // ... 4 3 1 x 2
                 Left = 0,
+                // x 1 2 3 ...
                 Right = 1
+                // are (... 3 2 1 x) and (... 4 3 2 x 1) needed?
             }
         }
         
