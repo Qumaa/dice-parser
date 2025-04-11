@@ -21,9 +21,9 @@ namespace DiceRoll.Input
             _operands = operands.ToArray();
         }
 
-        public MatchInfo Visit(IVisitor visitor, ReadOnlySpan<char> expression)
+        public Substring Visit(IVisitor visitor, Substring expression)
         {
-            if (StartsWithOpenParenthesis(expression, out MatchInfo tokenMatch))
+            if (StartsWithOpenParenthesis(expression, out Substring tokenMatch))
             {
                 visitor.OpenParenthesis();
                 return tokenMatch;
@@ -47,20 +47,19 @@ namespace DiceRoll.Input
                 return tokenMatch;
             }
 
-            int length = GetUnknownTokenLength(expression);
-            tokenMatch = new MatchInfo(expression, 0, length).Trim();
+            tokenMatch = GetUnknownTokenSubstring(expression).Trim();
             
             visitor.UnknownToken(in tokenMatch);
             return tokenMatch;
         }
 
-        private bool StartsWithOpenParenthesis(ReadOnlySpan<char> expression, out MatchInfo tokenMatch) =>
+        private bool StartsWithOpenParenthesis(Substring expression, out Substring tokenMatch) =>
             _openParenthesis.Matches(expression, out tokenMatch);
 
-        private bool StartsWithCloseParenthesis(ReadOnlySpan<char> expression, out MatchInfo tokenMatch) =>
+        private bool StartsWithCloseParenthesis(Substring expression, out Substring tokenMatch) =>
             _closeParenthesis.Matches(expression, out tokenMatch);
 
-        private bool StartsWithOperator(ReadOnlySpan<char> expression, out MatchInfo tokenMatch, out int precedence,
+        private bool StartsWithOperator(Substring expression, out Substring tokenMatch, out int precedence,
             out ShuntingYard.OperatorInvoker invoker)
         {
             foreach (TokenizedOperator tokenizedOperator in _operators)
@@ -79,14 +78,14 @@ namespace DiceRoll.Input
             return false;
         }
 
-        private bool StartsWithOperand(ReadOnlySpan<char> expression, out MatchInfo tokenMatch, out INumeric operand)
+        private bool StartsWithOperand(Substring expression, out Substring tokenMatch, out INumeric operand)
         {
             foreach (TokenizedOperand operandToken in _operands)
             {
                 if (!operandToken.Token.Matches(expression, out tokenMatch))
                     continue;
 
-                operand = operandToken.Handler.Invoke(tokenMatch.SliceMatch());
+                operand = operandToken.Parse(tokenMatch);
                 return true;
             }
 
@@ -95,15 +94,15 @@ namespace DiceRoll.Input
             return false;
         }
 
-        private int GetUnknownTokenLength(in ReadOnlySpan<char> expression)
+        private Substring GetUnknownTokenSubstring(Substring expression)
         {
             for (int i = 0; i < expression.Length; i++)
                 if (_MatchesAnyToken(expression[i..]))
-                    return i;
+                    return expression.SetLength(i);
 
-            return expression.Length;
+            return expression;
 
-            bool _MatchesAnyToken(ReadOnlySpan<char> expression)
+            bool _MatchesAnyToken(Substring expression)
             {
                 if (_openParenthesis.Matches(expression))
                     return true;
@@ -133,7 +132,7 @@ namespace DiceRoll.Input
 
             void Operand(INumeric operand);
 
-            void UnknownToken(in MatchInfo tokenMatch);
+            void UnknownToken(in Substring tokenMatch);
         }
     }
 }

@@ -14,10 +14,10 @@ namespace DiceRoll.Input
             Handler = handler;
         }
 
-        public INumeric Parse(string match) =>
+        public INumeric Parse(Substring match) =>
             Handler(match);
 
-        public bool TryParse(string match, out INumeric node)
+        public bool TryParse(Substring match, out INumeric node)
         {
             if (!Token.Matches(match))
             {

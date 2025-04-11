@@ -29,14 +29,14 @@ namespace DiceRoll.Input
         }
 
         public void Push(string expression) =>
-            VisitTableIteratively(expression.AsSpan());
+            VisitTableIteratively(expression);
 
         public INode Build() =>
             CollapseOperatorsStack();
         
-        private void VisitTableIteratively(ReadOnlySpan<char> expression)
+        private void VisitTableIteratively(string expression)
         {
-            MatchInfo notParsed = MatchInfo.All(expression);
+            Substring notParsed = Substring.All(expression);
             
             do notParsed = VisitTableOrThrow(notParsed); 
             while (!notParsed.Empty);
@@ -57,16 +57,16 @@ namespace DiceRoll.Input
             return _operands.Pop();
         }
         
-        private MatchInfo VisitTableOrThrow(MatchInfo notParsed)
+        private Substring VisitTableOrThrow(Substring notParsed)
         {
             try
             {
-                MatchInfo tokenMatch = _tokensTable.Visit(_tableVisitor, notParsed.SliceMatch());
-                return notParsed.MoveStart(tokenMatch.End);
+                Substring tokenMatch = _tokensTable.Visit(_tableVisitor, notParsed);
+                return notParsed.MoveStart(tokenMatch.Length);
             }
             catch (Exception e)
             {
-                throw new DiceExpressionParsingException(notParsed.TrimStart().MoveEnd(notParsed.Length - 1), e);
+                throw new DiceExpressionParsingException(notParsed.TrimStart().SetLength(1), e);
             }
         }
 
@@ -155,7 +155,7 @@ namespace DiceRoll.Input
                 _context.InvokeDelayedOperators();
             }
 
-            public void UnknownToken(in MatchInfo tokenMatch) =>
+            public void UnknownToken(in Substring tokenMatch) =>
                 throw new UnknownTokenException(in tokenMatch);
 
             private void DenoteParenthesisOpening() =>

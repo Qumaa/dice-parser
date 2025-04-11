@@ -1,18 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace DiceRoll.Input
 {
     public interface IToken
     {
-        bool Matches(ReadOnlySpan<char> token, out MatchInfo matchInfo);
+        bool Matches(Substring input, out Substring substring);
 
         IEnumerable<string> EnumerateRawTokens();
     }
 
     public static class TokenExtensions
     {
-        public static bool Matches(this IToken itoken, ReadOnlySpan<char> token) =>
-            itoken.Matches(token, out _);
+        public static bool Matches(this IToken token, Substring input) =>
+            token.Matches(input, out _);
+        public static bool Matches(this IToken token, string input) =>
+            token.Matches(Substring.All(input), out _);
     }
 }

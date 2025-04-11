@@ -15,7 +15,7 @@ namespace DiceRoll.Input
             _compositionTokens = compositionTokens;
         }
 
-        public INumeric Parse(ReadOnlySpan<char> expression)
+        public INumeric Parse(Substring expression)
         {
             Helper helper = StartParsing(expression);
 
@@ -28,18 +28,18 @@ namespace DiceRoll.Input
                 helper.CompositionHandler().Invoke(dice, diceCount);
         }
 
-        private Helper StartParsing(ReadOnlySpan<char> expression) =>
+        private Helper StartParsing(Substring expression) =>
             new(this, expression);
 
         [StructLayout(LayoutKind.Auto)]
-        private readonly ref struct Helper
+        private readonly struct Helper
         {
             private readonly DiceCompositionToken[] _compositionTokens;
-            private readonly ReadOnlySpan<char> _expression;
+            private readonly Substring _expression;
             private readonly int _delimiterIndex;
             private readonly int _diceNotationEnd;
             
-            public Helper(DiceParser context, ReadOnlySpan<char> expression)
+            public Helper(DiceParser context, Substring expression)
             {
                 _expression = expression;
                 _compositionTokens = context._compositionTokens;
@@ -52,17 +52,17 @@ namespace DiceRoll.Input
                 int diceCount = 1;
             
                 if (_delimiterIndex is not 0)
-                    diceCount = int.Parse(_expression[.._delimiterIndex]);
+                    diceCount = int.Parse(_expression[.._delimiterIndex].AsSpan());
 
                 return diceCount;
             }
             
             public int FacesCount() =>
-                int.Parse(_expression.Slice(_delimiterIndex + 1, _diceNotationEnd - _delimiterIndex - 1));
+                int.Parse(_expression.AsSpan(_delimiterIndex + 1, _diceNotationEnd - _delimiterIndex - 1));
             
             public DiceCompositionHandler CompositionHandler()
             {
-                if (!ExpressionEndsWithCompositionToken(out ReadOnlySpan<char> compositionToken))
+                if (!ExpressionEndsWithCompositionToken(out Substring compositionToken))
                     return DefaultCompositionHandler();
 
                 foreach (DiceCompositionToken token in _compositionTokens)
@@ -72,7 +72,7 @@ namespace DiceRoll.Input
                 return DefaultCompositionHandler();
             }
 
-            private bool ExpressionEndsWithCompositionToken(out ReadOnlySpan<char> compositionToken)
+            private bool ExpressionEndsWithCompositionToken(out Substring compositionToken)
             {
                 if (_diceNotationEnd == _expression.Length)
                 {
@@ -80,18 +80,18 @@ namespace DiceRoll.Input
                     return false;
                 }
                 
-                compositionToken = _expression[_diceNotationEnd..].Trim(' ');
+                compositionToken = _expression[_diceNotationEnd..].Trim();
                 return true;
             }
             
             private DiceCompositionHandler DefaultCompositionHandler() =>
                 _compositionTokens[0].CompositionHandler;
             
-            private static int IndexOfDelimiter(ReadOnlySpan<char> expression, string[] delimiters)
+            private static int IndexOfDelimiter(Substring expression, string[] delimiters)
             {
                 foreach (string delimiter in delimiters)
                 {
-                    int index = expression.IndexOf(delimiter.AsSpan(), StringComparison.OrdinalIgnoreCase);
+                    int index = expression.IndexOf(delimiter, StringComparison.OrdinalIgnoreCase);
 
                     if (index >= 0)
                         return index;
@@ -100,7 +100,7 @@ namespace DiceRoll.Input
                 return -1;
             }
             
-            private static int IndexOfDiceNotationEnd(ReadOnlySpan<char> expression, int delimiterIndex)
+            private static int IndexOfDiceNotationEnd(Substring expression, int delimiterIndex)
             {
                 int notationEnd = expression.Length;
             

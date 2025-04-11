@@ -18,26 +18,27 @@ namespace DiceRoll.Input
 
         public RegexToken(Regex pattern) : this(new [] {pattern}) { }
 
-        public bool Matches(ReadOnlySpan<char> token, out MatchInfo matchInfo)
+        public bool Matches(Substring input, out Substring substring)
         {
             // ReSharper disable once LoopCanBeConvertedToQuery
             // ReSharper disable once ForCanBeConvertedToForeach
             for (int i = 0; i < _patterns.Length; i++)
-                if (Matches(token, _patterns[i], out matchInfo))
+                if (Matches(input, _patterns[i], out substring))
                     return true;
 
-            matchInfo = default;
+            substring = default;
             return false;
         }
 
-        private static bool Matches(ReadOnlySpan<char> token, Regex pattern, out MatchInfo matchInfo)
+        // todo: don't check whether the substring starts with the token; do it outside
+        private static bool Matches(Substring input, Regex pattern, out Substring matchSubstring)
         {
-            int firstNonWhitespaceIndex = GetFirstNonWhitespaceIndex(token);
-            Regex.ValueMatchEnumerator enumerator = pattern.EnumerateMatches(token, firstNonWhitespaceIndex);
+            int firstNonWhitespaceIndex = GetFirstNonWhitespaceIndex(input);
+            Regex.ValueMatchEnumerator enumerator = pattern.EnumerateMatches(input.AsSpan(), firstNonWhitespaceIndex);
 
             if (!enumerator.MoveNext())
             {
-                matchInfo = default;
+                matchSubstring = default;
                 return false;
             }
 
@@ -45,15 +46,15 @@ namespace DiceRoll.Input
 
             if (match.Index != firstNonWhitespaceIndex)
             {
-                matchInfo = default;
+                matchSubstring = default;
                 return false;
             }
             
-            matchInfo = new MatchInfo(token, match.Index, match.Length);
+            matchSubstring = new Substring(input, match.Index, match.Length);
             return true;
         }
 
-        private static int GetFirstNonWhitespaceIndex(ReadOnlySpan<char> token)
+        private static int GetFirstNonWhitespaceIndex(Substring token)
         {
             int whitespaces = 0;
 

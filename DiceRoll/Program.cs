@@ -9,7 +9,7 @@ namespace DiceRoll
         // todo: binary/unary operator with same signature ( x - y & -x - -y) 
         public static void Main(string[] args)
         {
-            const string arg = "2 2 + 2";
+            const string arg = "^ 2 + 2";
             
             ExpressionParser parser = new(BuildTable());
 
@@ -23,7 +23,7 @@ namespace DiceRoll
             TokensTableBuilder builder = new("(", ")");
             
             builder.AddOperandToken(DiceOperand.Default);
-            builder.AddOperandToken(x => Node.Value.Constant(int.Parse(x)), new Regex(@"-?\d+"));
+            builder.AddOperandToken(x => Node.Value.Constant(int.Parse(x.AsSpan())), new Regex(@"-?\d+"));
             
             builder.AddOperatorToken<INumeric, INumeric>(100, static (left, right) => Node.Operator.Multiply(left, right), "*", "x");
             builder.AddOperatorToken<INumeric, INumeric>(100, static (left, right) => Node.Operator.DivideRoundUp(left, right), "//");
