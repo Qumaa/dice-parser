@@ -17,7 +17,7 @@
                 EncodeRightFlowDirectionArity(arity);
         }
 
-        public abstract void Invoke(OperandsStackAccess operands);
+        public abstract void Invoke(in OperandsStackAccess operands);
 
         private int DecodeArityFromRightFlowDirection() =>
             -_arity + 1;

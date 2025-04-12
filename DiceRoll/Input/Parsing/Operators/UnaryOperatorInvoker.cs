@@ -9,7 +9,7 @@
             _handler = handler;
         }
 
-        public override void Invoke(OperandsStackAccess operands) =>
-            operands.Push(_handler.Invoke(operands.Pop<T>()));
+        public override void Invoke(in OperandsStackAccess operands) =>
+            operands.PushResult(_handler.Invoke(operands.Pop<T>()));
     }
 }

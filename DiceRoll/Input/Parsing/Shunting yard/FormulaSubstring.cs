@@ -14,5 +14,8 @@ namespace DiceRoll.Input
             Value = value;
             Range = new Range(new Index(contextStart), new Index(contextStart + contextLength));
         }
+
+        public static FormulaSubstring<T> Inexpressable(in T value) =>
+            new(value, 0, 0);
     }
 }

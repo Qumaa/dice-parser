@@ -20,7 +20,10 @@ namespace DiceRoll.Input
             Push(_formulaAccumulator.Wrap(in value, in context));
         public void Push(in T value, int start, int length) =>
             Push(_formulaAccumulator.Wrap(in value, start, length));
-            
+
+        public void PushWithoutContext(in T value) =>
+            _stack.Push(FormulaSubstring<T>.Inexpressable(value));
+
         public void Push(in FormulaSubstring<T> context) =>
             _stack.Push(context);
             

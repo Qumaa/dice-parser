@@ -10,12 +10,12 @@
             _handler = handler;
         }
 
-        public override void Invoke(OperandsStackAccess operands)
+        public override void Invoke(in OperandsStackAccess operands)
         {
             TRight right = operands.Pop<TRight>();
             TLeft left = operands.Pop<TLeft>();
             
-            operands.Push(_handler.Invoke(left, right));
+            operands.PushResult(_handler.Invoke(left, right));
         }
     }
 }
