@@ -28,7 +28,7 @@ namespace DiceRoll.Input
             _closeParenthesis.Matches(in expression, out tokenMatch);
 
         public bool StartsWithOperator(in Substring expression, out Substring tokenMatch, out int precedence,
-            out ShuntingYard.OperatorInvoker invoker)
+            out OperatorInvoker invoker)
         {
             foreach (TokenizedOperator tokenizedOperator in _operators)
             {

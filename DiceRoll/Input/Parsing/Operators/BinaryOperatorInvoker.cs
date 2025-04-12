@@ -1,6 +1,6 @@
 ﻿namespace DiceRoll.Input
 {
-    public sealed class BinaryOperatorInvoker<TLeft, TRight> : ShuntingYard.OperatorInvoker
+    public sealed class BinaryOperatorInvoker<TLeft, TRight> : OperatorInvoker
         where TLeft : INode where TRight : INode
     {
         private readonly BinaryInvocationHandler<TLeft, TRight> _handler;
@@ -10,7 +10,7 @@
             _handler = handler;
         }
 
-        public override void Invoke(ShuntingYard.OperandsStackAccess operands)
+        public override void Invoke(OperandsStackAccess operands)
         {
             TRight right = operands.Pop<TRight>();
             TLeft left = operands.Pop<TLeft>();
