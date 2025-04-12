@@ -21,50 +21,18 @@ namespace DiceRoll.Input
             _operands = operands.ToArray();
         }
 
-        public Substring Visit(IVisitor visitor, Substring expression)
-        {
-            if (StartsWithOpenParenthesis(expression, out Substring tokenMatch))
-            {
-                visitor.OpenParenthesis();
-                return tokenMatch;
-            }
+        public bool StartsWithOpenParenthesis(in Substring expression, out Substring tokenMatch) =>
+            _openParenthesis.Matches(in expression, out tokenMatch);
 
-            if (StartsWithCloseParenthesis(expression, out tokenMatch))
-            {
-                visitor.CloseParenthesis();
-                return tokenMatch;
-            }
-            
-            if (StartsWithOperand(expression, out tokenMatch, out INumeric operand))
-            {
-                visitor.Operand(operand);
-                return tokenMatch;
-            }
+        public bool StartsWithCloseParenthesis(in Substring expression, out Substring tokenMatch) =>
+            _closeParenthesis.Matches(in expression, out tokenMatch);
 
-            if (StartsWithOperator(expression, out tokenMatch, out int precedence, out ShuntingYard.OperatorInvoker invoker))
-            {
-                visitor.Operator(precedence, invoker);
-                return tokenMatch;
-            }
-
-            tokenMatch = GetUnknownTokenSubstring(expression).Trim();
-            
-            visitor.UnknownToken(in tokenMatch);
-            return tokenMatch;
-        }
-
-        private bool StartsWithOpenParenthesis(Substring expression, out Substring tokenMatch) =>
-            _openParenthesis.Matches(expression, out tokenMatch);
-
-        private bool StartsWithCloseParenthesis(Substring expression, out Substring tokenMatch) =>
-            _closeParenthesis.Matches(expression, out tokenMatch);
-
-        private bool StartsWithOperator(Substring expression, out Substring tokenMatch, out int precedence,
+        public bool StartsWithOperator(in Substring expression, out Substring tokenMatch, out int precedence,
             out ShuntingYard.OperatorInvoker invoker)
         {
             foreach (TokenizedOperator tokenizedOperator in _operators)
             {
-                if (!tokenizedOperator.Token.Matches(expression, out tokenMatch))
+                if (!tokenizedOperator.Token.Matches(in expression, out tokenMatch))
                     continue;
 
                 precedence = tokenizedOperator.Precedence;
@@ -78,11 +46,11 @@ namespace DiceRoll.Input
             return false;
         }
 
-        private bool StartsWithOperand(Substring expression, out Substring tokenMatch, out INumeric operand)
+        public bool StartsWithOperand(in Substring expression, out Substring tokenMatch, out INumeric operand)
         {
             foreach (TokenizedOperand operandToken in _operands)
             {
-                if (!operandToken.Token.Matches(expression, out tokenMatch))
+                if (!operandToken.Token.Matches(in expression, out tokenMatch))
                     continue;
 
                 operand = operandToken.Parse(tokenMatch);
@@ -94,7 +62,7 @@ namespace DiceRoll.Input
             return false;
         }
 
-        private Substring GetUnknownTokenSubstring(Substring expression)
+        public Substring UntilFirstKnownToken(in Substring expression)
         {
             for (int i = 0; i < expression.Length; i++)
                 if (_MatchesAnyToken(expression[i..]))
@@ -104,35 +72,22 @@ namespace DiceRoll.Input
 
             bool _MatchesAnyToken(Substring expression)
             {
-                if (_openParenthesis.Matches(expression))
+                if (_openParenthesis.Matches(in expression))
                     return true;
                 
-                if (_closeParenthesis.Matches(expression))
+                if (_closeParenthesis.Matches(in expression))
                     return true;
 
                 foreach (TokenizedOperator tokenizedOperator in _operators)
-                    if (tokenizedOperator.Token.Matches(expression))
+                    if (tokenizedOperator.Token.Matches(in expression))
                         return true;
                 
                 foreach (TokenizedOperand tokenizedOperand in _operands)
-                    if (tokenizedOperand.Token.Matches(expression))
+                    if (tokenizedOperand.Token.Matches(in expression))
                         return true;
 
                 return false;
             }
-        }
-
-        public interface IVisitor
-        { 
-            void OpenParenthesis();
-
-            void CloseParenthesis();
-
-            void Operator(int precedence, ShuntingYard.OperatorInvoker invoker);
-
-            void Operand(INumeric operand);
-
-            void UnknownToken(in Substring tokenMatch);
         }
     }
 }

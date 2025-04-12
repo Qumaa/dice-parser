@@ -3,18 +3,18 @@ using System.Text;
 
 namespace DiceRoll.Input
 {
-    public sealed class DiceExpressionParsingException : Exception
+    public sealed class FormulaParsingException : Exception
     {
         private const char _ERROR_ARROW_TIP = '\u2514';
         private const char _ERROR_ARROW_HEAD = '\u2500';
         private const char _ERROR_ARROW_NECK = '\u2534';
         private const char _ERROR_ARROW_TAIL = '\u2500';
-        public DiceExpressionParsingException(in Substring context, string message) : base(GetMessage(in context, message)) { }
+        public FormulaParsingException(in Substring context, string message) : base(GetMessage(in context, message)) { }
 
-        public DiceExpressionParsingException(Exception innerException) :
+        public FormulaParsingException(Exception innerException) :
             base(GetMessage(innerException), innerException) { }
 
-        public DiceExpressionParsingException(in Substring context, Exception innerException) :
+        public FormulaParsingException(in Substring context, Exception innerException) :
             base(GetMessage(in context, innerException), innerException) { }
 
         private static string GetMessage(string message) =>
@@ -53,7 +53,7 @@ namespace DiceRoll.Input
             stringBuilder.Append(' ', 1 + context.Start);
             stringBuilder.Append(_ERROR_ARROW_TIP); // └
 
-            if (context.Length is not 1)
+            if (context.Length > 1)
             {
                 stringBuilder.Append(_ERROR_ARROW_HEAD, context.Length - 2); // ─
                 stringBuilder.Append(_ERROR_ARROW_NECK); // ┴

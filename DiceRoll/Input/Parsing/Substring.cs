@@ -13,7 +13,7 @@ namespace DiceRoll.Input
         public int End => Start + Length;
         public int UntilSourceEnd => Source.Length - End;
 
-        public bool Empty => Start == Source.Length;
+        public bool Empty => Start == End;
 
         public char this[int i] => IndexThis(i);
         public char this[Index i] => IndexThis(i);
@@ -101,7 +101,7 @@ namespace DiceRoll.Input
         }
 
         public override string ToString() =>
-            AsSpan().ToString();
+            $"\"{AsSpan().ToString()}\"";
 
         public Enumerator GetEnumerator() =>
             new(this);

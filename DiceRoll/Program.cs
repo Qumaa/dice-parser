@@ -9,11 +9,11 @@ namespace DiceRoll
         // todo: binary/unary operator with same signature ( x - y & -x - -y) 
         public static void Main(string[] args)
         {
-            const string arg = "^ 2 + 2";
+            args = "2 + 2 aaa".Split(' ');
             
             ExpressionParser parser = new(BuildTable());
 
-            INode output = parser.Parse(arg);
+            INode output = parser.Parse(args);
             
             output.Visit(new EvaluationVisitor());
         }

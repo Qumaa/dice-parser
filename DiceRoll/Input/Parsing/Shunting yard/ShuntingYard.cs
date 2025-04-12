@@ -9,66 +9,181 @@ namespace DiceRoll.Input
         private const string _TRAILING_DELAYED_OPERATORS_MESSAGE = "This operator didn't receive enough right-side operands.";
 
         private readonly TokensTable _tokensTable;
-        private readonly TableVisitor _tableVisitor;
         
-        private readonly Stack<OperatorToken> _operators;
-        private readonly Stack<INode> _operands;
-        private readonly Stack<DelayedOperatorToken> _delayedOperators;
+        private readonly FormulaAccumulator _formulaAccumulator;
+        private readonly FormulaSubstringsStack<OperatorToken> _operators;
+        private readonly FormulaSubstringsStack<INode> _operands;
+        private readonly FormulaSubstringsStack<DelayedOperatorToken> _delayedOperators;
 
         private int _parenthesisLevel;
+        
+        private bool ClosingParenthesisWouldImposeImbalance => _parenthesisLevel is 0;
 
         public ShuntingYard(TokensTable tokensTable)
         {
             _tokensTable = tokensTable;
-            _tableVisitor = new TableVisitor(this);
+
+            _formulaAccumulator = new FormulaAccumulator();
             
-            _operators = new Stack<OperatorToken>();
-            _operands = new Stack<INode>();
-            _delayedOperators = new Stack<DelayedOperatorToken>();
+            _operators = _formulaAccumulator.CreateStack<OperatorToken>();
+            _operands = _formulaAccumulator.CreateStack<INode>();
+            _delayedOperators = _formulaAccumulator.CreateStack<DelayedOperatorToken>();
+            
             _parenthesisLevel = 0;
         }
 
-        public void Push(string expression) =>
-            VisitTableIteratively(expression);
-
-        public INode Build() =>
-            CollapseOperatorsStack();
-        
-        private void VisitTableIteratively(string expression)
+        public void Push(string expression)
         {
-            Substring notParsed = Substring.All(expression);
+            ParseTokensIteratively(expression);
+            _formulaAccumulator.Accumulate(expression);
+        }
+
+        public INode Build()
+        {
+            INode node = CollapseOperatorsStack();
+            _formulaAccumulator.Clear();
+            return node;
+        }
+
+        private void ParseTokensIteratively(string expression)
+        {
+            Substring notParsed = Substring.All(expression).Trim();
             
-            do notParsed = VisitTableOrThrow(notParsed); 
+            do notParsed = ParseSubstringStart(in notParsed); 
             while (!notParsed.Empty);
         }
 
         private INode CollapseOperatorsStack()
         {
-            if (_delayedOperators.Count > 0)
-                throw new OperatorInvocationException(_TRAILING_DELAYED_OPERATORS_MESSAGE);
-            
-            while(_operators.TryPop(out OperatorToken token))
-                InvokeOperator(token.Invoker);
+            ThrowIfAnyTrailingOperators();
 
-            // todo
-            if (_operands.Count is not 1)
-                throw new Exception("trailing operands");
-            
-            return _operands.Pop();
-        }
-        
-        private Substring VisitTableOrThrow(Substring notParsed)
-        {
+            FormulaSubstring<OperatorToken> context = default;
+
             try
             {
-                Substring tokenMatch = _tokensTable.Visit(_tableVisitor, notParsed);
-                return notParsed.MoveStart(tokenMatch.Length);
+                while(_operators.TryPop(out context))
+                    InvokeOperator(context.Value.Invoker);
+            }
+            catch (FormulaParsingException)
+            {
+                throw;
             }
             catch (Exception e)
             {
-                throw new DiceExpressionParsingException(notParsed.TrimStart().SetLength(1), e);
+                throw new FormulaParsingException(_formulaAccumulator.AccumulatedFormulaSubstring(in context), e);
+            }
+
+            INode result = _operands.PopValue();
+            
+            ThrowIfAnyOperandLeft();
+
+            return result;
+        }
+
+    #region Tokens Parsing
+
+        private Substring ParseSubstringStart(in Substring notParsed)
+        {
+            Substring output = notParsed;
+
+            try
+            {
+                ParseSubstringStartOrThrow(in notParsed, out output);
+                return notParsed.MoveStart(output.Length).TrimStart();
+            }
+            catch (FormulaParsingException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                throw new FormulaParsingException(_formulaAccumulator.AccumulateAndBuild(in output), e);
             }
         }
+
+        private void ParseSubstringStartOrThrow(in Substring notParsed, out Substring output)
+        {
+            if (_tokensTable.StartsWithOpenParenthesis(in notParsed, out output))
+            {
+                OpenParenthesis(in output);
+                return;
+            }
+
+            if (_tokensTable.StartsWithCloseParenthesis(in notParsed, out output))
+            {
+                CloseParenthesis();
+                return;
+            }
+            
+            if (_tokensTable.StartsWithOperand(in notParsed, out output, out INumeric operand))
+            {
+                Operand(operand, in output);
+                return;
+            }
+
+            if (_tokensTable.StartsWithOperator(in notParsed, out output, out int precedence, out OperatorInvoker invoker))
+            {
+                Operator(precedence, invoker, in output);
+                return;
+            }
+
+            output = _tokensTable.UntilFirstKnownToken(in notParsed).Trim();
+            throw new UnknownTokenException(in output);
+        }
+
+        private void OpenParenthesis(in Substring context)
+        {
+            DenoteParenthesisOpening();
+            _operators.Push(OperatorToken.OpenParenthesis, in context);
+        }
+
+        private void CloseParenthesis()
+        {
+            if (ClosingParenthesisWouldImposeImbalance)
+                throw new UnbalancedParenthesisException();
+                
+            while (_operators.TryPop(out OperatorToken operatorToken))
+            {
+                if (operatorToken.IsOpenParenthesis)
+                {
+                    DenoteParenthesisClosing();
+                    InvokeDelayedOperators();
+                    return;
+                }
+
+                InvokeOperator(operatorToken.Invoker);
+            }
+        }
+
+        private void Operator(int precedence, OperatorInvoker invoker, in Substring context)
+        {
+            while (_operators.TryPeek(out OperatorToken lastOperator) &&
+                   !lastOperator.IsOpenParenthesis &&
+                   precedence < lastOperator.Precedence)
+                InvokeAfterDelayedOperators(_operators.PopValue().Invoker);
+
+            if (invoker.ExpectsRightOperands)
+                DelayOperatorInvocation(invoker, in context);
+            else
+                _operators.Push(new OperatorToken(precedence, invoker), in context);
+        }
+
+        private void Operand(INumeric operand, in Substring context)
+        {
+            _operands.Push(operand, in context);
+                
+            InvokeDelayedOperators();
+        }
+
+        private void DenoteParenthesisOpening() =>
+            _parenthesisLevel++;
+
+        private void DenoteParenthesisClosing() =>
+            _parenthesisLevel--;
+
+    #endregion
+
+    #region Operators Invocation
 
         private void InvokeOperator(OperatorInvoker invoker)
         {
@@ -79,7 +194,7 @@ namespace DiceRoll.Input
 
             OperandsStackAccess stackAccess = new(this, arity);
             
-            invoker.Invoke(in stackAccess);
+            invoker.Invoke(stackAccess);
         }
 
         private void InvokeDelayedOperators()
@@ -87,7 +202,7 @@ namespace DiceRoll.Input
             while (_delayedOperators.TryPeek(out DelayedOperatorToken token) &&
                    token.CapturedParenthesisLevel >= _parenthesisLevel &&
                    token.CapturedOperands + token.Invoker.Arity <= _operands.Count)
-                InvokeOperator(_delayedOperators.Pop().Invoker);
+                InvokeOperator(_delayedOperators.Pop().Value.Invoker);
         }
 
         private void InvokeAfterDelayedOperators(OperatorInvoker invoker)
@@ -96,77 +211,151 @@ namespace DiceRoll.Input
             InvokeOperator(invoker);
         }
 
-        private void DelayOperatorInvocation(OperatorInvoker invoker) =>
-            _delayedOperators.Push(new DelayedOperatorToken(invoker, _parenthesisLevel, _operands.Count));
+        private void DelayOperatorInvocation(OperatorInvoker invoker, in Substring context) =>
+            _delayedOperators.Push(new DelayedOperatorToken(invoker, _parenthesisLevel, _operands.Count), in context);
 
-        // todo: ditch (return to the previous approach with 4 methods on the table class). Will make notParsed always contain the actual info
-        private sealed class TableVisitor : TokensTable.IVisitor
+    #endregion
+
+    #region Throws
+
+        private void ThrowIfAnyTrailingOperators()
         {
-            private readonly ShuntingYard _context;
+            if (_delayedOperators.TryPeek(out FormulaSubstring<DelayedOperatorToken> context))
+                throw new FormulaParsingException(
+                    _formulaAccumulator.AccumulatedFormulaSubstring(in context),
+                    _TRAILING_DELAYED_OPERATORS_MESSAGE
+                    );
+        }
+        
+        private void ThrowIfAnyOperandLeft()
+        {
+            // todo
+            if (_operands.TryPeek(out FormulaSubstring<INode> context))
+                throw new FormulaParsingException(_formulaAccumulator.AccumulatedFormulaSubstring(in context), "trailing operands");
+        }
 
-            private bool ClosingParenthesisWouldImposeImbalance => _context._parenthesisLevel is 0;
+    #endregion
 
-            public TableVisitor(ShuntingYard context) 
+    #region Nested Types
+
+        private sealed class FormulaAccumulator
+        {
+            private readonly List<string> _accumulatedFormula = new();
+            private int _formulaLength = 0;
+
+            public FormulaSubstring<T> Wrap<T>(in T element, in Substring token) =>
+                Wrap(in element, token.Start, token.Length);
+            
+            public FormulaSubstring<T> Wrap<T>(in T element, int start, int length) =>
+                new(in element, _formulaLength + start, length);
+
+            public void Accumulate(string formulaPiece)
             {
-                _context = context;
-            }
-
-            public void OpenParenthesis()
-            {
-                DenoteParenthesisOpening();
-                _context._operators.Push(OperatorToken.OpenParenthesis);
-            }
-
-            public void CloseParenthesis()
-            {
-                if (ClosingParenthesisWouldImposeImbalance)
-                    throw new UnbalancedParenthesisException();
+                if (_accumulatedFormula.Count > 0 && !char.IsWhiteSpace(_accumulatedFormula[^1][^1]))
+                    _accumulatedFormula.Add(" ");
                 
-                while (_context._operators.TryPop(out OperatorToken operatorToken))
+                _accumulatedFormula.Add(formulaPiece);
+                _formulaLength += formulaPiece.Length + 1;
+            }
+
+            public Substring AccumulateAndBuild(in Substring substring)
+            {
+                int start = substring.Start + _formulaLength;
+                
+                Range range = new(new Index(start), new Index(start + substring.Length));
+                
+                Accumulate(substring.Source);
+
+                return AccumulatedFormulaSubstring(range);
+            }
+
+            public Substring AccumulatedFormulaSubstring(in Range tokenRange)
+            {
+                string source = string.Concat(_accumulatedFormula);
+                (int Offset, int Length) tuple = tokenRange.GetOffsetAndLength(source.Length);
+
+                return new Substring(source, tuple.Offset, tuple.Length);
+            }
+            
+            public Substring AccumulatedFormulaSubstring<T>(in FormulaSubstring<T> token) =>
+                AccumulatedFormulaSubstring(token.Range);
+
+            public void Clear()
+            {
+                _accumulatedFormula.Clear();
+                _formulaLength = 0;
+            }
+
+            public FormulaSubstringsStack<T> CreateStack<T>() =>
+                new(this);
+        }
+
+        private sealed class FormulaSubstringsStack<T>
+        {
+            private readonly Stack<FormulaSubstring<T>> _stack;
+            private readonly FormulaAccumulator _formulaAccumulator;
+            
+            public FormulaSubstringsStack(FormulaAccumulator formulaAccumulator)
+            {
+                _formulaAccumulator = formulaAccumulator;
+
+                _stack = new Stack<FormulaSubstring<T>>();
+            }
+
+            public int Count => _stack.Count;
+
+            public void Push(in T value, in Substring context) =>
+                Push(_formulaAccumulator.Wrap(in value, in context));
+            public void Push(in T value, int start, int length) =>
+                Push(_formulaAccumulator.Wrap(in value, start, length));
+            
+            public void Push(in FormulaSubstring<T> context) =>
+                _stack.Push(context);
+            
+            public FormulaSubstring<T> Pop() =>
+                _stack.Pop();
+
+            public T PopValue() =>
+                Pop().Value;
+
+            public FormulaSubstring<T> Peek() =>
+                _stack.Peek();
+            public T PeekValue() =>
+                Peek().Value;
+
+            public bool TryPeek(out FormulaSubstring<T> context) =>
+                _stack.TryPeek(out context);
+
+            public bool TryPeek(out T value)
+            {
+                if (TryPeek(out FormulaSubstring<T> context))
                 {
-                    if (operatorToken.IsOpenParenthesis)
-                    {
-                        DenoteParenthesisClosing();
-                        _context.InvokeDelayedOperators();
-                        return;
-                    }
-
-                    _context.InvokeOperator(operatorToken.Invoker);
+                    value = context.Value;
+                    return true;
                 }
+
+                value = default;
+                return false;
             }
 
-            public void Operator(int precedence, OperatorInvoker invoker)
+            public bool TryPop(out FormulaSubstring<T> context) =>
+                _stack.TryPop(out context);
+
+            public bool TryPop(out T value)
             {
-                while (_context._operators.TryPeek(out OperatorToken lastOperator) &&
-                       !lastOperator.IsOpenParenthesis &&
-                       precedence < lastOperator.Precedence)
-                    _context.InvokeAfterDelayedOperators(_context._operators.Pop().Invoker);
+                if (TryPop(out FormulaSubstring<T> context))
+                {
+                    value = context.Value;
+                    return true;
+                }
 
-                if (invoker.ExpectsRightOperands)
-                    _context.DelayOperatorInvocation(invoker);
-                else
-                    _context._operators.Push(new OperatorToken(precedence, invoker));
+                value = default;
+                return false;
             }
-
-            public void Operand(INumeric operand)
-            {
-                _context._operands.Push(operand);
-                
-                _context.InvokeDelayedOperators();
-            }
-
-            public void UnknownToken(in Substring tokenMatch) =>
-                throw new UnknownTokenException(in tokenMatch);
-
-            private void DenoteParenthesisOpening() =>
-                _context._parenthesisLevel++;
-
-            private void DenoteParenthesisClosing() =>
-                _context._parenthesisLevel--;
         }
 
         [StructLayout(LayoutKind.Auto)]
-        public readonly struct OperandsStackAccess
+        public struct OperandsStackAccess
         {
             private const string _EXCESSIVE_POPPING_MESSAGE_FORMAT =
                 "An attempt to work on more operands than the arity of the operator was intercepted. The operator's arity ({0}) is faulty.";
@@ -177,19 +366,32 @@ namespace DiceRoll.Input
             private readonly int _arity;
             private readonly int _popLimit;
 
+            private int _start;
+            private int _length;
+
             public OperandsStackAccess(ShuntingYard context, int arity)
             {
                 _context = context;
                 _arity = arity;
                 _popLimit = _context._operands.Count - arity;
+
+                FormulaSubstring<INode> peek = _context._operands.Peek();
+                _start = peek.Range.Start.Value;
+                _length = peek.Range.End.Value - _start;
             }
 
             public T Pop<T>() where T : INode
             {
                 if (_context._operands.Count - 1 < _popLimit)
                     throw new OperatorInvocationException(ExcessivePoppingMessage());
+
+                FormulaSubstring<INode> context = _context._operands.Pop();
+
+                int startDiff = _start - context.Range.Start.Value;
+                _start -= startDiff;
+                _length += startDiff;
                 
-                INode node = _context._operands.Pop();
+                INode node = context.Value;
                 
                 return node is T operand ?
                     operand :
@@ -204,7 +406,7 @@ namespace DiceRoll.Input
                 if (_context._operands.Count != _popLimit)
                     throw new OperatorInvocationException(_PREMATURE_PUSH_MESSAGE);
                 
-                _context._operands.Push(operand);
+                _context._operands.Push(operand, _start, _length);
             }
         }
 
@@ -225,7 +427,7 @@ namespace DiceRoll.Input
                     EncodeRightFlowDirectionArity(arity);
             }
 
-            public abstract void Invoke(in OperandsStackAccess operands);
+            public abstract void Invoke(OperandsStackAccess operands);
 
             private int DecodeArityFromRightFlowDirection() =>
                 -_arity + 1;
@@ -274,5 +476,20 @@ namespace DiceRoll.Input
                 CapturedOperands = capturedOperands;
             }
         }
+        
+        [StructLayout(LayoutKind.Auto)]
+        private readonly struct FormulaSubstring<T>
+        {
+            public readonly Range Range;
+            public readonly T Value;
+            
+            public FormulaSubstring(in T value, int contextStart, int contextLength)
+            {
+                Value = value;
+                Range = new Range(new Index(contextStart), new Index(contextStart + contextLength));
+            }
+        }
+
+    #endregion
     }
 }

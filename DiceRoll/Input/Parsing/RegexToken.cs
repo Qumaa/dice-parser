@@ -18,7 +18,7 @@ namespace DiceRoll.Input
 
         public RegexToken(Regex pattern) : this(new [] {pattern}) { }
 
-        public bool Matches(Substring input, out Substring substring)
+        public bool Matches(in Substring input, out Substring substring)
         {
             // ReSharper disable once LoopCanBeConvertedToQuery
             // ReSharper disable once ForCanBeConvertedToForeach
