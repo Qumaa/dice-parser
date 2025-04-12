@@ -229,7 +229,6 @@ namespace DiceRoll.Input
         
         private void ThrowIfAnyOperandLeft()
         {
-            // todo
             if (_operands.TryPeek(out FormulaSubstring<INode> context))
                 throw new FormulaParsingException(_formulaAccumulator.AccumulatedFormulaSubstring(in context), "trailing operands");
         }
