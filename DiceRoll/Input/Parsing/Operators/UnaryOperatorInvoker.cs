@@ -1,6 +1,6 @@
 ﻿namespace DiceRoll.Input
 {
-    public sealed class UnaryOperatorInvoker<T> : OperatorInvoker where T : INode
+    internal sealed class UnaryOperatorInvoker<T> : OperatorInvoker where T : INode
     {
         private readonly UnaryInvocationHandler<T> _handler;
         

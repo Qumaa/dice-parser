@@ -6,11 +6,11 @@
         // negative = takes parameters from the right; converted to positive by negating and adding 1
         private readonly int _arity;
 
-        public bool ExpectsRightOperands => _arity <= 0;
+        internal bool ExpectsRightOperands => _arity <= 0;
 
-        public int Arity => ExpectsRightOperands ? DecodeArityFromRightFlowDirection() : _arity;
+        internal int Arity => ExpectsRightOperands ? DecodeArityFromRightFlowDirection() : _arity;
 
-        protected OperatorInvoker(int arity, FlowDirection flowDirection = FlowDirection.Left)
+        protected private OperatorInvoker(int arity, FlowDirection flowDirection = FlowDirection.Left)
         {
             _arity = flowDirection is FlowDirection.Left ?
                 arity :
@@ -33,5 +33,15 @@
             Right = 1
             // are (... 3 2 1 x) and (... 4 3 2 x 1) needed?
         }
+
+        public static OperatorInvoker Binary<TLeft, TRight>(BinaryInvocationHandler<TLeft, TRight> handler)
+            where TLeft : INode where TRight : INode =>
+            new BinaryOperatorInvoker<TLeft, TRight>(handler);
+
+        public static OperatorInvoker Unary<T>(UnaryInvocationHandler<T> handler) where T : INode =>
+            new UnaryOperatorInvoker<T>(handler);
+        
+        public static OperatorInvoker ReversedUnary<T>(UnaryInvocationHandler<T> handler) where T : INode =>
+            new ReversedUnaryOperatorInvoker<T>(handler);
     }
 }
