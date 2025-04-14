@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace DiceRoll.Input
 {
@@ -16,11 +17,11 @@ namespace DiceRoll.Input
 
         public int Count => _stack.Count;
 
-        public void Push(in T value, in Substring context) =>
+        public void MapAndPush(in T value, in Substring context) =>
             Push(_inputMapper.Map(in value, in context));
         
-        public void Push(in T value, int start, int length) =>
-            Push(new Mapped<T>(in value, start, length));
+        public void Push(in T value, in Range range) =>
+            Push(new Mapped<T>(in value, range));
 
         public void Push(in Mapped<T> context) =>
             _stack.Push(context);

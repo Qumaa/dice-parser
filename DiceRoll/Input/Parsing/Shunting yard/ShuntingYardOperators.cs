@@ -12,7 +12,7 @@ namespace DiceRoll.Input
         }
 
         public void Push(OperatorToken operatorToken, in Substring context) =>
-            _state.Operators.Push(in operatorToken, context);
+            _state.Operators.MapAndPush(in operatorToken, context);
 
         public bool TryPeek(out OperatorToken operatorToken) =>
             _state.Operators.TryPeek(out operatorToken);
@@ -53,7 +53,7 @@ namespace DiceRoll.Input
         }
 
         public void DelayOperatorInvocation(OperatorInvoker invoker, in Substring context) =>
-            _state.DelayedOperators.Push(new DelayedOperatorToken(invoker, _state.ParenthesisLevel, _state.Operands.Count), in context);
+            _state.DelayedOperators.MapAndPush(new DelayedOperatorToken(invoker, _state.ParenthesisLevel, _state.Operands.Count), in context);
 
         private void InvokeOperatorOrThrow(in Mapped<DelayedOperatorToken> operatorToken)
         {
@@ -74,9 +74,7 @@ namespace DiceRoll.Input
             if (_state.Operands.Count < arity)
                 throw new OperatorInvocationException(ParsingErrorMessages.OperandsExpected(arity, _state.Operands.Count));
 
-            OperandsStackAccess stackAccess = new(_state.Operands, arity);
-            
-            invoker.Invoke(stackAccess);
+            invoker.Invoke(new OperandsStackAccess(_state.Operands, arity));
         }
     }
 }

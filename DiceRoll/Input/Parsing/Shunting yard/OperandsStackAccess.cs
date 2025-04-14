@@ -9,19 +9,16 @@ namespace DiceRoll.Input
         private readonly MappedStack<INode> _operands;
         private readonly int _arity;
         private readonly int _popLimit;
-        
-        private int _resultStart;
-        private int _resultLength;
+
+        private Range _resultRange;
 
         public OperandsStackAccess(MappedStack<INode> operands, int arity)
         {
             _operands = operands;
             _arity = arity;
             _popLimit = operands.Count - arity;
-            
-            Mapped<INode> peek = _operands.Peek();
-            _resultStart = peek.Range.Start.Value;
-            _resultLength = peek.Range.End.Value - _resultStart;
+
+            _resultRange = _operands.Peek().Range;
         }
 
         public T Pop<T>() where T : INode
@@ -30,23 +27,17 @@ namespace DiceRoll.Input
 
             Mapped<INode> operand = _operands.Pop();
 
-            IncludeToOutputTokenRange(in operand.Range);
-
+            _resultRange = operand.Merge(_resultRange);
+            
             return CastOrThrow<T>(operand.Value);
-        }
-
-        private void IncludeToOutputTokenRange(in Range range)
-        {
-            int startDiff = _resultStart - range.Start.Value;
-            _resultStart -= startDiff;
-            _resultLength += startDiff;
         }
 
         public void PushResult(INode operand)
         {
+            ArgumentNullException.ThrowIfNull(operand);
             ThrowIfPushingPrematurely();
 
-            _operands.Push(operand, _resultStart, _resultLength);
+            _operands.Push(operand, _resultRange);
         }
 
         private void ThrowIfExceedingArity()

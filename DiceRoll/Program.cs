@@ -8,7 +8,7 @@ namespace DiceRoll
     {
         public static void Main(string[] args)
         {
-            args = "-2 - - 2".Split(' ');
+            args = "(1 - 1) 2 / 2".Split(' ');
             
             ExpressionParser parser = new(BuildTable());
 

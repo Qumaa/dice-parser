@@ -35,7 +35,7 @@ namespace DiceRoll.Input
             if (context.Length > 1)
             {
                 stringBuilder.Append("..");
-                stringBuilder.Append(context.End);
+                stringBuilder.Append(context.End - 1);
             }
             stringBuilder.AppendLine();
 
