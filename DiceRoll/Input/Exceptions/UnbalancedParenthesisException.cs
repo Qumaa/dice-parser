@@ -4,8 +4,6 @@ namespace DiceRoll.Input
 {
     public sealed class UnbalancedParenthesisException : Exception
     {
-        private const string _MESSAGE = "Couldn't close parenthesis: unbalanced parenthesis within the expression.";
-
-        public UnbalancedParenthesisException() : base(_MESSAGE) { }
+        public UnbalancedParenthesisException() : base(ParsingErrorMessages.UNBALANCED_PARENTHESIS) { }
     }
 }

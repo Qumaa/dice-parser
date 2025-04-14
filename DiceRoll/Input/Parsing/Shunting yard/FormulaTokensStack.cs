@@ -2,48 +2,48 @@
 
 namespace DiceRoll.Input
 {
-    public sealed class FormulaSubstringsStack<T>
+    public sealed class FormulaTokensStack<T>
     {
-        private readonly Stack<FormulaSubstring<T>> _stack;
+        private readonly Stack<FormulaToken<T>> _stack;
         private readonly FormulaAccumulator _formulaAccumulator;
             
-        public FormulaSubstringsStack(FormulaAccumulator formulaAccumulator)
+        public FormulaTokensStack(FormulaAccumulator formulaAccumulator)
         {
             _formulaAccumulator = formulaAccumulator;
 
-            _stack = new Stack<FormulaSubstring<T>>();
+            _stack = new Stack<FormulaToken<T>>();
         }
 
         public int Count => _stack.Count;
 
         public void Push(in T value, in Substring context) =>
-            Push(_formulaAccumulator.Wrap(in value, in context));
+            Push(_formulaAccumulator.Tokenize(in value, in context));
         public void Push(in T value, int start, int length) =>
-            Push(_formulaAccumulator.Wrap(in value, start, length));
+            Push(new FormulaToken<T>(in value, start, length));
 
-        public void PushWithoutContext(in T value) =>
-            _stack.Push(FormulaSubstring<T>.Inexpressable(value));
+        public void PushWithoutToken(in T value) =>
+            _stack.Push(FormulaToken<T>.NotTokenized(value));
 
-        public void Push(in FormulaSubstring<T> context) =>
+        public void Push(in FormulaToken<T> context) =>
             _stack.Push(context);
             
-        public FormulaSubstring<T> Pop() =>
+        public FormulaToken<T> Pop() =>
             _stack.Pop();
 
         public T PopValue() =>
             Pop().Value;
 
-        public FormulaSubstring<T> Peek() =>
+        public FormulaToken<T> Peek() =>
             _stack.Peek();
         public T PeekValue() =>
             Peek().Value;
 
-        public bool TryPeek(out FormulaSubstring<T> context) =>
+        public bool TryPeek(out FormulaToken<T> context) =>
             _stack.TryPeek(out context);
 
         public bool TryPeek(out T value)
         {
-            if (TryPeek(out FormulaSubstring<T> context))
+            if (TryPeek(out FormulaToken<T> context))
             {
                 value = context.Value;
                 return true;
@@ -53,12 +53,12 @@ namespace DiceRoll.Input
             return false;
         }
 
-        public bool TryPop(out FormulaSubstring<T> context) =>
+        public bool TryPop(out FormulaToken<T> context) =>
             _stack.TryPop(out context);
 
         public bool TryPop(out T value)
         {
-            if (TryPop(out FormulaSubstring<T> context))
+            if (TryPop(out FormulaToken<T> context))
             {
                 value = context.Value;
                 return true;

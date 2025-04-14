@@ -7,51 +7,69 @@ namespace DiceRoll.Input
     {
         private readonly List<string> _accumulatedFormula = new();
         private int _formulaLength = 0;
+        private int _previousLength = 0;
 
-        public FormulaSubstring<T> Wrap<T>(in T element, in Substring token) =>
-            Wrap(in element, token.Start, token.Length);
+        public FormulaToken<T> Tokenize<T>(in T element, in Substring token) =>
+            Tokenize(in element, token.Start, token.Length);
             
-        public FormulaSubstring<T> Wrap<T>(in T element, int start, int length) =>
-            new(in element, _formulaLength + start, length);
+        public FormulaToken<T> Tokenize<T>(in T element, int start, int length) =>
+            new(in element, _previousLength + start, length);
 
-        public void Accumulate(string formulaPiece)
+        public void Append(string formulaPiece)
         {
             if (_accumulatedFormula.Count > 0 && !char.IsWhiteSpace(_accumulatedFormula[^1][^1]))
                 _accumulatedFormula.Add(" ");
                 
             _accumulatedFormula.Add(formulaPiece);
+            _previousLength = _formulaLength;
             _formulaLength += formulaPiece.Length + 1;
         }
 
-        public Substring AccumulateAndBuild(in Substring substring)
+        public Substring AppendAndGetSubstring(in Substring substring)
         {
-            int start = substring.Start + _formulaLength;
+            int start = substring.Start + _previousLength;
                 
             Range range = new(new Index(start), new Index(start + substring.Length));
                 
-            Accumulate(substring.Source);
+            Append(substring.Source);
 
-            return AccumulatedFormulaSubstring(range);
+            return GetFormulaSubstring(range);
         }
 
-        public Substring AccumulatedFormulaSubstring(in Range tokenRange)
+        public Substring GetFormulaSubstring(in Range tokenRange)
         {
-            string source = string.Concat(_accumulatedFormula);
+            string source = ConcatenateFormula();
             (int Offset, int Length) tuple = tokenRange.GetOffsetAndLength(source.Length);
 
             return new Substring(source, tuple.Offset, tuple.Length);
         }
+
+        private string ConcatenateFormula()
+        {
+            if (_formulaLength is 0)
+                return string.Empty;
             
-        public Substring AccumulatedFormulaSubstring<T>(in FormulaSubstring<T> token) =>
-            AccumulatedFormulaSubstring(token.Range);
+            char[] chars = new char[_formulaLength - 1];
+
+            int i = 0;
+            foreach (string piece in _accumulatedFormula)
+            foreach (char c in piece)
+                chars[i++] = c;
+            
+            return new string(chars);
+        }
+
+        public Substring GetFormulaSubstring<T>(in FormulaToken<T> token) =>
+            GetFormulaSubstring(token.Range);
 
         public void Clear()
         {
             _accumulatedFormula.Clear();
             _formulaLength = 0;
+            _previousLength = 0;
         }
 
-        public FormulaSubstringsStack<T> CreateStack<T>() =>
+        public FormulaTokensStack<T> CreateStack<T>() =>
             new(this);
     }
 }

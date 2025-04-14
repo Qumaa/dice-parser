@@ -101,7 +101,7 @@ namespace DiceRoll.Input
         }
 
         public override string ToString() =>
-            $"\"{AsSpan().ToString()}\"";
+            AsSpan().ToString();
 
         public Enumerator GetEnumerator() =>
             new(this);

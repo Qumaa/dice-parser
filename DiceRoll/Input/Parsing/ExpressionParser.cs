@@ -12,16 +12,16 @@
 
         public INode Parse(string expression)
         {
-                _nodeBuilder.Push(expression);
-                return _nodeBuilder.Build();
+                _nodeBuilder.Append(expression);
+                return _nodeBuilder.Parse();
         }
 
         public INode Parse(string[] expression)
         {
             foreach (string segment in expression)
-                _nodeBuilder.Push(segment);
+                _nodeBuilder.Append(segment);
 
-            return _nodeBuilder.Build();
+            return _nodeBuilder.Parse();
         }
     }
 }

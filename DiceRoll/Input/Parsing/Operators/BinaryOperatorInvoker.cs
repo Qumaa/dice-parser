@@ -10,7 +10,7 @@
             _handler = handler;
         }
 
-        public override void Invoke(in OperandsStackAccess operands)
+        public override void Invoke(OperandsStackAccess operands)
         {
             TRight right = operands.Pop<TRight>();
             TLeft left = operands.Pop<TLeft>();
