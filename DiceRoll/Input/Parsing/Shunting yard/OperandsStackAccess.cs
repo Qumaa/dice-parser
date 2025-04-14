@@ -6,20 +6,20 @@ namespace DiceRoll.Input
     [StructLayout(LayoutKind.Auto)]
     public struct OperandsStackAccess
     {
-        private readonly FormulaTokensStack<INode> _operands;
+        private readonly MappedStack<INode> _operands;
         private readonly int _arity;
         private readonly int _popLimit;
         
         private int _resultStart;
         private int _resultLength;
 
-        public OperandsStackAccess(FormulaTokensStack<INode> operands, int arity)
+        public OperandsStackAccess(MappedStack<INode> operands, int arity)
         {
             _operands = operands;
             _arity = arity;
             _popLimit = operands.Count - arity;
             
-            FormulaToken<INode> peek = _operands.Peek();
+            Mapped<INode> peek = _operands.Peek();
             _resultStart = peek.Range.Start.Value;
             _resultLength = peek.Range.End.Value - _resultStart;
         }
@@ -28,7 +28,7 @@ namespace DiceRoll.Input
         {
             ThrowIfExceedingArity();
 
-            FormulaToken<INode> operand = _operands.Pop();
+            Mapped<INode> operand = _operands.Pop();
 
             IncludeToOutputTokenRange(in operand.Range);
 

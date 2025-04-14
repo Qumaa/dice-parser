@@ -17,16 +17,16 @@ namespace DiceRoll.Input
         public bool TryPeek(out OperatorToken operatorToken) =>
             _state.Operators.TryPeek(out operatorToken);
         
-        public bool TryPeek(out FormulaToken<DelayedOperatorToken> operatorToken) =>
+        public bool TryPeek(out Mapped<DelayedOperatorToken> operatorToken) =>
             _state.DelayedOperators.TryPeek(out operatorToken);
 
-        public bool TryPop(out FormulaToken<OperatorToken> operatorToken) =>
+        public bool TryPop(out Mapped<OperatorToken> operatorToken) =>
             _state.Operators.TryPop(out operatorToken);
 
-        public FormulaToken<OperatorToken> Pop() =>
+        public Mapped<OperatorToken> Pop() =>
             _state.Operators.Pop();
 
-        public void InvokeOperatorOrThrow(in FormulaToken<OperatorToken> operatorToken)
+        public void InvokeOperatorOrThrow(in Mapped<OperatorToken> operatorToken)
         {
             try
             {
@@ -46,7 +46,7 @@ namespace DiceRoll.Input
                 InvokeOperatorOrThrow(_state.DelayedOperators.Pop());
         }
 
-        public void InvokeAfterDelayedOperators(in FormulaToken<OperatorToken> invoker)
+        public void InvokeAfterDelayedOperators(in Mapped<OperatorToken> invoker)
         {
             InvokeDelayedOperators();
             InvokeOperatorOrThrow(in invoker);
@@ -55,7 +55,7 @@ namespace DiceRoll.Input
         public void DelayOperatorInvocation(OperatorInvoker invoker, in Substring context) =>
             _state.DelayedOperators.Push(new DelayedOperatorToken(invoker, _state.ParenthesisLevel, _state.Operands.Count), in context);
 
-        private void InvokeOperatorOrThrow(in FormulaToken<DelayedOperatorToken> operatorToken)
+        private void InvokeOperatorOrThrow(in Mapped<DelayedOperatorToken> operatorToken)
         {
             try
             {

@@ -17,7 +17,7 @@ namespace DiceRoll.Input
         
         public void Read(string expression)
         {
-            _state.Accumulator.Append(expression);
+            _state.Mapper.Append(expression);
             ParseTokensIteratively(expression);
         }
 
@@ -99,7 +99,7 @@ namespace DiceRoll.Input
         {
             ThrowIfUnbalancedParenthesis(in token);
 
-            while (_operators.TryPop(out FormulaToken<OperatorToken> operatorToken))
+            while (_operators.TryPop(out Mapped<OperatorToken> operatorToken))
             {
                 if (operatorToken.Value.IsOpenParenthesis)
                     break;

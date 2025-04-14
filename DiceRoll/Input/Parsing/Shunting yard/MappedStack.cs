@@ -2,48 +2,46 @@
 
 namespace DiceRoll.Input
 {
-    public sealed class FormulaTokensStack<T>
+    public sealed class MappedStack<T>
     {
-        private readonly Stack<FormulaToken<T>> _stack;
-        private readonly FormulaAccumulator _formulaAccumulator;
+        private readonly Stack<Mapped<T>> _stack;
+        private readonly InputMapper _inputMapper;
             
-        public FormulaTokensStack(FormulaAccumulator formulaAccumulator)
+        public MappedStack(InputMapper inputMapper)
         {
-            _formulaAccumulator = formulaAccumulator;
+            _inputMapper = inputMapper;
 
-            _stack = new Stack<FormulaToken<T>>();
+            _stack = new Stack<Mapped<T>>();
         }
 
         public int Count => _stack.Count;
 
         public void Push(in T value, in Substring context) =>
-            Push(_formulaAccumulator.Tokenize(in value, in context));
+            Push(_inputMapper.Map(in value, in context));
+        
         public void Push(in T value, int start, int length) =>
-            Push(new FormulaToken<T>(in value, start, length));
+            Push(new Mapped<T>(in value, start, length));
 
-        public void PushWithoutToken(in T value) =>
-            _stack.Push(FormulaToken<T>.NotTokenized(value));
-
-        public void Push(in FormulaToken<T> context) =>
+        public void Push(in Mapped<T> context) =>
             _stack.Push(context);
             
-        public FormulaToken<T> Pop() =>
+        public Mapped<T> Pop() =>
             _stack.Pop();
 
         public T PopValue() =>
             Pop().Value;
 
-        public FormulaToken<T> Peek() =>
+        public Mapped<T> Peek() =>
             _stack.Peek();
         public T PeekValue() =>
             Peek().Value;
 
-        public bool TryPeek(out FormulaToken<T> context) =>
+        public bool TryPeek(out Mapped<T> context) =>
             _stack.TryPeek(out context);
 
         public bool TryPeek(out T value)
         {
-            if (TryPeek(out FormulaToken<T> context))
+            if (TryPeek(out Mapped<T> context))
             {
                 value = context.Value;
                 return true;
@@ -53,12 +51,12 @@ namespace DiceRoll.Input
             return false;
         }
 
-        public bool TryPop(out FormulaToken<T> context) =>
+        public bool TryPop(out Mapped<T> context) =>
             _stack.TryPop(out context);
 
         public bool TryPop(out T value)
         {
-            if (TryPop(out FormulaToken<T> context))
+            if (TryPop(out Mapped<T> context))
             {
                 value = context.Value;
                 return true;
