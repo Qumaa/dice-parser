@@ -68,19 +68,30 @@ namespace DiceRoll.Input
                 return;
             }
 
-            if (_state.Tokens.StartsWithOperator(in notParsed, out output, out int precedence, out OperatorInvoker invoker))
+            bool isUnary = _state.PrecedingTokenKind is TokenKind.ExpressionStart or TokenKind.Operator;
+            OperatorKind operatorKind = isUnary ? OperatorKind.Unary : OperatorKind.Binary;
+
+            if (_state.Tokens.StartsWithOperator(
+                    in notParsed,
+                    operatorKind,
+                    out output,
+                    out int precedence,
+                    out OperatorInvoker invoker
+                    ))
             {
                 Operator(precedence, invoker, in output);
                 return;
             }
 
-            output = _state.Tokens.UntilFirstKnownToken(in notParsed).Trim();
+            output = _state.Tokens.UntilFirstKnownToken(in notParsed, operatorKind.Reversed()).Trim();
             throw new UnknownTokenException(in output);
         }
         
         private void OpenParenthesis(in Substring context)
         {
             _state.DenoteParenthesisOpening();
+            _state.DenoteNewExpressionStart();
+            
             _operators.Push(OperatorToken.OpenParenthesis, in context);
         }
 
@@ -91,14 +102,15 @@ namespace DiceRoll.Input
             while (_operators.TryPop(out FormulaToken<OperatorToken> operatorToken))
             {
                 if (operatorToken.Value.IsOpenParenthesis)
-                {
-                    _state.DenoteParenthesisClosing();
-                    _operators.InvokeDelayedOperators();
-                    return;
-                }
+                    break;
 
                 _operators.InvokeOperatorOrThrow(in operatorToken);
             }
+            
+            _state.DenoteParenthesisClosing();
+            _state.DenoteOperandProcessing();
+            
+            _operators.InvokeDelayedOperators();
         }
 
         private void Operator(int precedence, OperatorInvoker invoker, in Substring context)
@@ -112,12 +124,16 @@ namespace DiceRoll.Input
                 _operators.DelayOperatorInvocation(invoker, in context);
             else
                 _operators.Push(new OperatorToken(precedence, invoker), in context);
+            
+            _state.DenoteOperatorProcessing();
         }
 
         private void Operand(INumeric operand, in Substring context)
         {
             _operands.Push(operand, in context);
                 
+            _state.DenoteOperandProcessing();
+            
             _operators.InvokeDelayedOperators();
         }
         

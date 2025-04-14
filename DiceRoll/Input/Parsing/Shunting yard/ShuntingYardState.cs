@@ -10,6 +10,7 @@ namespace DiceRoll.Input
         public FormulaTokensStack<OperatorToken> Operators { get; }
         public FormulaTokensStack<INode> Operands { get; }
         public FormulaTokensStack<DelayedOperatorToken> DelayedOperators { get; }
+        public TokenKind PrecedingTokenKind { get; private set; }
 
         public bool ClosingParenthesisWouldImposeImbalance => ParenthesisLevel is 0;
 
@@ -22,6 +23,9 @@ namespace DiceRoll.Input
             Operators = Accumulator.CreateStack<OperatorToken>();
             Operands = Accumulator.CreateStack<INode>();
             DelayedOperators = Accumulator.CreateStack<DelayedOperatorToken>();
+
+            PrecedingTokenKind = TokenKind.ExpressionStart;
+            ParenthesisLevel = 0;
         }
 
         public void DenoteParenthesisOpening() =>
@@ -29,6 +33,15 @@ namespace DiceRoll.Input
 
         public void DenoteParenthesisClosing() =>
             ParenthesisLevel--;
+
+        public void DenoteNewExpressionStart() =>
+            PrecedingTokenKind = TokenKind.ExpressionStart;
+
+        public void DenoteOperatorProcessing() =>
+            PrecedingTokenKind = TokenKind.Operator;
+        
+        public void DenoteOperandProcessing() =>
+            PrecedingTokenKind = TokenKind.Operand;
         
         public void Throw<T>(in FormulaToken<T> context, string message) =>
             throw new ParsingException(Accumulator.GetFormulaSubstring(in context), message);

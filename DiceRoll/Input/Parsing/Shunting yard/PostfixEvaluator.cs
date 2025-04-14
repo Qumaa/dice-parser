@@ -17,6 +17,7 @@
         {
             INode node = CollapseOperatorsStack();
             _state.Accumulator.Clear();
+            _state.DenoteNewExpressionStart();
             return node;
         }
         

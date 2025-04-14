@@ -6,10 +6,9 @@ namespace DiceRoll
 {
     public class Program
     {
-        // todo: binary/unary operator with same signature ( x - y & -x - -y) 
         public static void Main(string[] args)
         {
-            args = "(2 + 2) 2 + 2".Split(' ');
+            args = "-2 - - 2".Split(' ');
             
             ExpressionParser parser = new(BuildTable());
 
@@ -30,7 +29,7 @@ namespace DiceRoll
             builder.AddOperatorToken<INumeric, INumeric>(100, static (left, right) => Node.Operator.DivideRoundDown(left, right), "/");
             
             builder.AddOperatorToken<INumeric, INumeric>(90, static (left, right) => Node.Operator.Add(left, right), "+");
-            // builder.AddOperatorToken(90, "-"); // todo
+            builder.AddOperatorToken<INumeric, INumeric>(90, static (left, right) => Node.Operator.Subtract(left, right), "-");
             
             builder.AddOperatorToken<INumeric, INumeric>(80, static (left, right) => Node.Operator.GreaterThanOrEqual(left, right), ">=");
             builder.AddOperatorToken<INumeric, INumeric>(80, static (left, right) => Node.Operator.LessThanOrEqual(left, right), "<=");
