@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -7,40 +8,30 @@ namespace DiceRoll.Input
     public class DiceOperandBuilder
     {
         private readonly List<string> _delimiterTokens;
-        private readonly List<DiceCompositionToken> _compositionTokens;
+        private readonly List<RawCompositionToken> _compositionTokens;
 
-        private DiceOperandBuilder(List<string> delimiterTokens, IToken defaultComposition,
+        private DiceOperandBuilder(List<string> delimiterTokens, IEnumerable<string> defaultComposition,
             DiceCompositionHandler compositionHandler)
         {
             _delimiterTokens = delimiterTokens;
-            _compositionTokens = new List<DiceCompositionToken> { new(defaultComposition, compositionHandler) };
+            _compositionTokens = new List<RawCompositionToken> { new(defaultComposition, compositionHandler) };
         }
 
-        public DiceOperandBuilder(string defaultDelimiter, IToken defaultComposition, 
-            DiceCompositionHandler compositionHandler) :
-            this(new List<string> { defaultDelimiter }, defaultComposition, compositionHandler) { }
-
-        public DiceOperandBuilder(IEnumerable<string> defaultDelimiters, IToken defaultComposition, 
+        public DiceOperandBuilder(IEnumerable<string> defaultDelimiters, IEnumerable<string> defaultComposition, 
             DiceCompositionHandler compositionHandler) :
             this(new List<string>(defaultDelimiters), defaultComposition, compositionHandler) { }
 
-        public DiceOperandBuilder(string defaultDelimiter,
-            string defaultComposition, DiceCompositionHandler compositionHandler) :
-            this(defaultDelimiter, RegexToken.ExactIgnoreCase(defaultComposition),
-                compositionHandler) { }
+        public DiceOperandBuilder(string defaultDelimiter, IEnumerable<string> defaultComposition, 
+            DiceCompositionHandler compositionHandler) :
+            this(new List<string> { defaultDelimiter }, defaultComposition, compositionHandler) { }
+
         public DiceOperandBuilder(IEnumerable<string> defaultDelimiters,
             string defaultComposition, DiceCompositionHandler compositionHandler) :
-            this(defaultDelimiters, RegexToken.ExactIgnoreCase(defaultComposition),
-                compositionHandler) { }
+            this(new List<string>(defaultDelimiters), ToEnumerable(defaultComposition), compositionHandler) { }
 
         public DiceOperandBuilder(string defaultDelimiter,
-            IEnumerable<string> defaultComposition, DiceCompositionHandler compositionHandler) :
-            this(defaultDelimiter, RegexToken.ExactIgnoreCase(defaultComposition),
-                compositionHandler) { }
-        public DiceOperandBuilder(IEnumerable<string> defaultDelimiters,
-            IEnumerable<string> defaultComposition, DiceCompositionHandler compositionHandler) :
-            this(defaultDelimiters, RegexToken.ExactIgnoreCase(defaultComposition),
-                compositionHandler) { }
+            string defaultComposition, DiceCompositionHandler compositionHandler) :
+            this(new List<string> { defaultDelimiter }, ToEnumerable(defaultComposition), compositionHandler) { }
 
         public void AddDelimiter(string token)
         {
@@ -53,16 +44,15 @@ namespace DiceRoll.Input
         public void AddDelimiter(char token) =>
             AddDelimiter(char.ToString(token));
 
-        public void AddComposition(IToken token, DiceCompositionHandler handler) =>
-            _compositionTokens.Add(new DiceCompositionToken(token, handler));
-        public void AddComposition(string token, DiceCompositionHandler handler) =>
-            AddComposition(RegexToken.ExactIgnoreCase(token), handler);
         public void AddComposition(IEnumerable<string> tokens, DiceCompositionHandler handler) =>
-            AddComposition(RegexToken.ExactIgnoreCase(tokens), handler);
+            _compositionTokens.Add(new RawCompositionToken(tokens, handler));
+
+        public void AddComposition(string token, DiceCompositionHandler handler) =>
+            AddComposition(new[] { token }, handler);
 
         public TokenizedOperand Build()
         {
-            DiceParser parser = new(_delimiterTokens.ToArray(), _compositionTokens.ToArray());
+            DiceParser parser = new(_delimiterTokens.ToArray(), _compositionTokens.Select(x => x.Convert()).ToArray());
             return new TokenizedOperand(CreateToken(), diceExpression => parser.Parse(diceExpression));
         }
 
@@ -93,7 +83,7 @@ namespace DiceRoll.Input
             {
                 stringBuilder.Append('(');
                 
-                stringBuilder.AppendJoin(separator, _compositionTokens[i].Token.EnumerateRawTokens());
+                stringBuilder.AppendJoin(separator, _compositionTokens[i].Tokens);
                 
                 stringBuilder.Append(')');
 
@@ -104,6 +94,24 @@ namespace DiceRoll.Input
             stringBuilder.Append(")?");
 
             return stringBuilder.ToString();
+        }
+
+        private static IEnumerable<T> ToEnumerable<T>(T value) =>
+            new[] { value };
+
+        private readonly struct RawCompositionToken
+        {
+            public readonly IEnumerable<string> Tokens;
+            public readonly DiceCompositionHandler CompositionHandler;
+            
+            public RawCompositionToken(IEnumerable<string> tokens, DiceCompositionHandler compositionHandler)
+            {
+                Tokens = tokens;
+                CompositionHandler = compositionHandler;
+            }
+
+            public DiceCompositionToken Convert() =>
+                new(RegexToken.ExactIgnoreCase(Tokens), CompositionHandler);
         }
     }
 }

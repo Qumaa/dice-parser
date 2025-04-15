@@ -69,9 +69,6 @@ namespace DiceRoll.Input
             return whitespaces;
         }
 
-        public IEnumerable<string> EnumerateRawTokens() =>
-            _patterns.Select(static x => x.ToString());
-
         public static RegexToken ExactIgnoreCase(string word) =>
             new(CreateExactIgnoreCaseRegex(word));
 

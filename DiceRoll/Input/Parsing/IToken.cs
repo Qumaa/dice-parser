@@ -1,12 +1,8 @@
-﻿using System.Collections.Generic;
-
-namespace DiceRoll.Input
+﻿namespace DiceRoll.Input
 {
     public interface IToken
     {
         bool Matches(in Substring input, out Substring substring);
-
-        IEnumerable<string> EnumerateRawTokens();
     }
 
     public static class TokenExtensions
