@@ -22,10 +22,10 @@ namespace DiceRoll.Input
         }
 
         public bool StartsWithOpenParenthesis(in Substring expression, out Substring tokenMatch) =>
-            _openParenthesis.Matches(in expression, out tokenMatch);
+            _openParenthesis.MatchesStart(in expression, out tokenMatch);
 
         public bool StartsWithCloseParenthesis(in Substring expression, out Substring tokenMatch) =>
-            _closeParenthesis.Matches(in expression, out tokenMatch);
+            _closeParenthesis.MatchesStart(in expression, out tokenMatch);
 
         public bool StartsWithOperator(in Substring expression, OperatorKind kind, out Substring tokenMatch, out int precedence,
             out OperatorInvoker invoker) =>
@@ -35,7 +35,7 @@ namespace DiceRoll.Input
         {
             foreach (TokenizedOperand operandToken in _operands)
             {
-                if (!operandToken.Token.Matches(in expression, out tokenMatch))
+                if (!operandToken.Token.MatchesStart(in expression, out tokenMatch))
                     continue;
 
                 operand = operandToken.Parse(tokenMatch);
@@ -49,26 +49,24 @@ namespace DiceRoll.Input
 
         public Substring UntilFirstKnownToken(in Substring expression, OperatorKind ignoreOperatorKind)
         {
-            for (int i = 0; i < expression.Length; i++)
-                if (_MatchesAnyToken(expression[i..], OperatorKindToArity(ignoreOperatorKind)))
-                    return expression.SetLength(i);
+            return _MatchesAnyToken(in expression, OperatorKindToArity(ignoreOperatorKind), out Substring match) ?
+                expression.SetLength(match.Start - expression.Start) :
+                expression;
 
-            return expression;
-
-            bool _MatchesAnyToken(Substring expression, int ignoreArity)
+            bool _MatchesAnyToken(in Substring expression, int ignoreArity, out Substring match)
             {
-                if (_openParenthesis.Matches(in expression))
+                if (_openParenthesis.Matches(in expression, out match))
                     return true;
                 
-                if (_closeParenthesis.Matches(in expression))
+                if (_closeParenthesis.Matches(in expression, out match))
                     return true;
 
                 foreach (TokenizedOperator tokenizedOperator in _operators)
-                    if (tokenizedOperator.Invoker.Arity != ignoreArity && tokenizedOperator.Token.Matches(in expression))
+                    if (tokenizedOperator.Invoker.Arity != ignoreArity && tokenizedOperator.Token.Matches(in expression, out match))
                         return true;
                 
                 foreach (TokenizedOperand tokenizedOperand in _operands)
-                    if (tokenizedOperand.Token.Matches(in expression))
+                    if (tokenizedOperand.Token.Matches(in expression, out match))
                         return true;
 
                 return false;
@@ -81,7 +79,7 @@ namespace DiceRoll.Input
             foreach (TokenizedOperator tokenizedOperator in _operators)
             {
                 if (tokenizedOperator.Invoker.Arity != arity ||
-                    !tokenizedOperator.Token.Matches(in expression, out tokenMatch))
+                    !tokenizedOperator.Token.MatchesStart(in expression, out tokenMatch))
                     continue;
 
                 precedence = tokenizedOperator.Precedence;

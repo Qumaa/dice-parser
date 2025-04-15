@@ -8,7 +8,7 @@ namespace DiceRoll
     {
         public static void Main(string[] args)
         {
-            args = "(1 - 1) 2 / 2".Split(' ');
+            args = "6 + -4) aa".Split(' ');
             
             ExpressionParser parser = new(BuildTable());
 
@@ -22,7 +22,7 @@ namespace DiceRoll
             TokensTableBuilder builder = new("(", ")");
             
             builder.AddOperandToken(DiceOperand.Default);
-            builder.AddOperandToken(x => Node.Value.Constant(int.Parse(x.AsSpan())), new Regex(@"-?\d+"));
+            builder.AddOperandToken(x => Node.Value.Constant(int.Parse(x.AsSpan())), new Regex(@"\d+"));
             
             builder.AddOperatorToken<INumeric, INumeric>(100, static (left, right) => Node.Operator.Multiply(left, right), "*", "x");
             builder.AddOperatorToken<INumeric, INumeric>(100, static (left, right) => Node.Operator.DivideRoundUp(left, right), "//");

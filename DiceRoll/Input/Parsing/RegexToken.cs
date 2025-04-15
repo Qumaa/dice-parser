@@ -18,23 +18,21 @@ namespace DiceRoll.Input
 
         public RegexToken(Regex pattern) : this(new [] {pattern}) { }
 
-        public bool Matches(in Substring input, out Substring substring)
+        public bool Matches(in Substring input, out Substring match)
         {
             // ReSharper disable once LoopCanBeConvertedToQuery
             // ReSharper disable once ForCanBeConvertedToForeach
             for (int i = 0; i < _patterns.Length; i++)
-                if (Matches(input, _patterns[i], out substring))
+                if (Matches(in input, _patterns[i], out match))
                     return true;
 
-            substring = default;
+            match = default;
             return false;
         }
 
-        // todo: don't check whether the substring starts with the token; do it outside
-        private static bool Matches(Substring input, Regex pattern, out Substring matchSubstring)
+        private static bool Matches(in Substring input, Regex pattern, out Substring matchSubstring)
         {
-            int firstNonWhitespaceIndex = GetFirstNonWhitespaceIndex(input);
-            Regex.ValueMatchEnumerator enumerator = pattern.EnumerateMatches(input.AsSpan(), firstNonWhitespaceIndex);
+            Regex.ValueMatchEnumerator enumerator = pattern.EnumerateMatches(input.AsSpan());
 
             if (!enumerator.MoveNext())
             {
@@ -43,30 +41,9 @@ namespace DiceRoll.Input
             }
 
             ValueMatch match = enumerator.Current;
-
-            if (match.Index != firstNonWhitespaceIndex)
-            {
-                matchSubstring = default;
-                return false;
-            }
             
             matchSubstring = new Substring(input, match.Index, match.Length);
             return true;
-        }
-
-        private static int GetFirstNonWhitespaceIndex(Substring token)
-        {
-            int whitespaces = 0;
-
-            foreach (char c in token)
-            {
-                if (!char.IsWhiteSpace(c))
-                    break;
-
-                whitespaces++;
-            }
-
-            return whitespaces;
         }
 
         public static RegexToken ExactIgnoreCase(string word) =>

@@ -47,12 +47,12 @@ namespace DiceRoll.Input
             throw new ParsingException(Mapper.GetSubstringOf(in context), message);
         
         public void Throw(in Substring context, string message) =>
-            throw new ParsingException(Mapper.AppendAndGetSubstringOf(in context), message);
+            throw new ParsingException(Mapper.MapAndGetSubstringOf(in context), message);
 
         public ParsingException Wrap<T>(in Mapped<T> context, Exception innerException) =>
             new(Mapper.GetSubstringOf(in context), innerException);
         
         public ParsingException Wrap(in Substring context, Exception innerException) =>
-            new(Mapper.AppendAndGetSubstringOf(in context), innerException);
+            new(Mapper.MapAndGetSubstringOf(in context), innerException);
     }
 }
