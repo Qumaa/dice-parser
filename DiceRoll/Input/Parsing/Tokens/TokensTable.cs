@@ -1,13 +1,19 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace DiceRoll.Input.Parsing
 {
     public class TokensTable
     {
+        public static readonly TokensTable Default = BuildDefaultTable();
+
         private readonly IToken _openParenthesis;
+
         private readonly IToken _closeParenthesis;
+
         private readonly Operator[] _operators;
+
         private readonly Operand[] _operands;
 
         public TokensTable(IToken openParenthesis, IToken closeParenthesis, IEnumerable<Operator> operators,
@@ -95,5 +101,36 @@ namespace DiceRoll.Input.Parsing
                 OperatorArity.Unary => 1,
                 OperatorArity.Binary => 2
             };
+
+        private static TokensTable BuildDefaultTable()
+        {
+            TokensTableBuilder builder = new("(", ")");
+            
+            builder.AddOperandToken(DiceOperand.Default);
+            builder.AddOperandToken(x => Node.Value.Constant(int.Parse(x.AsSpan())), new Regex(@"\d+"));
+            
+            builder.AddOperatorToken<IAssertion>(110, static node => Node.Operator.Not(node), "!");
+            builder.AddOperatorToken<INumeric>(110, static node => Node.Operator.Negate(node), "-");
+            
+            builder.AddOperatorToken<INumeric, INumeric>(100, static (left, right) => Node.Operator.Multiply(left, right), "*");
+            builder.AddOperatorToken<INumeric, INumeric>(100, static (left, right) => Node.Operator.DivideRoundUp(left, right), "//");
+            builder.AddOperatorToken<INumeric, INumeric>(100, static (left, right) => Node.Operator.DivideRoundDown(left, right), "/");
+            
+            builder.AddOperatorToken<INumeric, INumeric>(90, static (left, right) => Node.Operator.Add(left, right), "+");
+            builder.AddOperatorToken<INumeric, INumeric>(90, static (left, right) => Node.Operator.Subtract(left, right), "-");
+            
+            builder.AddOperatorToken<INumeric, INumeric>(80, static (left, right) => Node.Operator.GreaterThanOrEqual(left, right), ">=");
+            builder.AddOperatorToken<INumeric, INumeric>(80, static (left, right) => Node.Operator.LessThanOrEqual(left, right), "<=");
+            builder.AddOperatorToken<INumeric, INumeric>(80, static (left, right) => Node.Operator.GreaterThan(left, right), ">");
+            builder.AddOperatorToken<INumeric, INumeric>(80, static (left, right) => Node.Operator.LessThan(left, right), "<");
+            
+            builder.AddOperatorToken<INumeric, INumeric>(70, static (left, right) => Node.Operator.Equal(left, right), "==", "=");
+            builder.AddOperatorToken<INumeric, INumeric>(70, static (left, right) => Node.Operator.NotEqual(left, right), "!=", "=/=");
+            
+            builder.AddOperatorToken<IAssertion, IAssertion>(60, static (left, right) => Node.Operator.And(left, right), "&&", "&", "and");
+            builder.AddOperatorToken<IAssertion, IAssertion>(60, static (left, right) => Node.Operator.Or(left, right), "||", "|", "or");
+
+            return builder.Build();
+        }
     }
 }
