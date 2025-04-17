@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DiceRoll.Input
+namespace DiceRoll.Input.Parsing
 {
     public sealed class UnbalancedParenthesisException : Exception
     {

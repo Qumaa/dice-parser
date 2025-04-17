@@ -1,4 +1,4 @@
-﻿namespace DiceRoll.Input
+﻿namespace DiceRoll.Input.Parsing
 {
     public abstract class OperatorInvoker
     {

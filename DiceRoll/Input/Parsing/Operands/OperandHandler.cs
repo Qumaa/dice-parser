@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DiceRoll.Input
+namespace DiceRoll.Input.Parsing
 {
     public delegate INumeric OperandHandler(Substring match);
 }

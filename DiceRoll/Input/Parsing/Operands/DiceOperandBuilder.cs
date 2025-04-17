@@ -3,7 +3,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace DiceRoll.Input
+namespace DiceRoll.Input.Parsing
 {
     public class DiceOperandBuilder
     {

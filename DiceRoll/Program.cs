@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
-using DiceRoll.Input;
+using DiceRoll.Input.Parsing;
 
 namespace DiceRoll
 {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace DiceRoll.Input
+namespace DiceRoll.Input.Parsing
 {
     [StructLayout(LayoutKind.Auto)]
     public readonly struct Mapped<T>

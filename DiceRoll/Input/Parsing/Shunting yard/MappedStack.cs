@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace DiceRoll.Input
+namespace DiceRoll.Input.Parsing
 {
     public sealed class MappedStack<T>
     {

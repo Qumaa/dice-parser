@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DiceRoll.Input
+namespace DiceRoll.Input.Parsing
 {
     public static class DiceOperand
     {

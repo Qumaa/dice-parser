@@ -1,4 +1,4 @@
-﻿namespace DiceRoll.Input
+﻿namespace DiceRoll.Input.Parsing
 {
     internal sealed class PostfixEvaluator
     {

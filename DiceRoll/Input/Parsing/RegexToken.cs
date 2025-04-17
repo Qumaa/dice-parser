@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace DiceRoll.Input
+namespace DiceRoll.Input.Parsing
 {
     public sealed class RegexToken : IToken
     {
