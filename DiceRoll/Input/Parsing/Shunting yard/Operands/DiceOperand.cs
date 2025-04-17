@@ -6,7 +6,7 @@ namespace DiceRoll.Input.Parsing
 {
     public static class DiceOperand
     {
-        public static readonly TokenizedOperand Default = BuildDefault();
+        public static readonly Operand Default = BuildDefault();
         
         public static DiceOperandBuilder StartBuilding(string defaultDelimiter, string defaultComposition,
             DiceCompositionHandler compositionHandler) =>
@@ -34,10 +34,10 @@ namespace DiceRoll.Input.Parsing
             DiceCompositionHandler compositionHandler) =>
             StartBuilding(defaultDelimiters.Select(static x => char.ToString(x)), defaultComposition, compositionHandler);
 
-        public static TokenizedOperand DefaultWithInjection(Action<DiceOperandBuilder> injector) =>
+        public static Operand DefaultWithInjection(Action<DiceOperandBuilder> injector) =>
             BuildDefault(injector);
 
-        private static TokenizedOperand BuildDefault(Action<DiceOperandBuilder> injector = null)
+        private static Operand BuildDefault(Action<DiceOperandBuilder> injector = null)
         {
             DiceOperandBuilder builder =
                 StartBuilding('d', Params("s", "sum", "summation"), static (dice, count) => Node.Value.Summation(dice, count));

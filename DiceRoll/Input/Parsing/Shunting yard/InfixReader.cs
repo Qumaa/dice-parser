@@ -68,12 +68,9 @@ namespace DiceRoll.Input.Parsing
                 return;
             }
 
-            bool isUnary = _state.PrecedingTokenKind is TokenKind.ExpressionStart or TokenKind.Operator;
-            OperatorKind operatorKind = isUnary ? OperatorKind.Unary : OperatorKind.Binary;
-
             if (_state.Tokens.StartsWithOperator(
                     in notParsed,
-                    operatorKind,
+                    GetCurrentOperatorArity(),
                     out output,
                     out int precedence,
                     out OperatorInvoker invoker
@@ -83,10 +80,13 @@ namespace DiceRoll.Input.Parsing
                 return;
             }
 
-            output = _state.Tokens.UntilFirstKnownToken(in notParsed, operatorKind.Reversed()).Trim();
+            output = _state.Tokens.UntilFirstKnownToken(in notParsed, GetCurrentOperatorArity().Reversed()).Trim();
             throw new UnknownTokenException(in output);
         }
-        
+
+        private OperatorArity GetCurrentOperatorArity() =>
+            _state.PrecedingTokenKind is TokenKind.Operand ? OperatorArity.Binary : OperatorArity.Unary;
+
         private void OpenParenthesis(in Substring context)
         {
             _state.DenoteParenthesisOpening();

@@ -50,10 +50,10 @@ namespace DiceRoll.Input.Parsing
         public void AddComposition(string token, DiceCompositionHandler handler) =>
             AddComposition(new[] { token }, handler);
 
-        public TokenizedOperand Build()
+        public Operand Build()
         {
             DiceParser parser = new(_delimiterTokens.ToArray(), _compositionTokens.Select(x => x.Convert()).ToArray());
-            return new TokenizedOperand(CreateToken(), diceExpression => parser.Parse(diceExpression));
+            return new Operand(CreateToken(), diceExpression => parser.Parse(diceExpression));
         }
 
         private IToken CreateToken()

@@ -20,8 +20,6 @@ namespace DiceRoll.Input.Parsing
 
         public bool Matches(in Substring input, out Substring match)
         {
-            // ReSharper disable once LoopCanBeConvertedToQuery
-            // ReSharper disable once ForCanBeConvertedToForeach
             for (int i = 0; i < _patterns.Length; i++)
                 if (Matches(in input, _patterns[i], out match))
                     return true;

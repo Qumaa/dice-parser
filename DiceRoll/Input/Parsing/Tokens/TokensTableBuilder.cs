@@ -8,16 +8,16 @@ namespace DiceRoll.Input.Parsing
     {
         private readonly List<string> _openParenthesis;
         private readonly List<string> _closeParenthesis;
-        private readonly List<TokenizedOperator> _operators;
-        private readonly List<TokenizedOperand> _operands;
+        private readonly List<Operator> _operators;
+        private readonly List<Operand> _operands;
 
         public TokensTableBuilder(string defaultOpenParenthesis, string defaultCloseParenthesis)
         {
             _openParenthesis = new List<string> { defaultOpenParenthesis };
             _closeParenthesis = new List<string> { defaultCloseParenthesis };
 
-            _operators = new List<TokenizedOperator>();
-            _operands = new List<TokenizedOperand>();
+            _operators = new List<Operator>();
+            _operands = new List<Operand>();
         }
 
         public void AddOpenParenthesisPattern(string pattern) =>
@@ -41,7 +41,7 @@ namespace DiceRoll.Input.Parsing
         public void AddOperatorToken<TLeft, TRight>(int precedence, BinaryInvocationHandler<TLeft, TRight> handler,
             Regex pattern) where TLeft : INode where TRight : INode =>
             _operators.Add(
-                new TokenizedOperator(
+                new Operator(
                     new RegexToken(pattern),
                     precedence,
                     OperatorInvoker.Binary(handler)
@@ -51,7 +51,7 @@ namespace DiceRoll.Input.Parsing
         public void AddOperatorToken<TLeft, TRight>(int precedence, BinaryInvocationHandler<TLeft, TRight> handler,
             IEnumerable<Regex> patterns) where TLeft : INode where TRight : INode =>
             _operators.Add(
-                new TokenizedOperator(
+                new Operator(
                     new RegexToken(patterns),
                     precedence,
                     OperatorInvoker.Binary(handler)
@@ -77,7 +77,7 @@ namespace DiceRoll.Input.Parsing
         public void AddOperatorToken<T>(int precedence, UnaryInvocationHandler<T> handler,
             Regex pattern) where T : INode =>
             _operators.Add(
-                new TokenizedOperator(
+                new Operator(
                     new RegexToken(pattern),
                     precedence,
                     OperatorInvoker.Unary(handler)
@@ -87,7 +87,7 @@ namespace DiceRoll.Input.Parsing
         public void AddOperatorToken<T>(int precedence, UnaryInvocationHandler<T> handler,
             IEnumerable<Regex> patterns) where T : INode =>
             _operators.Add(
-                new TokenizedOperator(
+                new Operator(
                     new RegexToken(patterns),
                     precedence,
                     OperatorInvoker.Unary(handler)
@@ -110,14 +110,14 @@ namespace DiceRoll.Input.Parsing
             params string[] words) where T : INode =>
             AddOperatorToken(precedence, handler, words as IEnumerable<string>);
 
-        public void AddOperandToken(TokenizedOperand operand) =>
+        public void AddOperandToken(Operand operand) =>
             _operands.Add(operand);
 
         public void AddOperandToken(OperandHandler handler, Regex pattern) =>
-            AddOperandToken(new TokenizedOperand(new RegexToken(pattern), handler));
+            AddOperandToken(new Operand(new RegexToken(pattern), handler));
 
         public void AddOperandToken(OperandHandler handler, IEnumerable<Regex> patterns) =>
-            AddOperandToken(new TokenizedOperand(new RegexToken(patterns), handler));
+            AddOperandToken(new Operand(new RegexToken(patterns), handler));
 
         public void AddOperandToken(OperandHandler handler, params Regex[] patterns) =>
             AddOperandToken(handler, patterns as IEnumerable<Regex>);

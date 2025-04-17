@@ -3,12 +3,12 @@
 namespace DiceRoll.Input.Parsing
 {
     [StructLayout(LayoutKind.Auto)]
-    public readonly struct TokenizedOperand
+    public readonly struct Operand
     {
         public readonly IToken Token;
         public readonly OperandHandler Handler;
             
-        public TokenizedOperand(IToken token, OperandHandler handler)
+        public Operand(IToken token, OperandHandler handler)
         {
             Token = token;
             Handler = handler;
