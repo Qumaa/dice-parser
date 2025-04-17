@@ -1,4 +1,6 @@
-﻿namespace DiceRoll.Input.Parsing
+﻿using System.Collections.Generic;
+
+namespace DiceRoll.Input.Parsing
 {
     public sealed class ExpressionParser
     {
@@ -15,7 +17,7 @@
             return _nodeBuilder.Parse();
         }
 
-        public INode Parse(string[] expression)
+        public INode Parse(IEnumerable<string> expression)
         {
             foreach (string segment in expression)
                 _nodeBuilder.Append(segment);
