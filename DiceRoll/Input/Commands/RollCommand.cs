@@ -6,12 +6,12 @@ namespace DiceRoll
 {
     internal sealed class RollCommand : Command
     {
-        public RollCommand(DiceCommandStrings strings, DiceExpressionArgument argument) : base("roll", strings.RollDescription)
+        public RollCommand(RollCommandStrings strings, DiceExpressionArgument argument) : base("roll", strings.Description)
         {
             AddAlias("r");
             AddArgument(argument);
                 
-            this.SetHandler(context => CommandHandler(context, argument, strings.RollOutputFailedToPass));
+            this.SetHandler(context => CommandHandler(context, argument, strings.FailedToPass));
         }
 
         private static void CommandHandler(InvocationContext context, DiceExpressionArgument argument, string failedToPass)

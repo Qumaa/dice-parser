@@ -6,21 +6,15 @@ namespace DiceRoll
 {
     internal sealed class AnalyzeCommand : Command
     {
-        public AnalyzeCommand(DiceCommandStrings strings, DiceExpressionArgument argument) : base(
+        public AnalyzeCommand(AnalyzeCommandStrings strings, DiceExpressionArgument argument) : base(
             "analyze",
-            strings.AnalyzeDescription
+            strings.Description
             )
         {
             AddAlias("a");
             AddArgument(argument);
 
-            Option<AnalyzeOutputStyle> style = new(
-                "--style",
-                () => AnalyzeOutputStyle.Full,
-                strings.AnalyzeStyleOptionDescription
-                );
-            
-            style.AddAlias("-s");
+            StyleOption style = new(strings);
             
             AddOption(style);
 
@@ -28,7 +22,7 @@ namespace DiceRoll
         }
 
         private static void CommandHandler(InvocationContext context, DiceExpressionArgument argument, 
-            Option<AnalyzeOutputStyle> styleOption, IAnalyzeCommandOutputFormatter formatter)
+            StyleOption styleOption, IAnalyzeCommandOutputFormatter formatter)
         {
             IEnumerable<string> tokens = context.ParseResult.GetValueForArgument(argument);
             AnalyzeOutputStyle style = context.ParseResult.GetValueForOption(styleOption);
