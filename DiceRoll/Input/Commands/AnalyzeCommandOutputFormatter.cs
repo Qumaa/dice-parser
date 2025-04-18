@@ -3,15 +3,15 @@
     internal class AnalyzeCommandOutputFormatter : IAnalyzeCommandOutputFormatter
     {
         public string Rolling(Outcome outcome, Probability probability) =>
-            $"Probability of {outcome} is {probability}";
+            $"Probability of rolling {outcome} is {probability}";
 
         public string Asserting(in Logical logical) =>
-            $"Probability of {logical.Outcome} is {logical.Probability}";
+            $"Probability of {(logical.Outcome ? "succeeding" : "failing")} is {logical.Probability}";
 
-        public string Failing(Probability probability) =>
+        public string CumulativeFailing(Probability probability) =>
             $"Cumulative probability of failing is {probability}";
 
-        public string Succeeding(Probability probability) =>
+        public string CumulativeSucceeding(Probability probability) =>
             $"Cumulative probability of succeeding is {probability}";
     }
 }
