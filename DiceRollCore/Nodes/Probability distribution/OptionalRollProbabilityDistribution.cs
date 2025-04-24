@@ -9,7 +9,6 @@ namespace DiceRoll
         public readonly Outcome Min;
         public readonly Outcome Max;
 
-        /// <inheritdoc cref="ProbabilityDistribution{T}(IEnumerable{T})"/>
         public OptionalRollProbabilityDistribution(IEnumerable<OptionalRoll> probabilities) : base(probabilities)
         {
             Init(out Min, out Max, out False);

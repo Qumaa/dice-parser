@@ -3,21 +3,10 @@ using System.Linq;
 
 namespace DiceRoll
 {
-    /// <summary>
-    /// Merges two arbitrary <see cref="INumeric">numeric nodes</see> by either adding or subtracting their
-    /// <see cref="Outcome"/> and provides an updated
-    /// <see cref="RollProbabilityDistribution">probability distribution</see> of the results.
-    /// </summary>
-    /// <seealso cref="CombinationType"/>
     public sealed class Combination : BinaryTransformation
     {
         private readonly CombinationType _combinationType;
 
-        /// <inheritdoc cref="BinaryTransformation(DiceRoll.INumeric,DiceRoll.INumeric)"/>
-        /// <param name="combinationType">The type of combination.</param>
-        /// <exception cref="EnumValueNotDefinedException">
-        /// When <paramref name="combinationType"/> holds a not defined value.
-        /// </exception>
         public Combination(INumeric source, INumeric other, CombinationType combinationType) : base(source, other)
         {
             if (IsDivision(combinationType))

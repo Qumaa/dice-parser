@@ -4,10 +4,6 @@ using System.Globalization;
 
 namespace DiceRoll
 {
-    /// <summary>
-    /// A <see cref="double">double-precision</see> number wrapper,
-    /// explicitly stating the intent to treat it as a likelihood of something.
-    /// </summary>
     public readonly struct Probability : IEquatable<Probability>, IComparable<Probability>, IComparable
     {
         private const string _FORMAT = "P";
@@ -19,9 +15,6 @@ namespace DiceRoll
 
         public static Probability Zero => new(0d);
 
-        /// <param name="probability">A <see cref="double">double-precision</see> number to represent,
-        /// where 0 = 0% and 1 = 100%.</param>
-        /// <exception cref="NegativeProbabilityException">When <paramref name="probability"/> is below 0.</exception>
         public Probability(double probability) 
         {
             if (probability < 0)

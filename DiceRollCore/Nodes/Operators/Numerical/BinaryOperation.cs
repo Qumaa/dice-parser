@@ -2,11 +2,6 @@
 
 namespace DiceRoll
 {
-    /// <summary>
-    /// Base class that allows to wrap two arbitrary <see cref="INumeric">numeric nodes</see> to perform binary
-    /// operations on their <see cref="Outcome"/> and provide a
-    /// <see cref="RollProbabilityDistribution">probability distribution</see> of true and false of said assertion.
-    /// </summary>
     public abstract class BinaryOperation : Operation
     {
         protected readonly INumeric _left;
