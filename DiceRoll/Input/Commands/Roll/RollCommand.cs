@@ -10,16 +10,30 @@ namespace DiceRoll
         {
             AddAlias("r");
             AddArgument(argument);
+
+            TreeOption treeOption = new(strings);
+            AddOption(treeOption);
                 
-            this.SetHandler(context => CommandHandler(context, argument, strings.FailedToPass));
+            this.SetHandler(context => CommandHandler(context, argument, treeOption, strings.FailedToPass));
         }
 
-        private static void CommandHandler(InvocationContext context, DiceExpressionArgument argument, string failedToPass)
+        private static void CommandHandler(InvocationContext context, DiceExpressionArgument argument,
+            TreeOption treeOption, string failedToPass)
         {
             IEnumerable<string> tokens = context.ParseResult.GetValueForArgument(argument);
-                    
-            if (ExpressionParsingHelper.Try(tokens, context.Console, out INode node))
-                node.Visit(new Visitor(context.Console, failedToPass));
+            
+            if (!ExpressionParsingHelper.Try(tokens, context.Console, out INode node))
+                return;
+            
+            bool tree = context.ParseResult.GetValueForOption(treeOption);
+
+            if (tree)
+            {
+                context.Console.WriteLine(DiceCommandStrings.WIP);
+                return;
+            }
+            
+            node.Visit(new Visitor(context.Console, failedToPass));
         }
         
         private sealed class Visitor : INodeVisitor
