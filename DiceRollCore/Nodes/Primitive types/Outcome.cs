@@ -3,15 +3,10 @@ using System.Collections.Generic;
 
 namespace DiceRoll
 {
-    /// <summary>
-    /// An <see cref="int">integer</see> number wrapper.
-    /// Use this type as the target evaluation type for <see cref="INumeric">numeric nodes</see>.
-    /// </summary>
     public readonly struct Outcome : IEquatable<Outcome>, IComparable<Outcome>, IComparable
     {
         public readonly int Value;
         
-        /// <param name="value">Any <see cref="int">integer</see> number.</param>
         public Outcome(int value)
         {
             Value = value;

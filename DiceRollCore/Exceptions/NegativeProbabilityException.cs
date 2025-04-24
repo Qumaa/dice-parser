@@ -2,10 +2,6 @@
 
 namespace DiceRoll
 {
-    /// <summary>
-    /// The exception that is thrown when the <see cref="DiceRoll.Probability(double)"/> constructor receives
-    /// a negative value.
-    /// </summary>
     public sealed class NegativeProbabilityException : ArgumentException
     {
         public NegativeProbabilityException() { }

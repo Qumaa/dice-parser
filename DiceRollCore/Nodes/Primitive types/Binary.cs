@@ -2,10 +2,6 @@
 
 namespace DiceRoll
 {
-    /// <summary>
-    /// A <see cref="bool">boolean</see> value wrapper.
-    /// Use this type as the target evaluation type for <see cref="IAssertion">binary assertion nodes</see>.
-    /// </summary>
     public readonly struct Binary
     {
         public readonly bool Value;
