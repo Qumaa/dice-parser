@@ -109,7 +109,7 @@ namespace DiceRoll.Input.Parsing
             builder.AddOperandToken(DiceOperand.Default);
             builder.AddOperandToken(x => Node.Value.Constant(int.Parse(x.AsSpan())), new Regex(@"\d+"));
             
-            builder.AddOperatorToken<IAssertion>(110, static node => Node.Operator.Not(node), "!");
+            builder.AddOperatorToken<IAssertion>(110, static node => Node.Operator.Not(node), "!", "not");
             builder.AddOperatorToken<INumeric>(110, static node => Node.Operator.Negate(node), "-");
             
             builder.AddOperatorToken<INumeric, INumeric>(100, static (left, right) => Node.Operator.Multiply(left, right), "*");
