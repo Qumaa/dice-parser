@@ -7,8 +7,6 @@ namespace DiceRoll
     {
         public AliasCommand(AliasCommandStrings strings) : base("alias", strings.Description)
         {
-            AddAlias("a");
-            
             this.SetHandler(context => CommandHandler(context));
         }
 
