@@ -6,6 +6,7 @@
         
         public readonly AnalyzeCommandStrings Analyze = new();
         public readonly RollCommandStrings Roll = new();
+        public readonly AliasCommandStrings Alias = new();
         
         public readonly string Description = "Enter the perpetual mode or evaluate the passed expression";
         public readonly string DiceExpressionName = "Dice expression";

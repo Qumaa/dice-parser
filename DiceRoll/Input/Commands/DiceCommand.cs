@@ -10,8 +10,9 @@ namespace DiceRoll
                 
             AddCommand(new RollCommand(strings.Roll, argument));
             AddCommand(new AnalyzeCommand(strings.Analyze, argument));
+            AddCommand(new AliasCommand(strings.Alias));
             
-            this.SetHandler(ctx => ctx.Console.WriteLine(DiceCommandStrings.WIP)); // todo
+            this.SetHandler(ctx => ctx.Console.WriteLine(DiceCommandStrings.WIP));
         }
     }
 }
