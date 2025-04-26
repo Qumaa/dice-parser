@@ -97,7 +97,7 @@ namespace DiceRoll.Input.Parsing
         {
             (int Offset, int Length) tuple = range.GetOffsetAndLength(Length);
 
-            return new Substring(this, Start + tuple.Offset, tuple.Length);
+            return new Substring(this, tuple.Offset, tuple.Length);
         }
 
         public override string ToString() =>
