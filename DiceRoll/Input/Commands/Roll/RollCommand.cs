@@ -13,12 +13,15 @@ namespace DiceRoll
 
             TreeOption treeOption = new(strings);
             AddOption(treeOption);
+
+            TimesOption timesOption = new(strings);
+            AddOption(timesOption);
                 
-            this.SetHandler(context => CommandHandler(context, argument, treeOption, strings.FailedToPass));
+            this.SetHandler(context => CommandHandler(context, argument, treeOption, timesOption, strings));
         }
 
         private static void CommandHandler(InvocationContext context, DiceExpressionArgument argument,
-            TreeOption treeOption, string failedToPass)
+            TreeOption treeOption, TimesOption timesOption, RollCommandStrings strings)
         {
             IEnumerable<string> tokens = context.ParseResult.GetValueForArgument(argument);
             
@@ -32,8 +35,13 @@ namespace DiceRoll
                 context.Console.WriteLine(DiceCommandStrings.WIP);
                 return;
             }
+
+            int times = context.ParseResult.GetValueForOption(timesOption);
+
+            Visitor visitor = new(context.Console, strings.FailedToPass);
             
-            node.Visit(new Visitor(context.Console, failedToPass));
+            for (int i = 0; i < times; i++)
+                node.Visit(visitor);
         }
         
         private sealed class Visitor : INodeVisitor
