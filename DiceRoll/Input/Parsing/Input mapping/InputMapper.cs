@@ -42,20 +42,6 @@ namespace DiceRoll.Input.Parsing
             _inputLength += input.Length + 1;
         }
 
-        public Substring MapAndGetSubstringOf(in Substring substring) =>
-            GetSubstringOf(Map(in substring));
-
-        public Substring GetSubstringOf<T>(in Mapped<T> token) =>
-            GetSubstringOf(token.Range);
-
-        public Substring GetSubstringOf(in Range mappedRange)
-        {
-            string source = ConcatenateInput();
-            (int Offset, int Length) tuple = mappedRange.GetOffsetAndLength(source.Length);
-
-            return new Substring(source, tuple.Offset, tuple.Length);
-        }
-
         public void Clear()
         {
             _accumulatedInput.Clear();
@@ -66,10 +52,10 @@ namespace DiceRoll.Input.Parsing
         public MappedStack<T> CreateLinkedStack<T>() =>
             new(this);
 
-        private string ConcatenateInput()
+        public SubstringSource BuildSubstringSource()
         {
             if (_inputLength is 0)
-                return string.Empty;
+                return new SubstringSource(string.Empty);
             
             char[] chars = new char[_inputLength - 1];
 
@@ -78,7 +64,19 @@ namespace DiceRoll.Input.Parsing
             foreach (char c in piece)
                 chars[i++] = c;
             
-            return new string(chars);
+            return new SubstringSource(new string(chars));
         }
+    }
+
+    public static class InputMapperExtensions
+    {
+        public static Substring GetSubstringOf<T>(this InputMapper mapper, in Mapped<T> mapped) =>
+            mapper.BuildSubstringSource().Apply(mapped);
+        
+        public static Substring GetSubstringOf(this InputMapper mapper, in Range mapped) =>
+            mapper.BuildSubstringSource().Apply(mapped);
+
+        public static Substring MapAndGetSubstringOf(this InputMapper mapper, in Substring substring) =>
+            mapper.GetSubstringOf(mapper.Map(in substring));
     }
 }
