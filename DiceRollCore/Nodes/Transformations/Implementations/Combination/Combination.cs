@@ -16,7 +16,7 @@ namespace DiceRoll
             _combinationType = combinationType;
         }
 
-        public override Outcome Evaluate() =>
+        protected override Outcome GetNextEvaluation() =>
             Combine(_source.Evaluate(), _other.Evaluate());
 
         protected override RollProbabilityDistribution CreateProbabilityDistribution()

@@ -13,7 +13,7 @@ namespace DiceRoll
             _selectionType = selectionType;
         }
 
-        public override Outcome Evaluate() =>
+        protected override Outcome GetNextEvaluation() =>
             _selectionType is SelectionType.Highest ?
                 Outcome.Max(_source.Evaluate(), _other.Evaluate()) : 
                 Outcome.Min(_source.Evaluate(), _other.Evaluate());

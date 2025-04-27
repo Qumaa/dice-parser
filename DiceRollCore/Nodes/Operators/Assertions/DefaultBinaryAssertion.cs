@@ -10,7 +10,7 @@
             _delegates = DefaultAssertionDelegates.Get(assertionType);
         }
 
-        public override Binary Evaluate() =>
+        protected override Binary GetNextEvaluation() =>
             _delegates.Evaluation.Invoke(_left.Evaluate(), _right.Evaluate());
 
         protected override LogicalProbabilityDistribution CreateProbabilityDistribution() =>

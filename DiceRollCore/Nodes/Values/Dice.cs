@@ -28,7 +28,7 @@ namespace DiceRoll
             return rolls.ToRollProbabilityDistribution();
         }
 
-        public override Outcome Evaluate() =>
+        protected override Outcome GetNextEvaluation() =>
             new(_random.Next(0, _faces) + 1);
     }
 }

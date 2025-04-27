@@ -7,12 +7,15 @@ namespace DiceRoll
         private readonly IAssertion _asAssertion;
         private OptionalRollProbabilityDistribution _cachedDistribution;
 
+        public Optional<Outcome> Evaluation { get; private set; }
+
         protected Operation()
         {
             _asAssertion = CreateAssertionWrapperSafe();
         }
 
-        public abstract Optional<Outcome> Evaluate();
+        public void Next() =>
+            Evaluation = GetNextEvaluation();
 
         public OptionalRollProbabilityDistribution GetProbabilityDistribution() =>
             _cachedDistribution ??= CreateProbabilityDistribution();
@@ -22,6 +25,8 @@ namespace DiceRoll
 
         public void Visit(INodeVisitor visitor) =>
             visitor.ForOperation(this);
+
+        protected abstract Optional<Outcome> GetNextEvaluation();
 
         protected virtual Assertion CreateAssertionWrapper() =>
             DefaultAssertionFactory();
@@ -45,8 +50,10 @@ namespace DiceRoll
 
         Probability IAssertion.True => _asAssertion.True;
 
-        Binary INode<Binary>.Evaluate() =>
-            _asAssertion.Evaluate();
+        Binary INode<Binary>.Evaluation => _asAssertion.Evaluation;
+
+        void INode<Binary>.Next() =>
+            _asAssertion.Next();
 
         LogicalProbabilityDistribution IDistributable<LogicalProbabilityDistribution, Logical>.
             GetProbabilityDistribution() =>

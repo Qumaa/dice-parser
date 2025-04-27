@@ -9,7 +9,7 @@
             _value = value;
         }
 
-        public override Outcome Evaluate() =>
+        protected override Outcome GetNextEvaluation() =>
             new(_value);
 
         protected override RollProbabilityDistribution CreateProbabilityDistribution() =>

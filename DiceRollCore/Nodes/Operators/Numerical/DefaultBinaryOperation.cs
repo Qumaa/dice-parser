@@ -9,7 +9,7 @@
             _delegates = DefaultOperationDelegates.Get(operationType);
         }
 
-        public override Optional<Outcome> Evaluate() =>
+        protected override Optional<Outcome> GetNextEvaluation() =>
             _delegates.Evaluation(_left.Evaluate(), _right.Evaluate());
 
         protected override OptionalRollProbabilityDistribution CreateProbabilityDistribution() =>
@@ -30,8 +30,8 @@
                 _operation = operation;
             }
 
-            public override Binary Evaluate() =>
-                _operation.Evaluate().AsBinary();
+            protected override Binary GetNextEvaluation() =>
+                _operation.GetNextEvaluation().AsBinary();
 
             protected override LogicalProbabilityDistribution CreateProbabilityDistribution() =>
                 _operation.GetLogicalProbabilityDistribution();

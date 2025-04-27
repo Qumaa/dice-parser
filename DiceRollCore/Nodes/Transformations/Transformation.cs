@@ -13,7 +13,7 @@ namespace DiceRoll
             _source = source;
         }
 
-        public abstract override Outcome Evaluate();
+        protected abstract override Outcome GetNextEvaluation();
 
         protected abstract override RollProbabilityDistribution CreateProbabilityDistribution();
     }

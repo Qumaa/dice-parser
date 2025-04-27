@@ -9,7 +9,7 @@
             _operation = operation;
         }
 
-        public override Binary Evaluate() =>
+        protected override Binary GetNextEvaluation() =>
             _operation.Evaluate().AsBinary();
 
         protected override LogicalProbabilityDistribution CreateProbabilityDistribution() =>

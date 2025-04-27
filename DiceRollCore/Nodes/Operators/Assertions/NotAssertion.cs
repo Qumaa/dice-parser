@@ -4,7 +4,7 @@
     {
         public NotAssertion(IAssertion assertion) : base(assertion) { }
 
-        public override Binary Evaluate() =>
+        protected override Binary GetNextEvaluation() =>
             !_assertion.Evaluate();
 
         protected override LogicalProbabilityDistribution CreateProbabilityDistribution() =>

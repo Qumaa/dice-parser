@@ -19,7 +19,7 @@ namespace DiceRoll
         public Composite(INumeric node, int repetitionCount, Composer composer) :
             this(Enumerable.Repeat(node, CompositeRepetitionException.ThrowIfBelowTwo(repetitionCount)), composer) { }
 
-        public override Outcome Evaluate() =>
+        protected override Outcome GetNextEvaluation() =>
             _composite.Evaluate();
 
         protected override RollProbabilityDistribution CreateProbabilityDistribution() =>
