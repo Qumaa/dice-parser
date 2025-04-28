@@ -23,7 +23,7 @@ namespace DiceRoll
         public virtual IAssertion AsAssertion() =>
             _asAssertion;
 
-        public void Visit(INodeVisitor visitor) =>
+        public void Visit<T>(T visitor) where T : INodeVisitor =>
             visitor.ForOperation(this);
 
         protected abstract Optional<Outcome> GetNextEvaluation();

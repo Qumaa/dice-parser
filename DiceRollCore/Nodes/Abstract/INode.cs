@@ -9,7 +9,7 @@
 
     public interface INode
     {
-        void Visit(INodeVisitor visitor);
+        void Visit<T>(T visitor) where T : INodeVisitor;
     }
 
     public static class NodeExtensions

@@ -13,7 +13,7 @@
         public LogicalProbabilityDistribution GetProbabilityDistribution() =>
             _cachedDistribution ??= CreateProbabilityDistribution();
 
-        public void Visit(INodeVisitor visitor) =>
+        public void Visit<T>(T visitor) where T : INodeVisitor =>
             visitor.ForAssertion(this);
 
         protected abstract LogicalProbabilityDistribution CreateProbabilityDistribution();

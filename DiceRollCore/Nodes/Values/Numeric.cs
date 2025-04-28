@@ -12,11 +12,11 @@
         public RollProbabilityDistribution GetProbabilityDistribution() =>
             _cachedDistribution ??= CreateProbabilityDistribution();
 
+        public void Visit<T>(T visitor) where T : INodeVisitor =>
+            visitor.ForNumeric(this);
+
         protected abstract RollProbabilityDistribution CreateProbabilityDistribution();
 
         protected abstract Outcome GetNextEvaluation();
-
-        public void Visit(INodeVisitor visitor) =>
-            visitor.ForNumeric(this);
     }
 }
