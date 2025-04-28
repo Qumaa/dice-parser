@@ -33,7 +33,7 @@ namespace DiceRoll
 
             if (tree)
             {
-                context.Console.WriteLine(DiceCommandStrings.WIP);
+                new TreePlotter(nodeTree, context.Console).Plot();
                 return;
             }
 

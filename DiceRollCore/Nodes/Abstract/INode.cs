@@ -3,13 +3,12 @@
     public interface INode<out T> : INode
     {
         T Evaluation { get; }
-
-        void Next();
     }
 
     public interface INode
     {
         void Visit<T>(T visitor) where T : INodeVisitor;
+        void Next();
     }
 
     public static class NodeExtensions
