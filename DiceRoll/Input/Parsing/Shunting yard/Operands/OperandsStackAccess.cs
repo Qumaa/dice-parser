@@ -1,22 +1,27 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace DiceRoll.Input.Parsing
 {
-    [StructLayout(LayoutKind.Auto)]
-    public struct OperandsStackAccess
+    public sealed class OperandsStackAccess
     {
-        private readonly MappedStack<INode> _operands;
+        private readonly MappedStack<LinkedNode> _operands;
         private readonly int _arity;
         private readonly int _popLimit;
+        
+        private readonly List<Mapped<LinkedNode>> _operatorParents;
+        private readonly Range _operatorRange;
 
         private Range _resultRange;
 
-        public OperandsStackAccess(MappedStack<INode> operands, int arity)
+        public OperandsStackAccess(MappedStack<LinkedNode> operands, int arity, in Range operatorRange)
         {
             _operands = operands;
             _arity = arity;
+            _operatorRange = operatorRange;
             _popLimit = operands.Count - arity;
+            _operatorParents = new List<Mapped<LinkedNode>>(arity);
 
             _resultRange = _operands.Peek().Range;
         }
@@ -25,11 +30,12 @@ namespace DiceRoll.Input.Parsing
         {
             ThrowIfExceedingArity();
 
-            Mapped<INode> operand = _operands.Pop();
+            Mapped<LinkedNode> operand = _operands.Pop();
+            _operatorParents.Add(operand);
 
             _resultRange = operand.Merge(_resultRange);
             
-            return CastOrThrow<T>(operand.Value);
+            return CastOrThrow<T>(operand.Value.Node);
         }
 
         public void PushResult(INode operand)
@@ -37,7 +43,12 @@ namespace DiceRoll.Input.Parsing
             ArgumentNullException.ThrowIfNull(operand);
             ThrowIfPushingPrematurely();
 
-            _operands.Push(operand, _resultRange);
+            LinkedNode linkedOperator = new(null, _operatorParents.ToArray());
+            Mapped<LinkedNode> mappedOperator = new(linkedOperator, in _operatorRange);
+
+            LinkedNode linkedOperand = new(operand, mappedOperator);
+            
+            _operands.Push(linkedOperand, in _resultRange);
         }
 
         private void ThrowIfExceedingArity()

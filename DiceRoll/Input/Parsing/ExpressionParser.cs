@@ -11,13 +11,13 @@ namespace DiceRoll.Input.Parsing
             _nodeBuilder = new ShuntingYard(diceFormulaTokens);
         }
 
-        public INode Parse(string expression)
+        public NodeTree Parse(string expression)
         {
             _nodeBuilder.Append(expression);
             return _nodeBuilder.Parse();
         }
 
-        public INode Parse(IEnumerable<string> expression)
+        public NodeTree Parse(IEnumerable<string> expression)
         {
             foreach (string segment in expression)
                 _nodeBuilder.Append(segment);

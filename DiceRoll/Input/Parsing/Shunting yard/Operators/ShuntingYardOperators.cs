@@ -30,7 +30,7 @@ namespace DiceRoll.Input.Parsing
         {
             try
             {
-                InvokeOperator(operatorToken.Value.Invoker);
+                InvokeOperator(operatorToken.Value.Invoker, in operatorToken.Range);
             }
             catch (Exception e)
             {
@@ -59,7 +59,7 @@ namespace DiceRoll.Input.Parsing
         {
             try
             {
-                InvokeOperator(operatorToken.Value.Invoker);
+                InvokeOperator(operatorToken.Value.Invoker, in operatorToken.Range);
             }
             catch (Exception e)
             {
@@ -67,14 +67,14 @@ namespace DiceRoll.Input.Parsing
             }
         }
 
-        private void InvokeOperator(OperatorInvoker invoker)
+        private void InvokeOperator(OperatorInvoker invoker, in Range operatorRange)
         {
             int arity = invoker.Arity;
             
             if (_state.Operands.Count < arity)
                 throw new OperatorInvocationException(ParsingErrorMessages.OperandsExpected(arity, _state.Operands.Count));
 
-            invoker.Invoke(new OperandsStackAccess(_state.Operands, arity));
+            invoker.Invoke(new OperandsStackAccess(_state.Operands, arity, in operatorRange));
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using DiceRoll.Input.Parsing;
 
 namespace DiceRoll
 {
@@ -27,8 +28,8 @@ namespace DiceRoll
             IEnumerable<string> tokens = context.ParseResult.GetValueForArgument(argument);
             AnalyzeOutputStyle style = context.ParseResult.GetValueForOption(styleOption);
                     
-            if (ExpressionParsingHelper.Try(tokens, context.Console, out INode node))
-                node.Visit(new Visitor(context.Console, formatter, style));
+            if (ExpressionParsingHelper.Try(tokens, context.Console, out NodeTree tree))
+                tree.Root.Value.Node.Visit(new Visitor(context.Console, formatter, style));
         }
         
         private sealed class Visitor : INodeVisitor

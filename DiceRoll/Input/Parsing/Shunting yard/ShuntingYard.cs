@@ -18,7 +18,7 @@
         public void Append(string expression) =>
             _infixReader.Read(expression);
 
-        public INode Parse() =>
+        public NodeTree Parse() =>
             _postfixEvaluator.Evaluate();
     }
 }

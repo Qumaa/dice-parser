@@ -130,7 +130,7 @@ namespace DiceRoll.Input.Parsing
 
         private void Operand(INumeric operand, in Substring context)
         {
-            _operands.Push(operand, in context);
+            _operands.PushParentless(operand, in context);
                 
             _state.DenoteOperandProcessing();
             

@@ -12,7 +12,7 @@ namespace DiceRoll
         public static void SetTokens(TokensTable tokens) =>
             _expressionParser = new ExpressionParser(tokens);
 
-        public static bool Try(IEnumerable<string> expression, IConsole exceptionOutput, out INode output)
+        public static bool Try(IEnumerable<string> expression, IConsole exceptionOutput, out NodeTree output)
         {
             try
             {

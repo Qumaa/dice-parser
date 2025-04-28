@@ -9,13 +9,13 @@
             _state = state;
         }
 
-        public void Push(INumeric operand, in Substring context) =>
-            _state.Operands.MapAndPush(operand, in context);
+        public void PushParentless(INumeric operand, in Substring context) =>
+            _state.Operands.MapAndPush(new LinkedNode(operand), in context);
 
-        public bool TryPeek(out Mapped<INode> mapped) =>
+        public bool TryPeek(out Mapped<LinkedNode> mapped) =>
             _state.Operands.TryPeek(out mapped);
 
-        public INode Pop() =>
-            _state.Operands.PopValue();
+        public Mapped<LinkedNode> Pop() =>
+            _state.Operands.Pop();
     }
 }

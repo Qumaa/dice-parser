@@ -13,26 +13,27 @@
             _operands = operands;
         }
 
-        public INode Evaluate()
+        public NodeTree Evaluate()
         {
-            INode node = CollapseOperatorsStack();
+            NodeTree node = CollapseOperatorsStack();
             _state.Mapper.Clear();
             _state.DenoteNewExpressionStart();
             return node;
         }
         
-        private INode CollapseOperatorsStack()
+        private NodeTree CollapseOperatorsStack()
         {
             ThrowIfAnyTrailingOperators();
 
             while(_operators.TryPop(out Mapped<OperatorToken> context))
                 _operators.InvokeOperatorOrThrow(in context);
 
-            INode result = _operands.Pop();
+            Mapped<LinkedNode> result = _operands.Pop();
+            SubstringSource source = _state.Mapper.BuildSubstringSource();
             
             ThrowIfAnyOperandLeft();
 
-            return result;
+            return new NodeTree(source, result);
         }
         
         private void ThrowIfAnyTrailingOperators()
@@ -43,7 +44,7 @@
         
         private void ThrowIfAnyOperandLeft()
         {
-            if (_operands.TryPeek(out Mapped<INode> operandToken))
+            if (_operands.TryPeek(out Mapped<LinkedNode> operandToken))
                 _state.Throw(in operandToken, ParsingErrorMessages.UNUSED_OPERAND);
         }
     }

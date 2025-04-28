@@ -8,7 +8,7 @@ namespace DiceRoll.Input.Parsing
         public int ParenthesisLevel { get; private set; }
         public InputMapper Mapper { get; }
         public MappedStack<OperatorToken> Operators { get; }
-        public MappedStack<INode> Operands { get; }
+        public MappedStack<LinkedNode> Operands { get; }
         public MappedStack<DelayedOperatorToken> DelayedOperators { get; }
         public TokenKind PrecedingTokenKind { get; private set; }
 
@@ -21,7 +21,7 @@ namespace DiceRoll.Input.Parsing
             Mapper = new InputMapper();
             
             Operators = Mapper.CreateLinkedStack<OperatorToken>();
-            Operands = Mapper.CreateLinkedStack<INode>();
+            Operands = Mapper.CreateLinkedStack<LinkedNode>();
             DelayedOperators = Mapper.CreateLinkedStack<DelayedOperatorToken>();
 
             PrecedingTokenKind = TokenKind.ExpressionStart;

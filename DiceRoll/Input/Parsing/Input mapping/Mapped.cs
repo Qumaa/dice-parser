@@ -14,7 +14,7 @@ namespace DiceRoll.Input.Parsing
             new Range(new Index(contextStart), new Index(contextStart + contextLength))
             ) { }
 
-        public Mapped(in T value, Range range)
+        public Mapped(in T value, in Range range)
         {
             Value = value;
             Range = range;
