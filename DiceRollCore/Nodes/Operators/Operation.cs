@@ -52,9 +52,6 @@ namespace DiceRoll
 
         Binary INode<Binary>.Evaluation => _asAssertion.Evaluation;
 
-        void INode.Next() =>
-            _asAssertion.Next();
-
         LogicalProbabilityDistribution IDistributable<LogicalProbabilityDistribution, Logical>.
             GetProbabilityDistribution() =>
             _asAssertion.GetProbabilityDistribution();
