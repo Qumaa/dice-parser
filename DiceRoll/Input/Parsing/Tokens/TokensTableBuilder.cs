@@ -40,23 +40,11 @@ namespace DiceRoll.Input.Parsing
 
         public void AddOperatorToken<TLeft, TRight>(int precedence, BinaryInvocationHandler<TLeft, TRight> handler,
             Regex pattern) where TLeft : INode where TRight : INode =>
-            _operators.Add(
-                new Operator(
-                    new RegexToken(pattern),
-                    precedence,
-                    OperatorInvoker.Binary(handler)
-                    )
-                );
+            _operators.Add(new Operator(new RegexToken(pattern), precedence, OperatorInvoker.Binary(handler)));
 
         public void AddOperatorToken<TLeft, TRight>(int precedence, BinaryInvocationHandler<TLeft, TRight> handler,
             IEnumerable<Regex> patterns) where TLeft : INode where TRight : INode =>
-            _operators.Add(
-                new Operator(
-                    new RegexToken(patterns),
-                    precedence,
-                    OperatorInvoker.Binary(handler)
-                    )
-                );
+            _operators.Add(new Operator(new RegexToken(patterns), precedence, OperatorInvoker.Binary(handler)));
 
         public void AddOperatorToken<TLeft, TRight>(int precedence, BinaryInvocationHandler<TLeft, TRight> handler,
             params Regex[] patterns) where TLeft : INode where TRight : INode =>
@@ -76,23 +64,11 @@ namespace DiceRoll.Input.Parsing
 
         public void AddOperatorToken<T>(int precedence, UnaryInvocationHandler<T> handler,
             Regex pattern) where T : INode =>
-            _operators.Add(
-                new Operator(
-                    new RegexToken(pattern),
-                    precedence,
-                    OperatorInvoker.Unary(handler)
-                    )
-                );
+            _operators.Add(new Operator(new RegexToken(pattern), precedence, OperatorInvoker.Unary(handler)));
 
         public void AddOperatorToken<T>(int precedence, UnaryInvocationHandler<T> handler,
             IEnumerable<Regex> patterns) where T : INode =>
-            _operators.Add(
-                new Operator(
-                    new RegexToken(patterns),
-                    precedence,
-                    OperatorInvoker.Unary(handler)
-                    )
-                );
+            _operators.Add(new Operator(new RegexToken(patterns), precedence, OperatorInvoker.Unary(handler)));
 
         public void AddOperatorToken<T>(int precedence, UnaryInvocationHandler<T> handler,
             params Regex[] patterns) where T : INode =>
