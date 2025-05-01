@@ -110,7 +110,7 @@ namespace DiceRoll.Input.Parsing
             params string[] words) where T : INode =>
             AddOperatorToken(precedence, handler, words as IEnumerable<string>);
 
-        public void AddOperandToken(Operand operand) =>
+        public void AddOperandToken(in Operand operand) =>
             _operands.Add(operand);
 
         public void AddOperandToken(OperandHandler handler, Regex pattern) =>

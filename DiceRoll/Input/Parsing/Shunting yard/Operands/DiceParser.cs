@@ -7,9 +7,9 @@ namespace DiceRoll.Input.Parsing
     public readonly struct DiceParser
     {
         private readonly string[] _delimiters;
-        private readonly DiceCompositionToken[] _compositionTokens;
+        private readonly CompositionToken[] _compositionTokens;
         
-        public DiceParser(string[] delimiters, DiceCompositionToken[] compositionTokens)
+        public DiceParser(string[] delimiters, CompositionToken[] compositionTokens)
         {
             _delimiters = delimiters;
             _compositionTokens = compositionTokens;
@@ -34,7 +34,7 @@ namespace DiceRoll.Input.Parsing
         [StructLayout(LayoutKind.Auto)]
         private readonly struct Helper
         {
-            private readonly DiceCompositionToken[] _compositionTokens;
+            private readonly CompositionToken[] _compositionTokens;
             private readonly Substring _expression;
             private readonly int _delimiterIndex;
             private readonly int _diceNotationEnd;
@@ -60,12 +60,12 @@ namespace DiceRoll.Input.Parsing
             public int FacesCount() =>
                 int.Parse(_expression.AsSpan(_delimiterIndex + 1, _diceNotationEnd - _delimiterIndex - 1));
             
-            public DiceCompositionHandler CompositionHandler()
+            public CompositionHandler CompositionHandler()
             {
                 if (!ExpressionEndsWithCompositionToken(out Substring compositionToken))
                     return DefaultCompositionHandler();
 
-                foreach (DiceCompositionToken token in _compositionTokens)
+                foreach (CompositionToken token in _compositionTokens)
                     if (token.Token.Matches(compositionToken))
                         return token.CompositionHandler;
 
@@ -84,7 +84,7 @@ namespace DiceRoll.Input.Parsing
                 return true;
             }
             
-            private DiceCompositionHandler DefaultCompositionHandler() =>
+            private CompositionHandler DefaultCompositionHandler() =>
                 _compositionTokens[0].CompositionHandler;
             
             private static int IndexOfDelimiter(Substring expression, string[] delimiters)

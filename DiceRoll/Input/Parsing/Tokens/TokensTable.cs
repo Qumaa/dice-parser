@@ -106,7 +106,7 @@ namespace DiceRoll.Input.Parsing
         {
             TokensTableBuilder builder = new("(", ")");
             
-            builder.AddOperandToken(DiceOperand.Default);
+            builder.AddOperandToken(in DiceOperand.Default);
             builder.AddOperandToken(x => Node.Value.Constant(int.Parse(x.AsSpan())), new Regex(@"\d+"));
             
             builder.AddOperatorToken<IAssertion>(110, static node => Node.Operator.Not(node), "!", "not");
