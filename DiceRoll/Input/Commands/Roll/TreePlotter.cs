@@ -21,12 +21,12 @@ namespace DiceRoll
         {
             _tree.Root.Value.Node.Next();
             
-            PlotNodeRecursively(in _tree.Root);
+            PlotNodeRecursively(in _tree.Root, new Visitor());
         }
 
-        private void PlotNodeRecursively(in Mapped<LinkedNode> node, int indent = 0, bool ignoreIndent = false)
+        private void PlotNodeRecursively(in Mapped<LinkedNode> node, Visitor visitor, int indent = 0, bool ignoreIndent = false)
         {
-            string evaluationString = NodeToString(in node, ignoreIndent ? 0 : indent, out int length);
+            string evaluationString = NodeToString(in node, visitor, ignoreIndent ? 0 : indent, out int length);
             _console.Write(evaluationString);
             _console.Write(" ");
             indent += length + 1;
@@ -40,15 +40,13 @@ namespace DiceRoll
             }
 
             for (int i = parents.Length - 1; i >= 0; i--)
-                PlotNodeRecursively(in parents[i], indent, i == parents.Length - 1);
+                PlotNodeRecursively(in parents[i], visitor, indent, i == parents.Length - 1);
         }
 
-        private string NodeToString(in Mapped<LinkedNode> node, int indent, out int i)
+        private string NodeToString(in Mapped<LinkedNode> node, Visitor visitor, int indent, out int i)
         {
             if (node.Value.IsOperator)
                 return _Indent($"({_tree.SubstringSource.Apply(in node).ToString()})", out i);
-            
-            Visitor visitor = new();
             
             node.Value.Node.Visit(visitor);
 

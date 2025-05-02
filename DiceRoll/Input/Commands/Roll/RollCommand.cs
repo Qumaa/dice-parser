@@ -30,14 +30,17 @@ namespace DiceRoll
                 return;
             
             bool tree = context.ParseResult.GetValueForOption(treeOption);
+            int times = context.ParseResult.GetValueForOption(timesOption);
 
             if (tree)
             {
-                new TreePlotter(nodeTree, context.Console).Plot();
+                TreePlotter plotter = new(nodeTree, context.Console);
+                
+                for (int i = 0; i < times; i++)
+                    plotter.Plot();
+                
                 return;
             }
-
-            int times = context.ParseResult.GetValueForOption(timesOption);
 
             Visitor visitor = new(context.Console, strings.FailedToPass);
             

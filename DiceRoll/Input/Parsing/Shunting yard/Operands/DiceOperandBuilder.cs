@@ -61,7 +61,7 @@ namespace DiceRoll.Input.Parsing
         {
             const char separator = '|';
             
-            // @"(?:(\d+)(delimiter1|...)(\d+)|(delimiter1|...)(\d+))\s*((composition1|...)|...)?"
+            // @"(?:(\d+)(delimiter1|...)(\d+)|(delimiter1|...)(\d+))((composition1|...)|...)?"
             StringBuilder stringBuilder = new(64);
             stringBuilder.Append(@"(?:(\d+)(");
 
@@ -71,7 +71,7 @@ namespace DiceRoll.Input.Parsing
             
             stringBuilder.AppendJoin(separator, _delimiterTokens);
 
-            stringBuilder.Append(@")(\d+))\s*(");
+            stringBuilder.Append(@")(\d+))(");
 
             for (int i = 0; i < _compositionTokens.Count; i++)
             {
