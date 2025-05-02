@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 
 namespace DiceRoll.Input.Parsing
 {
@@ -23,7 +22,7 @@ namespace DiceRoll.Input.Parsing
             _popLimit = operands.Count - arity;
             _operatorParents = new List<Mapped<LinkedNode>>(arity);
 
-            _resultRange = _operands.Peek().Range;
+            _resultRange = operatorRange;
         }
 
         public T Pop<T>() where T : INode

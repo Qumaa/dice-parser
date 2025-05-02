@@ -33,7 +33,7 @@ namespace DiceRoll
 
             Mapped<LinkedNode>[] parents = node.Value.Parents;
             
-            if (parents.Length is 0)
+            if (parents.Length is 0 || node.Value.Node is Composite)
             {
                 _console.WriteLine(string.Empty);
                 return;

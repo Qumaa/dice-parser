@@ -19,10 +19,8 @@ namespace DiceRoll
         public static int ThrowIfBelowTwo(int count,
             [CallerArgumentExpression("count")] string paramName = null)
         {
-            ArgumentNullException.ThrowIfNull(count, paramName);
-
             if (count < 2)
-                throw new EmptyEnumerableException("Invalid repetition count; expected at least 2.", paramName);
+                throw new CompositeRepetitionException("Invalid repetition count; expected at least 2.", paramName);
 
             return count;
         }
