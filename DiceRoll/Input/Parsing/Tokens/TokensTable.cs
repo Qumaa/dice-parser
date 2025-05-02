@@ -32,13 +32,12 @@ namespace DiceRoll.Input.Parsing
         public bool StartsWithCloseParenthesis(in Substring expression, out Substring tokenMatch) =>
             _closeParenthesis.MatchesStart(in expression, out tokenMatch);
 
-        public bool StartsWithOperator(in Substring expression, OperatorArity arity, out Substring tokenMatch, 
+        public bool StartsWithOperator(in Substring expression, OperatorGroup group, out Substring tokenMatch, 
             out int precedence, out OperatorInvoker invoker)
         {
-            int arityInt = ArityToInt(arity);
             foreach (Operator tokenizedOperator in _operators)
             {
-                if (tokenizedOperator.Invoker.Arity != arityInt ||
+                if (!MatchesOperatorGroup(tokenizedOperator.Invoker, group) ||
                     !tokenizedOperator.Token.MatchesStart(in expression, out tokenMatch))
                     continue;
 
@@ -69,13 +68,13 @@ namespace DiceRoll.Input.Parsing
             return false;
         }
 
-        public Substring UntilFirstKnownToken(in Substring expression, OperatorArity ignoreOperatorArity)
+        public Substring UntilFirstKnownToken(in Substring expression, OperatorGroup ignoreGroup)
         {
-            return _MatchesAnyToken(in expression, ArityToInt(ignoreOperatorArity), out Substring match) ?
+            return _MatchesAnyToken(in expression, ignoreGroup, out Substring match) ?
                 expression.SetLength(match.Start - expression.Start) :
                 expression;
 
-            bool _MatchesAnyToken(in Substring expression, int ignoreArity, out Substring match)
+            bool _MatchesAnyToken(in Substring expression, OperatorGroup ignoreGroup, out Substring match)
             {
                 if (_openParenthesis.Matches(in expression, out match))
                     return true;
@@ -84,7 +83,8 @@ namespace DiceRoll.Input.Parsing
                     return true;
 
                 foreach (Operator tokenizedOperator in _operators)
-                    if (tokenizedOperator.Invoker.Arity != ignoreArity && tokenizedOperator.Token.Matches(in expression, out match))
+                    if (!MatchesOperatorGroup(tokenizedOperator.Invoker, ignoreGroup) && 
+                        tokenizedOperator.Token.Matches(in expression, out match))
                         return true;
                 
                 foreach (Operand tokenizedOperand in _operands)
@@ -95,12 +95,8 @@ namespace DiceRoll.Input.Parsing
             }
         }
 
-        private static int ArityToInt(OperatorArity arity) =>
-            arity switch
-            {
-                OperatorArity.Unary => 1,
-                OperatorArity.Binary => 2
-            };
+        private static bool MatchesOperatorGroup(OperatorInvoker invoker, OperatorGroup group) =>
+            invoker.Layout is ArgumentsLayout.FullRight == group is OperatorGroup.RightSideArguments;
 
         private static TokensTable BuildDefaultTable()
         {
@@ -111,6 +107,10 @@ namespace DiceRoll.Input.Parsing
             
             builder.AddOperatorToken<IAssertion>(110, static node => Node.Operator.Not(node), "!", "not");
             builder.AddOperatorToken<INumeric>(110, static node => Node.Operator.Negate(node), "-");
+
+            builder.AddOperatorToken(120, new CompositionInvoker(CompositionTokenDescriptor.Summation.CompositionHandler), CompositionTokenDescriptor.Summation.Convert().Token);
+            builder.AddOperatorToken(120, new CompositionInvoker(CompositionTokenDescriptor.Highest.CompositionHandler), CompositionTokenDescriptor.Highest.Convert().Token);
+            builder.AddOperatorToken(120, new CompositionInvoker(CompositionTokenDescriptor.Lowest.CompositionHandler), CompositionTokenDescriptor.Lowest.Convert().Token);
             
             builder.AddOperatorToken<INumeric, INumeric>(100, static (left, right) => Node.Operator.Multiply(left, right), "*");
             builder.AddOperatorToken<INumeric, INumeric>(100, static (left, right) => Node.Operator.DivideRoundUp(left, right), "//");

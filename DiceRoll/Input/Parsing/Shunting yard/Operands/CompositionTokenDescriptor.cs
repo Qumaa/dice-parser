@@ -5,17 +5,17 @@ namespace DiceRoll.Input.Parsing
     public readonly struct CompositionTokenDescriptor
     {
         public static readonly CompositionTokenDescriptor Summation = new(
-            Params("s", "sum", "summation"),
+            Params("summation", "sum", "s"),
             static (numeric, times) => Node.Value.Summation(numeric, times)
             );
         
         public static readonly CompositionTokenDescriptor Highest = new(
-            Params("h", "highest"),
+            Params("highest", "h"),
             static (numeric, times) => Node.Value.Highest(numeric, times)
             );
         
         public static readonly CompositionTokenDescriptor Lowest = new(
-            Params("l", "lowest"),
+            Params("lowest", "l"),
             static (numeric, times) => Node.Value.Lowest(numeric, times)
             );
 

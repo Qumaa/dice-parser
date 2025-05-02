@@ -4,7 +4,7 @@
     {
         private readonly UnaryInvocationHandler<T> _handler;
         
-        public ReversedUnaryOperatorInvoker(UnaryInvocationHandler<T> handler) : base(1)
+        public ReversedUnaryOperatorInvoker(UnaryInvocationHandler<T> handler) : base(1, ArgumentsLayout.FullLeft)
         {
             _handler = handler;
         }

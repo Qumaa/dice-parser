@@ -20,17 +20,17 @@ namespace DiceRoll.Input.Parsing
             _operands = new List<Operand>();
         }
 
-        public void AddOpenParenthesisPattern(string pattern) =>
-            _openParenthesis.Add(pattern);
+        public void AddOpenParenthesisToken(string token) =>
+            _openParenthesis.Add(token);
 
-        public void AddOpenParenthesisPattern(IEnumerable<string> patterns) =>
-            _openParenthesis.AddRange(patterns);
+        public void AddOpenParenthesisToken(IEnumerable<string> tokens) =>
+            _openParenthesis.AddRange(tokens);
 
-        public void AddOpenParenthesisPattern(params string[] patterns) =>
-            _openParenthesis.AddRange(patterns);
+        public void AddOpenParenthesisToken(params string[] tokens) =>
+            _openParenthesis.AddRange(tokens);
 
-        public void AddCloseParenthesisPattern(string pattern) =>
-            _closeParenthesis.Add(pattern);
+        public void AddCloseParenthesisPattern(string token) =>
+            _closeParenthesis.Add(token);
 
         public void AddCloseParenthesisPattern(IEnumerable<string> patterns) =>
             _closeParenthesis.AddRange(patterns);
@@ -38,13 +38,16 @@ namespace DiceRoll.Input.Parsing
         public void AddCloseParenthesisPattern(params string[] patterns) =>
             _closeParenthesis.AddRange(patterns);
 
+        public void AddOperatorToken(int precedence, OperatorInvoker invoker, IToken token) =>
+            _operators.Add(new Operator(token, precedence, invoker));
+        
         public void AddOperatorToken<TLeft, TRight>(int precedence, BinaryInvocationHandler<TLeft, TRight> handler,
             Regex pattern) where TLeft : INode where TRight : INode =>
-            _operators.Add(new Operator(new RegexToken(pattern), precedence, OperatorInvoker.Binary(handler)));
+            AddOperatorToken(precedence, OperatorInvoker.Binary(handler), new RegexToken(pattern));
 
         public void AddOperatorToken<TLeft, TRight>(int precedence, BinaryInvocationHandler<TLeft, TRight> handler,
             IEnumerable<Regex> patterns) where TLeft : INode where TRight : INode =>
-            _operators.Add(new Operator(new RegexToken(patterns), precedence, OperatorInvoker.Binary(handler)));
+            AddOperatorToken(precedence, OperatorInvoker.Binary(handler), new RegexToken(patterns));
 
         public void AddOperatorToken<TLeft, TRight>(int precedence, BinaryInvocationHandler<TLeft, TRight> handler,
             params Regex[] patterns) where TLeft : INode where TRight : INode =>
@@ -64,11 +67,11 @@ namespace DiceRoll.Input.Parsing
 
         public void AddOperatorToken<T>(int precedence, UnaryInvocationHandler<T> handler,
             Regex pattern) where T : INode =>
-            _operators.Add(new Operator(new RegexToken(pattern), precedence, OperatorInvoker.Unary(handler)));
+            AddOperatorToken(precedence, OperatorInvoker.Unary(handler), new RegexToken(pattern));
 
         public void AddOperatorToken<T>(int precedence, UnaryInvocationHandler<T> handler,
             IEnumerable<Regex> patterns) where T : INode =>
-            _operators.Add(new Operator(new RegexToken(patterns), precedence, OperatorInvoker.Unary(handler)));
+            AddOperatorToken(precedence, OperatorInvoker.Unary(handler), new RegexToken(patterns));
 
         public void AddOperatorToken<T>(int precedence, UnaryInvocationHandler<T> handler,
             params Regex[] patterns) where T : INode =>

@@ -4,7 +4,7 @@
     {
         private readonly UnaryInvocationHandler<T> _handler;
         
-        public UnaryOperatorInvoker(UnaryInvocationHandler<T> handler) : base(1, FlowDirection.Right)
+        public UnaryOperatorInvoker(UnaryInvocationHandler<T> handler) : base(1, ArgumentsLayout.FullRight)
         {
             _handler = handler;
         }

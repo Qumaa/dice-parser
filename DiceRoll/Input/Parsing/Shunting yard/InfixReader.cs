@@ -70,7 +70,7 @@ namespace DiceRoll.Input.Parsing
 
             if (_state.Tokens.StartsWithOperator(
                     in notParsed,
-                    GetCurrentOperatorArity(),
+                    GetCurrentOperatorGroup(),
                     out output,
                     out int precedence,
                     out OperatorInvoker invoker
@@ -80,19 +80,21 @@ namespace DiceRoll.Input.Parsing
                 return;
             }
 
-            output = _state.Tokens.UntilFirstKnownToken(in notParsed, GetCurrentOperatorArity().Reversed()).Trim();
+            output = _state.Tokens.UntilFirstKnownToken(in notParsed, GetCurrentOperatorGroup().Reversed()).Trim();
             throw new UnknownTokenException(in output);
         }
 
-        private OperatorArity GetCurrentOperatorArity() =>
-            _state.PrecedingTokenKind is TokenKind.Operand ? OperatorArity.Binary : OperatorArity.Unary;
+        private OperatorGroup GetCurrentOperatorGroup() =>
+            _state.PrecedingTokenKind is TokenKind.Operand ?
+                OperatorGroup.LeftSideArguments :
+                OperatorGroup.RightSideArguments;
 
         private void OpenParenthesis(in Substring context)
         {
             _state.DenoteParenthesisOpening();
             _state.DenoteNewExpressionStart();
             
-            _operators.Push(OperatorToken.OpenParenthesis, in context);
+            _operators.Push(in OperatorToken.OpenParenthesis, in context);
         }
 
         private void CloseParenthesis(in Substring token)
@@ -120,11 +122,8 @@ namespace DiceRoll.Input.Parsing
                    precedence < lastOperator.Precedence)
                 _operators.InvokeAfterDelayedOperators(_operators.Pop());
 
-            if (invoker.ExpectsRightOperands)
-                _operators.DelayOperatorInvocation(invoker, in context);
-            else
-                _operators.Push(new OperatorToken(precedence, invoker), in context);
-            
+            _operators.Push(new OperatorToken(precedence, invoker), in context);
+
             _state.DenoteOperatorProcessing();
         }
 

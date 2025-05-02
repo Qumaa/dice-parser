@@ -11,8 +11,38 @@ namespace DiceRoll.Input.Parsing
             _state = state;
         }
 
-        public void Push(OperatorToken operatorToken, in Substring context) =>
-            _state.Operators.MapAndPush(in operatorToken, context);
+        public void Push(in OperatorToken operatorToken, in Substring context)
+        {
+            if (operatorToken.Invoker is null)
+            {
+                _state.Operators.MapAndPush(in operatorToken, context);
+                return;
+            }
+
+            Mapped<OperatorToken> mapped = _state.Mapper.Map(in operatorToken, in context);
+            ArgumentsLayout layout = operatorToken.Invoker.Layout;
+
+            if (layout is ArgumentsLayout.FullLeft)
+            {
+                InvokeOperatorOrThrow(in mapped);
+                return;
+            }
+
+            if (layout is ArgumentsLayout.Left)
+            {
+                _state.Operators.Push(in mapped);
+                return;
+            }
+
+            int capturedOperands = _state.Operands.Count;
+            if (layout is ArgumentsLayout.Right)
+                capturedOperands--; // require one more operand
+            
+            _state.DelayedOperators.MapAndPush(
+                new DelayedOperatorToken(operatorToken.Invoker, _state.ParenthesisLevel, capturedOperands),
+                in context
+                );
+        }
 
         public bool TryPeek(out OperatorToken operatorToken) =>
             _state.Operators.TryPeek(out operatorToken);
@@ -51,9 +81,6 @@ namespace DiceRoll.Input.Parsing
             InvokeDelayedOperators();
             InvokeOperatorOrThrow(in invoker);
         }
-
-        public void DelayOperatorInvocation(OperatorInvoker invoker, in Substring context) =>
-            _state.DelayedOperators.MapAndPush(new DelayedOperatorToken(invoker, _state.ParenthesisLevel, _state.Operands.Count), in context);
 
         private void InvokeOperatorOrThrow(in Mapped<DelayedOperatorToken> operatorToken)
         {
