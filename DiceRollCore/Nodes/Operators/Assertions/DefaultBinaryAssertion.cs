@@ -11,7 +11,7 @@
         }
 
         protected override Binary GetNextEvaluation() =>
-            _delegates.Evaluation.Invoke(_left.Evaluate(), _right.Evaluate());
+            _delegates.Evaluation.Invoke(_left.Evaluation, _right.Evaluation);
 
         protected override LogicalProbabilityDistribution CreateProbabilityDistribution() =>
             new(_delegates.Probability.Invoke(_left.GetProbabilityDistribution(), _right.GetProbabilityDistribution()));

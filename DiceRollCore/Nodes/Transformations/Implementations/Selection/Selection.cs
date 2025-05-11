@@ -6,17 +6,16 @@ namespace DiceRoll
     {
         private readonly SelectionType _selectionType;
 
+        public override Outcome Evaluation => _selectionType is SelectionType.Highest ?
+                Outcome.Max(_source.Evaluation, _other.Evaluation) : 
+                Outcome.Min(_source.Evaluation, _other.Evaluation);
+
         public Selection(INumeric source, INumeric other, SelectionType selectionType) : base(source, other)
         {
             EnumValueNotDefinedException.ThrowIfValueNotDefined(selectionType);
             
             _selectionType = selectionType;
         }
-
-        protected override Outcome GetNextEvaluation() =>
-            _selectionType is SelectionType.Highest ?
-                Outcome.Max(_source.Evaluate(), _other.Evaluate()) : 
-                Outcome.Min(_source.Evaluate(), _other.Evaluate());
 
         protected override RollProbabilityDistribution CreateProbabilityDistribution()
         {

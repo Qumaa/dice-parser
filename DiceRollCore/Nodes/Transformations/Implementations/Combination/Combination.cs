@@ -7,6 +7,8 @@ namespace DiceRoll
     {
         private readonly CombinationType _combinationType;
 
+        public override Outcome Evaluation => Combine(_source.Evaluation, _other.Evaluation);
+
         public Combination(INumeric source, INumeric other, CombinationType combinationType) : base(source, other)
         {
             if (IsDivision(combinationType))
@@ -15,9 +17,6 @@ namespace DiceRoll
             
             _combinationType = combinationType;
         }
-
-        protected override Outcome GetNextEvaluation() =>
-            Combine(_source.Evaluate(), _other.Evaluate());
 
         protected override RollProbabilityDistribution CreateProbabilityDistribution()
         {

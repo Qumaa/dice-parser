@@ -44,8 +44,12 @@ namespace DiceRoll
 
             Visitor visitor = new(context.Console, strings.FailedToPass);
             
+            INode node = nodeTree.Root.Value.Node;
             for (int i = 0; i < times; i++)
-                nodeTree.Root.Value.Node.Visit(visitor);
+            {
+                node.Next();
+                node.Visit(visitor);
+            }
         }
         
         private sealed class Visitor : INodeVisitor
@@ -60,17 +64,17 @@ namespace DiceRoll
             }
 
             public void ForNumeric(INumeric numeric) =>
-                _console.WriteLine(numeric.Evaluate().ToString());
+                _console.WriteLine(numeric.Evaluation.ToString());
 
             public void ForOperation(IOperation operation) =>
                 _console.WriteLine(
-                    operation.Evaluate().Exists(out Outcome outcome) ?
+                    operation.Evaluation.Exists(out Outcome outcome) ?
                         outcome.ToString() :
                         _failedToPass
                     );
 
             public void ForAssertion(IAssertion assertion) =>
-                _console.WriteLine(assertion.Evaluate().ToString());
+                _console.WriteLine(assertion.Evaluation.ToString());
         }
     }
 }

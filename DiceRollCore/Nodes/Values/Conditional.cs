@@ -19,6 +19,6 @@ namespace DiceRoll
                 .ToOptionalRollProbabilityDistribution();
 
         protected override Optional<Outcome> GetNextEvaluation() =>
-            _assertion.Evaluate() ? new Optional<Outcome>(_value.Evaluate()) : Optional<Outcome>.Empty;
+            _assertion.Evaluation ? new Optional<Outcome>(_value.Evaluation) : Optional<Outcome>.Empty;
     }
 }

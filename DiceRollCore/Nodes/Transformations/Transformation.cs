@@ -12,9 +12,10 @@ namespace DiceRoll
             
             _source = source;
         }
-
-        protected abstract override Outcome GetNextEvaluation();
-
+        
         protected abstract override RollProbabilityDistribution CreateProbabilityDistribution();
+
+        public override void Next() =>
+            _source.Next();
     }
 }

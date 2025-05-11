@@ -9,6 +9,7 @@ namespace DiceRoll
     {
         private readonly IComposite _composite;
 
+        public override Outcome Evaluation => _composite.AsNumeric.Evaluation;
         CompositeEvaluation INode<CompositeEvaluation>.Evaluation => _composite.Evaluation;
 
         INumeric IComposite.AsNumeric => _composite.AsNumeric;
@@ -28,8 +29,8 @@ namespace DiceRoll
         public Composite(INumeric node, int repetitionCount, Composer composer) :
             this(Enumerable.Repeat(node, repetitionCount), composer) { }
 
-        protected override Outcome GetNextEvaluation() =>
-            _composite.AsNumeric.Evaluate();
+        public override void Next() =>
+            _composite.Next();
 
         protected override RollProbabilityDistribution CreateProbabilityDistribution() =>
             _composite.AsNumeric.GetProbabilityDistribution();

@@ -10,7 +10,7 @@
         }
 
         protected override Optional<Outcome> GetNextEvaluation() =>
-            _delegates.Evaluation(_left.Evaluate(), _right.Evaluate());
+            _delegates.Evaluation(_left.Evaluation, _right.Evaluation);
 
         protected override OptionalRollProbabilityDistribution CreateProbabilityDistribution() =>
             new(_delegates.Distribution(_left.GetProbabilityDistribution(), _right.GetProbabilityDistribution()));

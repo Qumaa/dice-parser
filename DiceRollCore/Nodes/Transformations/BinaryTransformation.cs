@@ -12,5 +12,11 @@ namespace DiceRoll
             
             _other = other;
         }
+
+        public override void Next()
+        {
+            base.Next();
+            _other.Next();
+        }
     }
 }

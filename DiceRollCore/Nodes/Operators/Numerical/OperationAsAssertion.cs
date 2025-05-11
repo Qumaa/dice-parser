@@ -10,7 +10,7 @@
         }
 
         protected override Binary GetNextEvaluation() =>
-            _operation.Evaluate().AsBinary();
+            _operation.Evaluation.AsBinary();
 
         protected override LogicalProbabilityDistribution CreateProbabilityDistribution() =>
             _operation.GetProbabilityDistribution().AsLogical();

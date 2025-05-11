@@ -4,10 +4,9 @@
     {
         private RollProbabilityDistribution _cachedDistribution;
 
-        public Outcome Evaluation { get; private set; }
+        public abstract Outcome Evaluation { get; }
 
-        public void Next() =>
-            Evaluation = GetNextEvaluation();
+        public abstract void Next();
 
         public RollProbabilityDistribution GetProbabilityDistribution() =>
             _cachedDistribution ??= CreateProbabilityDistribution();
@@ -16,7 +15,5 @@
             visitor.ForNumeric(this);
 
         protected abstract RollProbabilityDistribution CreateProbabilityDistribution();
-
-        protected abstract Outcome GetNextEvaluation();
     }
 }

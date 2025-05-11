@@ -3,14 +3,15 @@
     public sealed class Constant : Numeric
     {
         private readonly int _value;
-        
+
+        public override Outcome Evaluation => new(_value);
+
         public Constant(int value) 
         {
             _value = value;
         }
 
-        protected override Outcome GetNextEvaluation() =>
-            new(_value);
+        public override void Next() { }
 
         protected override RollProbabilityDistribution CreateProbabilityDistribution() =>
             new(new Outcome(_value));
