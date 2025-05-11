@@ -1,5 +1,6 @@
 ﻿using System;
 using System.CommandLine;
+using System.Linq;
 using System.Runtime.InteropServices;
 using DiceRoll.Input.Parsing;
 
@@ -33,7 +34,7 @@ namespace DiceRoll
 
             Mapped<LinkedNode>[] parents = node.Value.Parents;
             
-            if (parents.Length is 0 || node.Value.Node is Composite)
+            if (parents.Length is 0)
             {
                 _console.WriteLine(string.Empty);
                 return;
@@ -43,18 +44,27 @@ namespace DiceRoll
                 PlotNodeRecursively(in parents[i], visitor, indent, i == parents.Length - 1);
         }
 
-        private string NodeToString(in Mapped<LinkedNode> node, Visitor visitor, int indent, out int i)
+        private string NodeToString(in Mapped<LinkedNode> node, Visitor visitor, int indent, out int nodeStringLength)
         {
             if (node.Value.IsOperator)
-                return _Indent($"({_tree.SubstringSource.Apply(in node).ToString()})", out i);
-            
-            node.Value.Node.Visit(visitor);
+                return _Indent($"({_tree.SubstringSource.Apply(in node).ToString()})", out nodeStringLength);
 
-            string output = node.Value.Node is Dice or Composite ?
-                $"{visitor.Output} ({_tree.SubstringSource.Apply(in node.Range).ToString()})" :
-                visitor.Output;
-            
-            return _Indent(output, out i);
+            INode operand = node.Value.Node;
+            operand.Visit(visitor);
+
+            string output = visitor.Output;
+
+            if (operand is not (Dice or IComposite))
+                return _Indent(output, out nodeStringLength);
+
+            output += $" ({_tree.SubstringSource.Apply(in node.Range).ToString()}";
+
+            if (operand is IComposite composite)
+                output += $" = [{string.Join(", ", composite.Evaluation.Select(x => x.ToString()))}]";
+                
+            output += ")";
+
+            return _Indent(output, out nodeStringLength);
 
             string _Indent(string input, out int inputLength)
             {

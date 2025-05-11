@@ -1,28 +1,60 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace DiceRoll
 {
-    public sealed class Composite : Numeric
+    public sealed class Composite : Numeric, IComposite
     {
-        private readonly INumeric _composite;
-        
+        private readonly IComposite _composite;
+
+        CompositeEvaluation INode<CompositeEvaluation>.Evaluation => _composite.Evaluation;
+
+        INumeric IComposite.AsNumeric => _composite.AsNumeric;
+
         public Composite(IEnumerable<INumeric> sequence, Composer composer)
         {
-            EmptyEnumerableException.ThrowIfNullOrEmpty(sequence);
+            ArgumentNullException.ThrowIfNull(sequence);
             ArgumentNullException.ThrowIfNull(composer);
+
+            INumeric[] sourceNodes = sequence.ToArray();
+
+            CompositeRepetitionArgumentException.ThrowIfBelowOne(sourceNodes.Length);
             
-            _composite = composer.Compose(sequence);
+            _composite = composer.Compose(sourceNodes);
         }
 
         public Composite(INumeric node, int repetitionCount, Composer composer) :
-            this(Enumerable.Repeat(node, CompositeRepetitionException.ThrowIfBelowTwo(repetitionCount)), composer) { }
+            this(Enumerable.Repeat(node, repetitionCount), composer) { }
 
         protected override Outcome GetNextEvaluation() =>
-            _composite.Evaluate();
+            _composite.AsNumeric.Evaluate();
 
         protected override RollProbabilityDistribution CreateProbabilityDistribution() =>
-            _composite.GetProbabilityDistribution();
+            _composite.AsNumeric.GetProbabilityDistribution();
+    }
+
+    public interface IComposite : INode<CompositeEvaluation>
+    {
+        INumeric AsNumeric { get; }
+    }
+
+    public sealed class CompositeEvaluation : IEnumerable<Outcome>
+    {
+        public readonly Outcome Outcome;
+        private readonly Outcome[] _source;
+        
+        public CompositeEvaluation(Outcome outcome, Outcome[] source)
+        {
+            _source = source;
+            Outcome = outcome;
+        }
+        
+        public IEnumerator<Outcome> GetEnumerator() =>
+            (_source as IEnumerable<Outcome>).GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() =>
+            GetEnumerator();
     }
 }
