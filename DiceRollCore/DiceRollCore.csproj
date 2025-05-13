@@ -6,4 +6,12 @@
         <LangVersion>9</LangVersion>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Compile Remove="Nodes\Primitive types\Logical.cs" />
+      <Compile Remove="Nodes\Primitive types\Optional.cs" />
+      <Compile Remove="Nodes\Primitive types\Probability.cs" />
+      <Compile Remove="Nodes\Primitive types\ProbabilityOf.cs" />
+      <Compile Remove="Nodes\Values\Composite\Composer.cs" />
+    </ItemGroup>
+
 </Project>

@@ -7,21 +7,27 @@ namespace DiceRoll
     {
         private readonly CombinationType _combinationType;
 
-        public override Outcome Evaluation => Combine(_source.Evaluation, _other.Evaluation);
-
-        public Combination(INumeric source, INumeric other, CombinationType combinationType) : base(source, other)
+        public Combination(INumeric left, INumeric right, CombinationType combinationType) : base(left, right)
         {
             if (IsDivision(combinationType))
-                ZeroDivisorException.ThrowIfAnyZero(_other.GetProbabilityDistribution());
+                ZeroDivisorException.ThrowIfAnyZero(_right.GetProbabilityDistribution());
             EnumValueNotDefinedException.ThrowIfValueNotDefined(combinationType);
             
             _combinationType = combinationType;
         }
 
+        public override void Next()
+        {
+            Outcome left = _left.Evaluate();
+            Outcome right = _right.Evaluate();
+            
+            CacheEvaluation(Combine(left, right));
+        }
+
         protected override RollProbabilityDistribution CreateProbabilityDistribution()
         {
-            RollProbabilityDistribution source = _source.GetProbabilityDistribution();
-            RollProbabilityDistribution other = _other.GetProbabilityDistribution();
+            RollProbabilityDistribution source = _left.GetProbabilityDistribution();
+            RollProbabilityDistribution other = _right.GetProbabilityDistribution();
 
             SortedList<Outcome, Probability> probabilities = new(Outcome.RelationalComparer);
             

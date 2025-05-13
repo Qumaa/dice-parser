@@ -4,9 +4,13 @@ namespace DiceRoll
 {
     public sealed class Negation : Transformation
     {
-        public override Outcome Evaluation => -_source.Evaluation;
-        
         public Negation(INumeric node) : base(node) { }
+
+        public override void Next()
+        {
+            base.Next();
+            CacheEvaluation(-_source.Evaluation);
+        }
 
         protected override RollProbabilityDistribution CreateProbabilityDistribution() =>
             _source.GetProbabilityDistribution()

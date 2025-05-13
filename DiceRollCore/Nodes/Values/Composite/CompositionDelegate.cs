@@ -1,4 +1,4 @@
 ﻿namespace DiceRoll
 {
-    public delegate IComposite CompositionDelegate(INumeric[] composed);
+    public delegate INumeric CompositionDelegate(INumeric[] composed);
 }

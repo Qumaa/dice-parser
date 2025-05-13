@@ -2,21 +2,23 @@
 
 namespace DiceRoll
 {
-    public abstract class BinaryTransformation : Transformation
+    public abstract class BinaryTransformation : Numeric
     {
-        protected readonly INumeric _other;
+        protected readonly INumeric _left;
+        protected readonly INumeric _right;
 
-        protected BinaryTransformation(INumeric source, INumeric other) : base(source)
+        protected BinaryTransformation(INumeric left, INumeric right)
         {
-            ArgumentNullException.ThrowIfNull(other);
-            
-            _other = other;
+            ArgumentNullException.ThrowIfNull(right);
+
+            _left = left;
+            _right = right;
         }
 
         public override void Next()
         {
-            base.Next();
-            _other.Next();
+            _left.Next();
+            _right.Next();
         }
     }
 }

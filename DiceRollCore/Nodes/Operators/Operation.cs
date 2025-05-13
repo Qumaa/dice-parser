@@ -14,21 +14,21 @@ namespace DiceRoll
             _asAssertion = CreateAssertionWrapperSafe();
         }
 
-        public void Next() =>
-            Evaluation = GetNextEvaluation();
+        public abstract void Next();
 
         public OptionalRollProbabilityDistribution GetProbabilityDistribution() =>
             _cachedDistribution ??= CreateProbabilityDistribution();
 
-        public virtual IAssertion AsAssertion() =>
+        public IAssertion AsAssertion() =>
             _asAssertion;
 
         public void Visit<T>(T visitor) where T : INodeVisitor =>
             visitor.ForOperation(this);
 
-        protected abstract Optional<Outcome> GetNextEvaluation();
-
-        protected virtual Assertion CreateAssertionWrapper() =>
+        protected void CacheEvaluation(in Optional<Outcome> evaluation) =>
+            Evaluation = evaluation;
+        
+        protected virtual IAssertion CreateAssertionWrapper() =>
             DefaultAssertionFactory();
 
         protected abstract OptionalRollProbabilityDistribution CreateProbabilityDistribution();

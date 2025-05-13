@@ -6,21 +6,29 @@ namespace DiceRoll
     {
         private readonly SelectionType _selectionType;
 
-        public override Outcome Evaluation => _selectionType is SelectionType.Highest ?
-                Outcome.Max(_source.Evaluation, _other.Evaluation) : 
-                Outcome.Min(_source.Evaluation, _other.Evaluation);
-
-        public Selection(INumeric source, INumeric other, SelectionType selectionType) : base(source, other)
+        public Selection(INumeric left, INumeric right, SelectionType selectionType) : base(left, right)
         {
             EnumValueNotDefinedException.ThrowIfValueNotDefined(selectionType);
             
             _selectionType = selectionType;
         }
 
+        public override void Next()
+        {
+            Outcome left = _left.Evaluate();
+            Outcome right = _right.Evaluate();
+            
+            Outcome evaluation = _selectionType is SelectionType.Highest ?
+                Outcome.Max(left, right) : 
+                Outcome.Min(left, right);
+            
+            CacheEvaluation(in evaluation);
+        }
+
         protected override RollProbabilityDistribution CreateProbabilityDistribution()
         {
-            RollProbabilityDistribution source = _source.GetProbabilityDistribution();
-            RollProbabilityDistribution other = _other.GetProbabilityDistribution();
+            RollProbabilityDistribution source = _left.GetProbabilityDistribution();
+            RollProbabilityDistribution other = _right.GetProbabilityDistribution();
             
             CDFTable sourceTable = new(source);
             CDFTable otherTable = new(other);

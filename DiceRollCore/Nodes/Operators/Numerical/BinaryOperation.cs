@@ -15,5 +15,11 @@ namespace DiceRoll
             _left = left;
             _right = right;
         }
+
+        public override void Next()
+        {
+            _left.Next();
+            _right.Next();
+        }
     }
 }

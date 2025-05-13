@@ -9,13 +9,18 @@
             _delegates = DefaultOperationDelegates.Get(operationType);
         }
 
-        protected override Optional<Outcome> GetNextEvaluation() =>
-            _delegates.Evaluation(_left.Evaluation, _right.Evaluation);
+        public override void Next()
+        {
+            Outcome left = _left.Evaluate();
+            Outcome right = _right.Evaluate();
+            
+            CacheEvaluation(_delegates.Evaluation(left, right));
+        }
 
         protected override OptionalRollProbabilityDistribution CreateProbabilityDistribution() =>
             new(_delegates.Distribution(_left.GetProbabilityDistribution(), _right.GetProbabilityDistribution()));
 
-        protected override Assertion CreateAssertionWrapper() =>
+        protected override IAssertion CreateAssertionWrapper() =>
             new AsAssertionWrapper(this);
 
         private LogicalProbabilityDistribution GetLogicalProbabilityDistribution() =>
@@ -29,9 +34,12 @@
             {
                 _operation = operation;
             }
-
-            protected override Binary GetNextEvaluation() =>
-                _operation.GetNextEvaluation().AsBinary();
+            
+            public override void Next()
+            {
+                _operation.Next();
+                CacheEvaluation(_operation.Evaluation.AsBinary());
+            }
 
             protected override LogicalProbabilityDistribution CreateProbabilityDistribution() =>
                 _operation.GetLogicalProbabilityDistribution();

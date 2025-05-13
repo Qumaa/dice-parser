@@ -4,13 +4,16 @@ namespace DiceRoll
 {
     public abstract class UnaryAssertion : Assertion
     {
-        protected readonly IAssertion _assertion;
+        protected readonly IAssertion _source;
 
-        protected UnaryAssertion(IAssertion assertion)
+        protected UnaryAssertion(IAssertion source)
         {
-            ArgumentNullException.ThrowIfNull(assertion);
+            ArgumentNullException.ThrowIfNull(source);
             
-            _assertion = assertion;
+            _source = source;
         }
+
+        public override void Next() =>
+            _source.Next();
     }
 }

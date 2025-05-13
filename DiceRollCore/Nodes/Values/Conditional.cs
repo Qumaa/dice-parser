@@ -13,12 +13,17 @@ namespace DiceRoll
             _value = value;
         }
 
+        public override void Next()
+        {
+            _assertion.Next();
+            _value.Next();
+            
+            CacheEvaluation(_assertion.Evaluation ? new Optional<Outcome>(_value.Evaluation) : Optional<Outcome>.Empty);
+        }
+
         protected override OptionalRollProbabilityDistribution CreateProbabilityDistribution() =>
             _value.GetProbabilityDistribution()
                 .Select(x => new Roll(x.Outcome, x.Probability * _assertion.True))
                 .ToOptionalRollProbabilityDistribution();
-
-        protected override Optional<Outcome> GetNextEvaluation() =>
-            _assertion.Evaluation ? new Optional<Outcome>(_value.Evaluation) : Optional<Outcome>.Empty;
     }
 }

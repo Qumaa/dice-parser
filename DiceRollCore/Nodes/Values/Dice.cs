@@ -7,10 +7,6 @@ namespace DiceRoll
         private readonly Random _random;
         private readonly int _faces;
         
-        private Outcome _outcome;
-
-        public override Outcome Evaluation => _outcome;
-
         public Dice(Random random, int faces)
         {
             ArgumentNullException.ThrowIfNull(random);
@@ -21,7 +17,7 @@ namespace DiceRoll
         }
 
         public override void Next() =>
-            _outcome = new Outcome(_random.Next(0, _faces) + 1);
+            CacheEvaluation(new Outcome(_random.Next(0, _faces) + 1));
 
         protected override RollProbabilityDistribution CreateProbabilityDistribution()
         {
