@@ -52,10 +52,10 @@ namespace DiceRoll.Input.Parsing
         public MappedStack<T> CreateLinkedStack<T>() =>
             new(this);
 
-        public SubstringSource BuildSubstringSource()
+        public SubstringMapper BuildSubstringSource()
         {
             if (_inputLength is 0)
-                return new SubstringSource(string.Empty);
+                return new SubstringMapper(string.Empty);
             
             char[] chars = new char[_inputLength - 1];
 
@@ -64,7 +64,7 @@ namespace DiceRoll.Input.Parsing
             foreach (char c in piece)
                 chars[i++] = c;
             
-            return new SubstringSource(new string(chars));
+            return new SubstringMapper(new string(chars));
         }
     }
 

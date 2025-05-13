@@ -29,11 +29,11 @@
                 _operators.InvokeOperatorOrThrow(in context);
 
             Mapped<LinkedNode> result = _operands.Pop();
-            SubstringSource source = _state.Mapper.BuildSubstringSource();
+            SubstringMapper mapper = _state.Mapper.BuildSubstringSource();
             
             ThrowIfAnyOperandLeft();
 
-            return new NodeTree(source, result);
+            return new NodeTree(mapper, result);
         }
         
         private void ThrowIfAnyTrailingOperators()

@@ -29,14 +29,14 @@ namespace DiceRoll
         {
             string evaluationString = NodeToString(in node, visitor, ignoreIndent ? 0 : indent, out int length);
             _console.Write(evaluationString);
-            _console.Write(" ");
+            _console.Space();
             indent += length + 1;
 
             Mapped<LinkedNode>[] parents = node.Value.Parents;
             
             if (parents.Length is 0)
             {
-                _console.WriteLine(string.Empty);
+                _console.WriteLine();
                 return;
             }
 
@@ -47,7 +47,7 @@ namespace DiceRoll
         private string NodeToString(in Mapped<LinkedNode> node, Visitor visitor, int indent, out int nodeStringLength)
         {
             if (node.Value.IsOperator)
-                return _Indent($"({_tree.SubstringSource.Apply(in node).ToString()})", out nodeStringLength);
+                return _Indent($"({_tree.SubstringMapper.Apply(in node).ToString()})", out nodeStringLength);
 
             INode operand = node.Value.Node;
             operand.Visit(visitor);
@@ -57,7 +57,7 @@ namespace DiceRoll
             if (operand is not (Dice or IComposite))
                 return _Indent(output, out nodeStringLength);
 
-            output += $" ({_tree.SubstringSource.Apply(in node.Range).ToString()}";
+            output += $" ({_tree.SubstringMapper.Apply(in node.Range).ToString()}";
 
             if (operand is IComposite composite)
                 output += $" = [{string.Join(", ", composite.Evaluation.Select(x => x.ToString()))}]";

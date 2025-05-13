@@ -38,5 +38,8 @@ namespace DiceRoll
             for (int i = 0; i < count; i++)
                 console.Space();
         }
+        
+        public static void WriteLine(this IConsole console) =>
+            console.WriteLine(string.Empty);
     }
 }

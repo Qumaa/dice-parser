@@ -2,12 +2,12 @@
 {
     public sealed class NodeTree
     {
-        public readonly SubstringSource SubstringSource;
+        public readonly SubstringMapper SubstringMapper;
         public readonly Mapped<LinkedNode> Root;
         
-        public NodeTree(SubstringSource substringSource, Mapped<LinkedNode> root)
+        public NodeTree(SubstringMapper substringMapper, Mapped<LinkedNode> root)
         {
-            SubstringSource = substringSource;
+            SubstringMapper = substringMapper;
             Root = root;
         }
     }
