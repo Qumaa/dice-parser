@@ -32,12 +32,12 @@ namespace DiceRoll.Input.Parsing
         public bool StartsWithCloseParenthesis(in Substring expression, out Substring tokenMatch) =>
             _closeParenthesis.MatchesStart(in expression, out tokenMatch);
 
-        public bool StartsWithOperator(in Substring expression, OperatorGroup group, out Substring tokenMatch, 
+        public bool StartsWithOperator(in Substring expression, OperatorGroup currentGroup, out Substring tokenMatch, 
             out int precedence, out OperatorInvoker invoker)
         {
             foreach (Operator tokenizedOperator in _operators)
             {
-                if (!MatchesOperatorGroup(tokenizedOperator.Invoker, group) ||
+                if (!MatchesOperatorGroup(tokenizedOperator.Invoker, currentGroup) ||
                     !tokenizedOperator.Token.MatchesStart(in expression, out tokenMatch))
                     continue;
 
@@ -96,7 +96,7 @@ namespace DiceRoll.Input.Parsing
         }
 
         private static bool MatchesOperatorGroup(OperatorInvoker invoker, OperatorGroup group) =>
-            invoker.Layout is ArgumentsLayout.FullRight == group is OperatorGroup.RightSideArguments;
+            invoker is { LeftArity: 0, RightArity: > 0 } == group is OperatorGroup.RightSideArguments;
 
         private static TokensTable BuildDefaultTable()
         {
@@ -107,7 +107,7 @@ namespace DiceRoll.Input.Parsing
             
             builder.AddOperatorToken<IAssertion>(110, static node => Node.Operator.Not(node), "!", "not");
             builder.AddOperatorToken<INumeric>(110, static node => Node.Operator.Negate(node), "-");
-
+            
             builder.AddOperatorToken(120, new CompositionInvoker(CompositionTokenDescriptor.Summation.CompositionHandler), CompositionTokenDescriptor.Summation.Convert().Token);
             builder.AddOperatorToken(120, new CompositionInvoker(CompositionTokenDescriptor.Highest.CompositionHandler), CompositionTokenDescriptor.Highest.Convert().Token);
             builder.AddOperatorToken(120, new CompositionInvoker(CompositionTokenDescriptor.Lowest.CompositionHandler), CompositionTokenDescriptor.Lowest.Convert().Token);

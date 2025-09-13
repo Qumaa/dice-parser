@@ -3,18 +3,18 @@
     public sealed class CompositionInvoker : OperatorInvoker
     {
         private readonly CompositionHandler _handler;
-        
-        public CompositionInvoker(CompositionHandler handler) : base(2, ArgumentsLayout.FullLeft)
+
+        public CompositionInvoker(CompositionHandler handler) : base(2, 0)
         {
             _handler = handler;
         }
         
-        public override void Invoke(OperandsStackAccess operands)
+        public override INode Invoke(OperandsStackAccess operands)
         {
             INumeric node = operands.Pop<INumeric>();
             int times = operands.Pop<INumeric>().Evaluate().Value;
             
-            operands.PushResult(_handler(node, times));
+            return _handler(node, times);
         }
 
         public static CompositionInvoker Factory<T>() where T : Composer, new() =>

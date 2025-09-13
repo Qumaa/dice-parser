@@ -20,23 +20,27 @@ namespace DiceRoll.Input.Parsing
             }
 
             Mapped<OperatorToken> mapped = _state.Mapper.Map(in operatorToken, in context);
-            ArgumentsLayout layout = operatorToken.Invoker.Layout;
 
-            if (layout is ArgumentsLayout.FullLeft)
+            OperatorInvoker invoker = operatorToken.Invoker;
+
+            if (invoker.RightArity is 0)
             {
+                // invoke immediately using existing operands
                 InvokeOperatorOrThrow(in mapped);
                 return;
             }
 
-            if (layout is ArgumentsLayout.Left)
+            if (invoker is { RightArity: 1, LeftArity: > 0 })
             {
+                // resolve using default shunting-yard mechanism
                 _state.Operators.Push(in mapped);
                 return;
             }
 
-            int capturedOperands = _state.Operands.Count;
-            if (layout is ArgumentsLayout.Right)
-                capturedOperands--; // require one more operand
+            // delay until more operands are pushed
+            
+            // include (LeftArity) more operands in the delayed operator definition to use during its invocation
+            int capturedOperands = _state.Operands.Count - invoker.LeftArity;
             
             _state.DelayedOperators.MapAndPush(
                 new DelayedOperatorToken(operatorToken.Invoker, _state.ParenthesisLevel, capturedOperands),
@@ -64,7 +68,7 @@ namespace DiceRoll.Input.Parsing
             }
             catch (Exception e)
             {
-                throw _state.Wrap(in operatorToken, e);
+                throw _state.MapException(in operatorToken, e);
             }
         }
 
@@ -90,7 +94,7 @@ namespace DiceRoll.Input.Parsing
             }
             catch (Exception e)
             {
-                throw _state.Wrap(in operatorToken, e);
+                throw _state.MapException(in operatorToken, e);
             }
         }
 
@@ -101,7 +105,8 @@ namespace DiceRoll.Input.Parsing
             if (_state.Operands.Count < arity)
                 throw new OperatorInvocationException(ParsingErrorMessages.OperandsExpected(arity, _state.Operands.Count));
 
-            invoker.Invoke(new OperandsStackAccess(_state.Operands, arity, in operatorRange));
+            OperandsStackAccess access = new(_state.Operands, arity, in operatorRange);
+            access.PushResult(invoker.Invoke(access));
         }
     }
 }

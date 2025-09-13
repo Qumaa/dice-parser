@@ -39,13 +39,13 @@
         private void ThrowIfAnyTrailingOperators()
         {
             if (_operators.TryPeek(out Mapped<DelayedOperatorToken> operatorToken))
-                _state.Throw(in operatorToken, ParsingErrorMessages.TRAILING_DELAYED_OPERATOR);
+                _state.MapAndThrow(in operatorToken, ParsingErrorMessages.TRAILING_DELAYED_OPERATOR);
         }
         
         private void ThrowIfAnyOperandLeft()
         {
             if (_operands.TryPeek(out Mapped<LinkedNode> operandToken))
-                _state.Throw(in operandToken, ParsingErrorMessages.UNUSED_OPERAND);
+                _state.MapAndThrow(in operandToken, ParsingErrorMessages.UNUSED_OPERAND);
         }
     }
 }

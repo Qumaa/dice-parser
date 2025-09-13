@@ -67,11 +67,11 @@ namespace DiceRoll.Input.Parsing
 
         public void AddOperatorToken<T>(int precedence, UnaryInvocationHandler<T> handler,
             Regex pattern) where T : INode =>
-            AddOperatorToken(precedence, OperatorInvoker.Unary(handler), new RegexToken(pattern));
+            AddOperatorToken(precedence, OperatorInvoker.RightUnary(handler), new RegexToken(pattern));
 
         public void AddOperatorToken<T>(int precedence, UnaryInvocationHandler<T> handler,
             IEnumerable<Regex> patterns) where T : INode =>
-            AddOperatorToken(precedence, OperatorInvoker.Unary(handler), new RegexToken(patterns));
+            AddOperatorToken(precedence, OperatorInvoker.RightUnary(handler), new RegexToken(patterns));
 
         public void AddOperatorToken<T>(int precedence, UnaryInvocationHandler<T> handler,
             params Regex[] patterns) where T : INode =>

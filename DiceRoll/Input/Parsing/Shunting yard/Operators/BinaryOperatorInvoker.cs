@@ -5,17 +5,17 @@
     {
         private readonly BinaryInvocationHandler<TLeft, TRight> _handler;
         
-        public BinaryOperatorInvoker(BinaryInvocationHandler<TLeft, TRight> handler) : base(2)
+        public BinaryOperatorInvoker(BinaryInvocationHandler<TLeft, TRight> handler) : base(1, 1)
         {
             _handler = handler;
         }
 
-        public override void Invoke(OperandsStackAccess operands)
+        public override INode Invoke(OperandsStackAccess operands)
         {
             TRight right = operands.Pop<TRight>();
             TLeft left = operands.Pop<TLeft>();
             
-            operands.PushResult(_handler.Invoke(left, right));
+            return _handler.Invoke(left, right);
         }
     }
 }

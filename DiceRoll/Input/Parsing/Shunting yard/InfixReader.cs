@@ -44,7 +44,7 @@ namespace DiceRoll.Input.Parsing
             }
             catch (Exception e)
             {
-                throw _state.Wrap(in output, e);
+                throw _state.MapException(in output, e);
             }
         }
 

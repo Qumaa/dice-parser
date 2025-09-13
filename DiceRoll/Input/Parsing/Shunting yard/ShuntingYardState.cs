@@ -43,16 +43,16 @@ namespace DiceRoll.Input.Parsing
         public void DenoteOperandProcessing() =>
             PrecedingTokenKind = TokenKind.Operand;
         
-        public void Throw<T>(in Mapped<T> context, string message) =>
+        public void MapAndThrow<T>(in Mapped<T> context, string message) =>
             throw new ParsingException(Mapper.GetSubstringOf(in context), message);
         
         public void Throw(in Substring context, string message) =>
             throw new ParsingException(Mapper.MapAndGetSubstringOf(in context), message);
 
-        public ParsingException Wrap<T>(in Mapped<T> context, Exception innerException) =>
+        public ParsingException MapException<T>(in Mapped<T> context, Exception innerException) =>
             new(Mapper.GetSubstringOf(in context), innerException);
         
-        public ParsingException Wrap(in Substring context, Exception innerException) =>
+        public ParsingException MapException(in Substring context, Exception innerException) =>
             new(Mapper.MapAndGetSubstringOf(in context), innerException);
     }
 }

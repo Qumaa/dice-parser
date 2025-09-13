@@ -2,25 +2,27 @@
 {
     public abstract class OperatorInvoker
     {
-        public readonly ArgumentsLayout Layout;
-        public readonly int Arity;
+        public readonly int LeftArity;
+        public readonly int RightArity;
 
-        protected OperatorInvoker(int arity, ArgumentsLayout layout = ArgumentsLayout.Left)
+        public int Arity => LeftArity + RightArity;
+
+        protected OperatorInvoker(int leftArity, int rightArity)
         {
-            Arity = arity;
-            Layout = layout;
+            LeftArity = leftArity;
+            RightArity = rightArity;
         }
 
-        public abstract void Invoke(OperandsStackAccess operands);
+        public abstract INode Invoke(OperandsStackAccess operands);
         
         public static OperatorInvoker Binary<TLeft, TRight>(BinaryInvocationHandler<TLeft, TRight> handler)
             where TLeft : INode where TRight : INode =>
             new BinaryOperatorInvoker<TLeft, TRight>(handler);
 
-        public static OperatorInvoker Unary<T>(UnaryInvocationHandler<T> handler) where T : INode =>
-            new UnaryOperatorInvoker<T>(handler);
+        public static OperatorInvoker RightUnary<T>(UnaryInvocationHandler<T> handler) where T : INode =>
+            new RightUnaryOperatorInvoker<T>(handler);
         
         public static OperatorInvoker ReversedUnary<T>(UnaryInvocationHandler<T> handler) where T : INode =>
-            new ReversedUnaryOperatorInvoker<T>(handler);
+            new LeftUnaryOperatorInvoker<T>(handler);
     }
 }
