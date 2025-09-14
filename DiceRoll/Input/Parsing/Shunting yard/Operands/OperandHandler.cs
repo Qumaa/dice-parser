@@ -2,5 +2,5 @@
 
 namespace DiceRoll.Input.Parsing
 {
-    public delegate INumeric OperandHandler(Substring match);
+    public delegate INode OperandHandler(Substring match);
 }

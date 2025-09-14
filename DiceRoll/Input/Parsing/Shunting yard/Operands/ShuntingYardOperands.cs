@@ -9,7 +9,7 @@
             _state = state;
         }
 
-        public void PushParentless(INumeric operand, in Substring context) =>
+        public void PushParentless(INode operand, in Substring context) =>
             _state.Operands.MapAndPush(new LinkedNode(operand), in context);
 
         public bool TryPeek(out Mapped<LinkedNode> mapped) =>

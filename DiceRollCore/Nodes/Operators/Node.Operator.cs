@@ -31,6 +31,9 @@
             public static IAssertion Equal(IAssertion left, IAssertion right) =>
                 new DefaultBinaryAssertion(left, right, BinaryAssertionType.Equal);
             
+            public static IAssertion NotEqual(IAssertion left, IAssertion right) =>
+                new DefaultBinaryAssertion(left, right, BinaryAssertionType.NotEqual);
+            
             public static IAssertion Not(IAssertion assertion) =>
                 new NotAssertion(assertion);
         }

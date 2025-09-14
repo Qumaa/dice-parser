@@ -62,7 +62,7 @@ namespace DiceRoll.Input.Parsing
                 return;
             }
             
-            if (_state.Tokens.StartsWithOperand(in notParsed, out output, out INumeric operand))
+            if (_state.Tokens.StartsWithOperand(in notParsed, out output, out INode operand))
             {
                 Operand(operand, in output);
                 return;
@@ -70,7 +70,7 @@ namespace DiceRoll.Input.Parsing
 
             if (_state.Tokens.StartsWithOperator(
                     in notParsed,
-                    GetCurrentOperatorGroup(),
+                    GetCurrentOperatorUsageForm(),
                     out output,
                     out int precedence,
                     out OperatorInvoker invoker
@@ -80,19 +80,18 @@ namespace DiceRoll.Input.Parsing
                 return;
             }
 
-            output = _state.Tokens.UntilFirstKnownToken(in notParsed, GetCurrentOperatorGroup().Reversed()).Trim();
+            output = _state.Tokens.UntilFirstKnownToken(in notParsed, GetCurrentOperatorUsageForm()).Trim();
             throw new UnknownTokenException(in output);
         }
 
-        private OperatorGroup GetCurrentOperatorGroup() =>
+        private OperatorUsageForm GetCurrentOperatorUsageForm() =>
             _state.PrecedingTokenKind is TokenKind.Operand ?
-                OperatorGroup.LeftSideArguments :
-                OperatorGroup.RightSideArguments;
+                OperatorUsageForm.Infix :
+                OperatorUsageForm.Prefix;
 
         private void OpenParenthesis(in Substring context)
         {
-            _state.DenoteParenthesisOpening();
-            _state.DenoteNewExpressionStart();
+            _state.Annotate().ParenthesisOpening();
             
             _operators.Push(in OperatorToken.OpenParenthesis, in context);
         }
@@ -109,8 +108,7 @@ namespace DiceRoll.Input.Parsing
                 _operators.InvokeOperatorOrThrow(in operatorToken);
             }
             
-            _state.DenoteParenthesisClosing();
-            _state.DenoteOperandProcessing();
+            _state.Annotate().ParenthesisClosing();
             
             _operators.InvokeDelayedOperators();
         }
@@ -124,14 +122,14 @@ namespace DiceRoll.Input.Parsing
 
             _operators.Push(new OperatorToken(precedence, invoker), in context);
 
-            _state.DenoteOperatorProcessing();
+            _state.Annotate().OperatorProcessing();
         }
 
-        private void Operand(INumeric operand, in Substring context)
+        private void Operand(INode operand, in Substring context)
         {
             _operands.PushParentless(operand, in context);
                 
-            _state.DenoteOperandProcessing();
+            _state.Annotate().OperandProcessing();
             
             _operators.InvokeDelayedOperators();
         }
@@ -139,7 +137,7 @@ namespace DiceRoll.Input.Parsing
         private void ThrowIfUnbalancedParenthesis(in Substring parenthesisToken)
         {
             if (_state.ClosingParenthesisWouldImposeImbalance)
-                _state.Throw(in parenthesisToken, ParsingErrorMessages.UNBALANCED_PARENTHESIS);
+                _state.MapAndThrow(in parenthesisToken, ParsingErrorMessages.UNBALANCED_PARENTHESIS);
         }
     }
 }

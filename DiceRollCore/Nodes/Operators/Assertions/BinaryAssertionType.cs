@@ -4,6 +4,7 @@
     {
         And = 0,
         Or = 1,
-        Equal = 2
+        Equal = 2,
+        NotEqual = 3
     }
 }

@@ -19,7 +19,8 @@
                 {
                     BinaryAssertionType.And => static (left, right) => And(left, right),
                     BinaryAssertionType.Or => static (left, right) => Or(left, right),
-                    BinaryAssertionType.Equal => static (left, right) => Equal(left, right)
+                    BinaryAssertionType.Equal => static (left, right) => Equal(left, right),
+                    BinaryAssertionType.NotEqual => static (left, right) => NotEqual(left, right)
                 };
 
             private static Binary And(Binary left, Binary right) =>
@@ -29,7 +30,10 @@
                 left || right;
 
             private static Binary Equal(Binary left, Binary right) =>
-                (left && right) || !(left || right);
+                left == right;
+
+            private static Binary NotEqual(Binary left, Binary right) =>
+                left != right;
         }
 
         private static class ProbabilityEvaluation
@@ -39,7 +43,8 @@
                 {
                     BinaryAssertionType.And => static (left, right) => And(left, right),
                     BinaryAssertionType.Or => static (left, right) => Or(left, right),
-                    BinaryAssertionType.Equal => static (left, right) => Equal(left, right)
+                    BinaryAssertionType.Equal => static (left, right) => Equal(left, right),
+                    BinaryAssertionType.NotEqual => static (left, right) => NotEqual(left, right)
                 };
 
             private static Probability And(LogicalProbabilityDistribution left, LogicalProbabilityDistribution right) =>
@@ -50,7 +55,11 @@
 
             private static Probability Equal(LogicalProbabilityDistribution left,
                 LogicalProbabilityDistribution right) =>
-                ((left.True + right.True) - (And(left, right) * 2)).Inversed();
+                NotEqual(left, right).Inversed();
+
+            private static Probability NotEqual(LogicalProbabilityDistribution left,
+                LogicalProbabilityDistribution right) =>
+                (left.True + right.True) - (And(left, right) * 2);
         }
     }
 }

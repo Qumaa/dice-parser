@@ -10,7 +10,10 @@ namespace DiceRoll
         public static class Value
         {
             public static INumeric Constant(int value) =>
-                new Constant(value);
+                new NumericConstant(value);
+            
+            public static IAssertion Constant(bool value) =>
+                new BinaryConstant(value);
 
             public static INumeric Dice(int faces) =>
                 new Dice(_allDiceRandom, faces);

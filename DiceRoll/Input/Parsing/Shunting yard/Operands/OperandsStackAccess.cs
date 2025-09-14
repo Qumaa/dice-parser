@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace DiceRoll.Input.Parsing
 {
@@ -9,10 +8,12 @@ namespace DiceRoll.Input.Parsing
         private readonly int _arity;
         private readonly int _popLimit;
         
-        private readonly List<Mapped<LinkedNode>> _operatorParents;
+        private readonly Mapped<LinkedNode>[] _operatorParents;
         private readonly Range _operatorRange;
 
         private Range _resultRange;
+
+        private int _operatorParentsCount => _arity - (_operands.Count - _popLimit);
 
         public OperandsStackAccess(MappedStack<LinkedNode> operands, int arity, in Range operatorRange)
         {
@@ -20,7 +21,7 @@ namespace DiceRoll.Input.Parsing
             _arity = arity;
             _operatorRange = operatorRange;
             _popLimit = operands.Count - arity;
-            _operatorParents = new List<Mapped<LinkedNode>>(arity);
+            _operatorParents = new Mapped<LinkedNode>[arity];
 
             _resultRange = operatorRange;
         }
@@ -29,8 +30,9 @@ namespace DiceRoll.Input.Parsing
         {
             ThrowIfExceedingArity();
 
+            int parentIndex = _operatorParentsCount;
             Mapped<LinkedNode> operand = _operands.Pop();
-            _operatorParents.Add(operand);
+            _operatorParents[parentIndex] = operand;
 
             _resultRange = operand.Merge(_resultRange);
             
@@ -42,7 +44,7 @@ namespace DiceRoll.Input.Parsing
             ArgumentNullException.ThrowIfNull(operand);
             ThrowIfPushingPrematurely();
 
-            LinkedNode linkedOperator = new(null, _operatorParents.ToArray());
+            LinkedNode linkedOperator = new(null, _operatorParents);
             Mapped<LinkedNode> mappedOperator = new(linkedOperator, in _operatorRange);
 
             LinkedNode linkedOperand = new(operand, mappedOperator);
@@ -50,9 +52,18 @@ namespace DiceRoll.Input.Parsing
             _operands.Push(linkedOperand, in _resultRange);
         }
 
+        public void Reset()
+        {
+            _resultRange = _operatorRange;
+
+            for (int i = _operatorParentsCount - 1; i >= 0; i--)
+                if (_operatorParents[i].Value.IsOperand)
+                    _operands.Push(_operatorParents[i]);
+        }
+
         private void ThrowIfExceedingArity()
         {
-            if (_operands.Count - 1 < _popLimit)
+            if (_operands.Count <= _popLimit)
                 throw new OperatorInvocationException(ParsingErrorMessages.ExceedingArity(_arity));
         }
 

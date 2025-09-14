@@ -28,25 +28,13 @@ namespace DiceRoll.Input.Parsing
             ParenthesisLevel = 0;
         }
 
-        public void DenoteParenthesisOpening() =>
-            ParenthesisLevel++;
-
-        public void DenoteParenthesisClosing() =>
-            ParenthesisLevel--;
-
-        public void DenoteNewExpressionStart() =>
-            PrecedingTokenKind = TokenKind.ExpressionStart;
-
-        public void DenoteOperatorProcessing() =>
-            PrecedingTokenKind = TokenKind.Operator;
-        
-        public void DenoteOperandProcessing() =>
-            PrecedingTokenKind = TokenKind.Operand;
+        public Annotator Annotate() =>
+            new(this);
         
         public void MapAndThrow<T>(in Mapped<T> context, string message) =>
             throw new ParsingException(Mapper.GetSubstringOf(in context), message);
         
-        public void Throw(in Substring context, string message) =>
+        public void MapAndThrow(in Substring context, string message) =>
             throw new ParsingException(Mapper.MapAndGetSubstringOf(in context), message);
 
         public ParsingException MapException<T>(in Mapped<T> context, Exception innerException) =>
@@ -54,5 +42,45 @@ namespace DiceRoll.Input.Parsing
         
         public ParsingException MapException(in Substring context, Exception innerException) =>
             new(Mapper.MapAndGetSubstringOf(in context), innerException);
+
+        public readonly ref struct Annotator
+        {
+            private readonly ShuntingYardState _context;
+            
+            public Annotator(ShuntingYardState context)
+            {
+                _context = context;
+            }
+            
+            public Annotator ParenthesisOpening()
+            {
+                _context.ParenthesisLevel++;
+                return NewExpressionStart();
+            }
+
+            public Annotator ParenthesisClosing()
+            {
+                _context.ParenthesisLevel--;
+                return OperandProcessing();
+            }
+
+            public Annotator NewExpressionStart()
+            {
+                _context.PrecedingTokenKind = TokenKind.ExpressionStart;
+                return this;
+            }
+
+            public Annotator OperatorProcessing()
+            {
+                _context.PrecedingTokenKind = TokenKind.Operator;
+                return this;
+            }
+        
+            public Annotator OperandProcessing()
+            {
+                _context.PrecedingTokenKind = TokenKind.Operand;
+                return this;
+            }
+        }
     }
 }

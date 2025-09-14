@@ -17,7 +17,7 @@
         {
             NodeTree node = CollapseOperatorsStack();
             _state.Mapper.Clear();
-            _state.DenoteNewExpressionStart();
+            _state.Annotate().NewExpressionStart();
             return node;
         }
         

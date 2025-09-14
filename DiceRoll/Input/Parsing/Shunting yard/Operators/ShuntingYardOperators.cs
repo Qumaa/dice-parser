@@ -106,7 +106,10 @@ namespace DiceRoll.Input.Parsing
                 throw new OperatorInvocationException(ParsingErrorMessages.OperandsExpected(arity, _state.Operands.Count));
 
             OperandsStackAccess access = new(_state.Operands, arity, in operatorRange);
-            access.PushResult(invoker.Invoke(access));
+            
+            INode result = invoker.Invoke(access);
+            
+            access.PushResult(result);
         }
     }
 }

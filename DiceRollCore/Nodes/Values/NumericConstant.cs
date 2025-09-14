@@ -1,8 +1,8 @@
 ﻿namespace DiceRoll
 {
-    public sealed class Constant : Numeric
+    public sealed class NumericConstant : Numeric
     {
-        public Constant(int value) 
+        public NumericConstant(int value) 
         {
             CacheEvaluation(new Outcome(value));
         }
