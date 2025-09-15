@@ -13,7 +13,7 @@ namespace DiceRoll.Input.Parsing
         public int End => Start + Length;
         public int UntilSourceEnd => Source.Length - End;
 
-        public bool Empty => Start == End;
+        public bool IsEmpty => Start == End;
 
         public char this[int i] => IndexThis(i);
         public char this[Index i] => IndexThis(i);
@@ -32,7 +32,7 @@ namespace DiceRoll.Input.Parsing
 
         public Substring(string source) : this(source, 0, source.Length) { }
         
-        public Substring(Substring source, int start, int length) : this(source.Source, source.Start + start, length) { }
+        public Substring(in Substring source, int start, int length) : this(source.Source, source.Start + start, length) { }
 
         public ReadOnlySpan<char> AsSpan() =>
             Source.AsSpan(Start, Length);
@@ -40,6 +40,36 @@ namespace DiceRoll.Input.Parsing
             MoveStart(start).AsSpan();
         public ReadOnlySpan<char> AsSpan(int start, int length) =>
             MoveStart(start).SetLength(length).AsSpan();
+
+        public Range AsRange() =>
+            new(Start, End);
+        public Range AsRange(int start) =>
+            MoveStart(start).AsRange();
+        public Range AsRange(int start, int length) =>
+            MoveStart(start).SetLength(length).AsRange();
+        
+        public Range AsRelativeRange(in Substring parent) =>
+            IsSharedSource(in parent) ? new Range(Start - parent.Start, End - parent.Start) : AsRange();
+        public Range AsRelativeRange(in Substring parent, int start) =>
+            MoveStart(start).AsRelativeRange(in parent);
+        public Range AsRelativeRange(in Substring parent, int start, int length) =>
+            MoveStart(start).SetLength(length).AsRelativeRange(in parent);
+
+        public int RelativeStart(in Substring parent)
+        {
+            if (!IsSharedSource(in parent))
+                return Start;
+
+            return Start - parent.Start;
+        }
+
+        public int RelativeEnd(in Substring parent)
+        {
+            if (!IsSharedSource(in parent))
+                return End;
+
+            return End - parent.Start;
+        }
 
         public Substring MoveStart(int offset) =>
             new(Source, Start + offset, Length - offset);
@@ -82,23 +112,9 @@ namespace DiceRoll.Input.Parsing
 
             return trim >= 0 ? MoveEnd(trim) : this;
         }
-
-        private char IndexThis(int i)
-        {
-            if (i < 0 || i >= Length)
-                throw new IndexOutOfRangeException();
-            
-            return Source[Start + i];
-        }
-        private char IndexThis(Index i) =>
-            IndexThis(i.IsFromEnd ? Length - i.Value : i.Value);
-
-        private Substring IndexThis(Range range)
-        {
-            (int Offset, int Length) tuple = range.GetOffsetAndLength(Length);
-
-            return new Substring(this, tuple.Offset, tuple.Length);
-        }
+        
+        private bool IsSharedSource(in Substring parent) =>
+            ReferenceEquals(Source, parent.Source) || Source.Equals(parent.Source, StringComparison.OrdinalIgnoreCase);
 
         public override string ToString() =>
             Source.Substring(Start, Length);
@@ -108,15 +124,36 @@ namespace DiceRoll.Input.Parsing
 
         public int IndexOf(string value, StringComparison stringComparison) =>
             IndexOf(value.AsSpan(), stringComparison);
-        
+
         public int IndexOf(Substring value, StringComparison stringComparison) =>
             IndexOf(value.AsSpan(), stringComparison);
 
         public int IndexOf(ReadOnlySpan<char> value, StringComparison stringComparison) =>
             AsSpan().IndexOf(value, stringComparison);
 
-        public static Substring None(string source) =>
+        private char IndexThis(int i)
+        {
+            if (i < 0 || i >= Length)
+                throw new IndexOutOfRangeException();
+            
+            return Source[Start + i];
+        }
+        
+        private char IndexThis(Index i) =>
+            IndexThis(i.IsFromEnd ? Length - i.Value : i.Value);
+
+        private Substring IndexThis(Range range)
+        {
+            (int offset, int length) = range.GetOffsetAndLength(Length);
+
+            return new Substring(in this, offset, length);
+        }
+
+        public static Substring Empty(string source) =>
             new(source, 0, 0);
+        
+        public static Substring Empty(in Substring source) =>
+            new(in source, 0, 0);
 
         public static Substring All(string source) =>
             new(source);

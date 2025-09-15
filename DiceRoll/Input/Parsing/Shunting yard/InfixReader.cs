@@ -26,7 +26,7 @@ namespace DiceRoll.Input.Parsing
             Substring notParsed = Substring.All(expression).Trim();
             
             do notParsed = ParseSubstringStartOrThrow(in notParsed); 
-            while (!notParsed.Empty);
+            while (!notParsed.IsEmpty);
         }
         
         private Substring ParseSubstringStartOrThrow(in Substring notParsed)
@@ -93,14 +93,14 @@ namespace DiceRoll.Input.Parsing
         {
             _state.Annotate().ParenthesisOpening();
             
-            _operators.Push(in OperatorToken.OpenParenthesis, in context);
+            _operators.Push(in Parsing.Operator.OpenParenthesis, in context);
         }
 
         private void CloseParenthesis(in Substring token)
         {
             ThrowIfUnbalancedParenthesis(in token);
 
-            while (_operators.TryPop(out Mapped<OperatorToken> operatorToken))
+            while (_operators.TryPop(out Mapped<Operator> operatorToken))
             {
                 if (operatorToken.Value.IsOpenParenthesis)
                     break;
@@ -110,17 +110,17 @@ namespace DiceRoll.Input.Parsing
             
             _state.Annotate().ParenthesisClosing();
             
-            _operators.InvokeDelayedOperators();
+            _operators.TryInvokeDelayedOperators();
         }
 
         private void Operator(int precedence, OperatorInvoker invoker, in Substring context)
         {
-            while (_operators.TryPeek(out OperatorToken lastOperator) &&
+            while (_operators.TryPeek(out Operator lastOperator) &&
                    !lastOperator.IsOpenParenthesis &&
                    precedence < lastOperator.Precedence)
                 _operators.InvokeAfterDelayedOperators(_operators.Pop());
 
-            _operators.Push(new OperatorToken(precedence, invoker), in context);
+            _operators.Push(new Operator(precedence, invoker), in context);
 
             _state.Annotate().OperatorProcessing();
         }
@@ -131,7 +131,7 @@ namespace DiceRoll.Input.Parsing
                 
             _state.Annotate().OperandProcessing();
             
-            _operators.InvokeDelayedOperators();
+            _operators.TryInvokeDelayedOperators();
         }
         
         private void ThrowIfUnbalancedParenthesis(in Substring parenthesisToken)

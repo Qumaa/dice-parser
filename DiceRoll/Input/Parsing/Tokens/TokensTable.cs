@@ -13,12 +13,12 @@ namespace DiceRoll.Input.Parsing
 
         private readonly IToken _closeParenthesis;
 
-        private readonly Operator[] _operators;
+        private readonly OperatorDefinition[] _operators;
 
-        private readonly Operand[] _operands;
+        private readonly OperandDefinition[] _operands;
 
-        public TokensTable(IToken openParenthesis, IToken closeParenthesis, IEnumerable<Operator> operators,
-            IEnumerable<Operand> operands)
+        public TokensTable(IToken openParenthesis, IToken closeParenthesis, IEnumerable<OperatorDefinition> operators,
+            IEnumerable<OperandDefinition> operands)
         {
             _openParenthesis = openParenthesis;
             _closeParenthesis = closeParenthesis;
@@ -54,7 +54,7 @@ namespace DiceRoll.Input.Parsing
 
         public bool StartsWithOperand(in Substring expression, out Substring tokenMatch, out INode operand)
         {
-            foreach (Operand operandToken in _operands)
+            foreach (OperandDefinition operandToken in _operands)
             {
                 if (!operandToken.Token.MatchesStart(in expression, out tokenMatch))
                     continue;
@@ -82,11 +82,11 @@ namespace DiceRoll.Input.Parsing
                 if (_closeParenthesis.Matches(in expression, out match))
                     return true;
 
-                foreach (Operator tokenizedOperator in _operators)
+                foreach (OperatorDefinition tokenizedOperator in _operators)
                     if (OperatorMatches(in tokenizedOperator, usageForm, in expression, out match))
                         return true;
                 
-                foreach (Operand tokenizedOperand in _operands)
+                foreach (OperandDefinition tokenizedOperand in _operands)
                     if (tokenizedOperand.Token.Matches(in expression, out match))
                         return true;
 
@@ -105,7 +105,7 @@ namespace DiceRoll.Input.Parsing
             
             for (int i = 0; i < _operators.Length; i++)
             {
-                Operator matchCandidate = _operators[i];
+                OperatorDefinition matchCandidate = _operators[i];
                 
                 if (!OperatorMatches(in matchCandidate, usageForm, in expression, out Substring match))
                     continue;
@@ -137,13 +137,13 @@ namespace DiceRoll.Input.Parsing
 
             return true;
 
-            bool _IsOverload(in Operator mainOperator, in Operator matchCandidate) =>
-                matchCandidate.Precedence == mainOperator.Precedence &&
-                matchCandidate.Invoker.LeftArity == mainOperator.Invoker.LeftArity &&
-                matchCandidate.Invoker.RightArity == mainOperator.Invoker.RightArity;
+            bool _IsOverload(in OperatorDefinition mainDefinition, in OperatorDefinition matchCandidate) =>
+                matchCandidate.Precedence == mainDefinition.Precedence &&
+                matchCandidate.Invoker.LeftArity == mainDefinition.Invoker.LeftArity &&
+                matchCandidate.Invoker.RightArity == mainDefinition.Invoker.RightArity;
         }
 
-        private static bool OperatorMatches(in Operator matchCandidate, OperatorUsageForm usageForm, in Substring expression, out Substring tokenMatch)
+        private static bool OperatorMatches(in OperatorDefinition matchCandidate, OperatorUsageForm usageForm, in Substring expression, out Substring tokenMatch)
         {
             if (MatchesUsageForm(matchCandidate.Invoker, usageForm) &&
                 matchCandidate.Token.MatchesStart(in expression, out tokenMatch))
@@ -156,44 +156,44 @@ namespace DiceRoll.Input.Parsing
         private static bool MatchesUsageForm(OperatorInvoker invoker, OperatorUsageForm usageForm) =>
             invoker is { LeftArity: 0, RightArity: > 0 } == usageForm is OperatorUsageForm.Prefix;
 
-        private static TokensTable BuildDefaultTable()
-        {
-            TokensTableBuilder builder = new("(", ")");
-            
-            builder.AddOperandToken(in DiceOperand.Default);
-            builder.AddOperandToken(x => Node.Value.Constant(int.Parse(x.AsSpan())), new Regex(@"\d+"));
-            builder.AddOperandToken(x => Node.Value.Constant(bool.Parse(x.AsSpan())), RegexToken.CreateExactIgnoreCaseRegex("true"), RegexToken.CreateExactIgnoreCaseRegex("false"));
-            
-            builder.AddOperatorToken<IAssertion>(110, static node => node.Not(), "!", "not");
-            builder.AddOperatorToken<INumeric>(110, static node => node.Negate(), "-");
-            
-            builder.AddOperatorToken(120, new CompositionInvoker(CompositionTokenDescriptor.Summation.CompositionHandler), CompositionTokenDescriptor.Summation.Convert().Token);
-            builder.AddOperatorToken(120, new CompositionInvoker(CompositionTokenDescriptor.Highest.CompositionHandler), CompositionTokenDescriptor.Highest.Convert().Token);
-            builder.AddOperatorToken(120, new CompositionInvoker(CompositionTokenDescriptor.Lowest.CompositionHandler), CompositionTokenDescriptor.Lowest.Convert().Token);
-            
-            builder.AddOperatorToken<INumeric, INumeric>(100, static (left, right) => left.Multiply(right), "*");
-            builder.AddOperatorToken<INumeric, INumeric>(100, static (left, right) => left.DivideRoundUp(right), "//");
-            builder.AddOperatorToken<INumeric, INumeric>(100, static (left, right) => left.DivideRoundDown(right), "/");
-            
-            builder.AddOperatorToken<INumeric, INumeric>(90, static (left, right) => left.Add(right), "+");
-            builder.AddOperatorToken<INumeric, INumeric>(90, static (left, right) => left.Subtract(right), "-");
-            
-            builder.AddOperatorToken<INumeric, INumeric>(80, static (left, right) => left.GreaterThanOrEqual(right), ">=");
-            builder.AddOperatorToken<INumeric, INumeric>(80, static (left, right) => left.LessThanOrEqual(right), "<=");
-            builder.AddOperatorToken<INumeric, INumeric>(80, static (left, right) => left.GreaterThan(right), ">");
-            builder.AddOperatorToken<INumeric, INumeric>(80, static (left, right) => left.LessThan(right), "<");
-            
-            builder.AddOperatorToken<INumeric, INumeric>(70, static (left, right) => left.Equal(right), "==", "=");
-            builder.AddOperatorToken<INumeric, INumeric>(70, static (left, right) => left.NotEqual(right), "!=", "=/=");
-            
-            builder.AddOperatorToken<IAssertion, IAssertion>(70, static (left, right) => left.Equal(right), "==", "=");
-            builder.AddOperatorToken<IAssertion, IAssertion>(70, static (left, right) => left.NotEqual(right), "!=", "=/=");
-            
-            builder.AddOperatorToken<IAssertion, IAssertion>(60, static (left, right) => left.And(right), "&&", "&", "and");
-            builder.AddOperatorToken<IAssertion, IAssertion>(60, static (left, right) => left.Or(right), "||", "|", "or");
+        private static TokensTable BuildDefaultTable() =>
+            new TokensTableBuilder(Token("("), Token(")"))
+                .Operand(in DiceOperand.Default)
+                .Operand(in NumericOperand.Default)
+                .Operand(in BinaryOperand.Default)
+                
+                .PrefixUnaryOperator<IAssertion>(110, static node => node.Not(), Token("!", "not"))
+                .PrefixUnaryOperator<INumeric>(110, static node => node.Negate(), Token("-"))
+                
+                .CompositionOperator(120, in CompositionDefinition.Summation)
+                .CompositionOperator(120, in CompositionDefinition.Highest)
+                .CompositionOperator(120, in CompositionDefinition.Lowest)
+                
+                .BinaryOperator<INumeric, INumeric>(100, static (left, right) => left.Multiply(right), Token("*"))
+                .BinaryOperator<INumeric, INumeric>(100, static (left, right) => left.DivideRoundUp(right), Token("//"))
+                .BinaryOperator<INumeric, INumeric>(100, static (left, right) => left.DivideRoundDown(right), Token("/"))
+                
+                .BinaryOperator<INumeric, INumeric>(90, static (left, right) => left.Add(right), Token("+"))
+                .BinaryOperator<INumeric, INumeric>(90, static (left, right) => left.Subtract(right), Token("-"))
+                
+                .BinaryOperator<INumeric, INumeric>(80, static (left, right) => left.GreaterThanOrEqual(right), Token(">="))
+                .BinaryOperator<INumeric, INumeric>(80, static (left, right) => left.LessThanOrEqual(right), Token("<="))
+                .BinaryOperator<INumeric, INumeric>(80, static (left, right) => left.GreaterThan(right), Token(">"))
+                .BinaryOperator<INumeric, INumeric>(80, static (left, right) => left.LessThan(right), Token("<"))
+                
+                .BinaryOperator<INumeric, INumeric>(70, static (left, right) => left.Equal(right), Token("==", "="))
+                .BinaryOperator<INumeric, INumeric>(70, static (left, right) => left.NotEqual(right), Token("!=", "=/="))
+                
+                .BinaryOperator<IAssertion, IAssertion>(70, static (left, right) => left.Equal(right), Token("==", "="))
+                .BinaryOperator<IAssertion, IAssertion>(70, static (left, right) => left.NotEqual(right), Token("!=", "=/="))
+                
+                .BinaryOperator<IAssertion, IAssertion>(60, static (left, right) => left.And(right), Token("&&", "&", "and"))
+                .BinaryOperator<IAssertion, IAssertion>(60, static (left, right) => left.Or(right), Token("||", "|", "or"))
 
-            return builder.Build();
-        }
+                .Build();
+
+        private static IToken Token(params string[] values) =>
+            ComparisonToken.CaseInsensitive(values);
         
         private sealed class OverloadInvoker : OperatorInvoker
         {

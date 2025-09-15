@@ -16,8 +16,5 @@
             
             return _handler(node, times);
         }
-
-        public static CompositionInvoker Factory<T>() where T : Composer, new() =>
-            new(Node.Value.Composite<T>);
     }
 }

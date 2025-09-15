@@ -11,17 +11,17 @@ namespace DiceRoll.Input.Parsing
             _state = state;
         }
 
-        public void Push(in OperatorToken operatorToken, in Substring context)
+        public void Push(in Operator @operator, in Substring context)
         {
-            if (operatorToken.Invoker is null)
+            if (@operator.IsOpenParenthesis)
             {
-                _state.Operators.MapAndPush(in operatorToken, context);
+                _state.Operators.MapAndPush(in @operator, context);
                 return;
             }
 
-            Mapped<OperatorToken> mapped = _state.Mapper.Map(in operatorToken, in context);
+            Mapped<Operator> mapped = _state.Mapper.Map(in @operator, in context);
 
-            OperatorInvoker invoker = operatorToken.Invoker;
+            OperatorInvoker invoker = @operator.Invoker;
 
             if (invoker.RightArity is 0)
             {
@@ -38,29 +38,25 @@ namespace DiceRoll.Input.Parsing
             }
 
             // delay until more operands are pushed
-            
-            // include (LeftArity) more operands in the delayed operator definition to use during its invocation
-            int capturedOperands = _state.Operands.Count - invoker.LeftArity;
-            
             _state.DelayedOperators.MapAndPush(
-                new DelayedOperatorToken(operatorToken.Invoker, _state.ParenthesisLevel, capturedOperands),
+                new DelayedOperator(@operator.Invoker, _state.ParenthesisLevel, _state.Operands.Count),
                 in context
                 );
         }
 
-        public bool TryPeek(out OperatorToken operatorToken) =>
-            _state.Operators.TryPeek(out operatorToken);
+        public bool TryPeek(out Operator @operator) =>
+            _state.Operators.TryPeek(out @operator);
         
-        public bool TryPeek(out Mapped<DelayedOperatorToken> operatorToken) =>
+        public bool TryPeek(out Mapped<DelayedOperator> operatorToken) =>
             _state.DelayedOperators.TryPeek(out operatorToken);
 
-        public bool TryPop(out Mapped<OperatorToken> operatorToken) =>
+        public bool TryPop(out Mapped<Operator> operatorToken) =>
             _state.Operators.TryPop(out operatorToken);
 
-        public Mapped<OperatorToken> Pop() =>
+        public Mapped<Operator> Pop() =>
             _state.Operators.Pop();
 
-        public void InvokeOperatorOrThrow(in Mapped<OperatorToken> operatorToken)
+        public void InvokeOperatorOrThrow(in Mapped<Operator> operatorToken)
         {
             try
             {
@@ -72,21 +68,21 @@ namespace DiceRoll.Input.Parsing
             }
         }
 
-        public void InvokeDelayedOperators()
+        public void TryInvokeDelayedOperators()
         {
-            while (_state.DelayedOperators.TryPeek(out DelayedOperatorToken token) &&
+            while (_state.DelayedOperators.TryPeek(out DelayedOperator token) &&
                    token.CapturedParenthesisLevel >= _state.ParenthesisLevel &&
-                   token.CapturedOperands + token.Invoker.Arity <= _state.Operands.Count)
+                   token.CapturedOperands + token.Invoker.RightArity <= _state.Operands.Count)
                 InvokeOperatorOrThrow(_state.DelayedOperators.Pop());
         }
 
-        public void InvokeAfterDelayedOperators(in Mapped<OperatorToken> invoker)
+        public void InvokeAfterDelayedOperators(in Mapped<Operator> invoker)
         {
-            InvokeDelayedOperators();
+            TryInvokeDelayedOperators();
             InvokeOperatorOrThrow(in invoker);
         }
 
-        private void InvokeOperatorOrThrow(in Mapped<DelayedOperatorToken> operatorToken)
+        private void InvokeOperatorOrThrow(in Mapped<DelayedOperator> operatorToken)
         {
             try
             {

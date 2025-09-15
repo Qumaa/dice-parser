@@ -1,115 +1,122 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
+﻿using System;
+using System.Collections.Generic;
 
 namespace DiceRoll.Input.Parsing
 {
     public class TokensTableBuilder
     {
-        private readonly List<string> _openParenthesis;
-        private readonly List<string> _closeParenthesis;
-        private readonly List<Operator> _operators;
-        private readonly List<Operand> _operands;
+        private readonly List<IToken> _openParenthesis;
+        private readonly List<IToken> _closeParenthesis;
+        private readonly List<OperatorDefinition> _operators;
+        private readonly List<OperandDefinition> _operands;
 
-        public TokensTableBuilder(string defaultOpenParenthesis, string defaultCloseParenthesis)
+        public TokensTableBuilder(IToken defaultOpenParenthesis, IToken defaultCloseParenthesis)
         {
-            _openParenthesis = new List<string> { defaultOpenParenthesis };
-            _closeParenthesis = new List<string> { defaultCloseParenthesis };
+            ArgumentNullException.ThrowIfNull(defaultOpenParenthesis);
+            ArgumentNullException.ThrowIfNull(defaultCloseParenthesis);
+            
+            _openParenthesis = new List<IToken> { defaultOpenParenthesis };
+            _closeParenthesis = new List<IToken> { defaultCloseParenthesis };
 
-            _operators = new List<Operator>();
-            _operands = new List<Operand>();
+            _operators = new List<OperatorDefinition>();
+            _operands = new List<OperandDefinition>();
         }
 
-        public void AddOpenParenthesisToken(string token) =>
+        public TokensTableBuilder OpenParenthesis(IToken token)
+        {
             _openParenthesis.Add(token);
+            return this;
+        }
 
-        public void AddOpenParenthesisToken(IEnumerable<string> tokens) =>
-            _openParenthesis.AddRange(tokens);
-
-        public void AddOpenParenthesisToken(params string[] tokens) =>
-            _openParenthesis.AddRange(tokens);
-
-        public void AddCloseParenthesisPattern(string token) =>
+        public TokensTableBuilder CloseParenthesis(IToken token)
+        {
             _closeParenthesis.Add(token);
+            return this;
+        }
 
-        public void AddCloseParenthesisPattern(IEnumerable<string> patterns) =>
-            _closeParenthesis.AddRange(patterns);
+        public TokensTableBuilder Operator(in OperatorDefinition definition)
+        {
+            _operators.Add(definition);
+            return this;
+        }
 
-        public void AddCloseParenthesisPattern(params string[] patterns) =>
-            _closeParenthesis.AddRange(patterns);
-
-        public void AddOperatorToken(int precedence, OperatorInvoker invoker, IToken token) =>
-            _operators.Add(new Operator(token, precedence, invoker));
-        
-        public void AddOperatorToken<TLeft, TRight>(int precedence, BinaryInvocationHandler<TLeft, TRight> handler,
-            Regex pattern) where TLeft : INode where TRight : INode =>
-            AddOperatorToken(precedence, OperatorInvoker.Binary(handler), new RegexToken(pattern));
-
-        public void AddOperatorToken<TLeft, TRight>(int precedence, BinaryInvocationHandler<TLeft, TRight> handler,
-            IEnumerable<Regex> patterns) where TLeft : INode where TRight : INode =>
-            AddOperatorToken(precedence, OperatorInvoker.Binary(handler), new RegexToken(patterns));
-
-        public void AddOperatorToken<TLeft, TRight>(int precedence, BinaryInvocationHandler<TLeft, TRight> handler,
-            params Regex[] patterns) where TLeft : INode where TRight : INode =>
-            AddOperatorToken(precedence, handler, patterns as IEnumerable<Regex>);
-
-        public void AddOperatorToken<TLeft, TRight>(int precedence, BinaryInvocationHandler<TLeft, TRight> handler,
-            string word) where TLeft : INode where TRight : INode =>
-            AddOperatorToken(precedence, handler, ExactIgnoreCase(word));
-
-        public void AddOperatorToken<TLeft, TRight>(int precedence, BinaryInvocationHandler<TLeft, TRight> handler,
-            IEnumerable<string> words) where TLeft : INode where TRight : INode =>
-            AddOperatorToken(precedence, handler, words.Select(static x => ExactIgnoreCase(x)));
-
-        public void AddOperatorToken<TLeft, TRight>(int precedence, BinaryInvocationHandler<TLeft, TRight> handler,
-            params string[] words) where TLeft : INode where TRight : INode =>
-            AddOperatorToken(precedence, handler, words as IEnumerable<string>);
-
-        public void AddOperatorToken<T>(int precedence, UnaryInvocationHandler<T> handler,
-            Regex pattern) where T : INode =>
-            AddOperatorToken(precedence, OperatorInvoker.RightUnary(handler), new RegexToken(pattern));
-
-        public void AddOperatorToken<T>(int precedence, UnaryInvocationHandler<T> handler,
-            IEnumerable<Regex> patterns) where T : INode =>
-            AddOperatorToken(precedence, OperatorInvoker.RightUnary(handler), new RegexToken(patterns));
-
-        public void AddOperatorToken<T>(int precedence, UnaryInvocationHandler<T> handler,
-            params Regex[] patterns) where T : INode =>
-            AddOperatorToken(precedence, handler, patterns as IEnumerable<Regex>);
-
-        public void AddOperatorToken<T>(int precedence, UnaryInvocationHandler<T> handler,
-            string word) where T : INode =>
-            AddOperatorToken(precedence, handler, ExactIgnoreCase(word));
-
-        public void AddOperatorToken<T>(int precedence, UnaryInvocationHandler<T> handler,
-            IEnumerable<string> words) where T : INode =>
-            AddOperatorToken(precedence, handler, words.Select(static x => ExactIgnoreCase(x)));
-
-        public void AddOperatorToken<T>(int precedence, UnaryInvocationHandler<T> handler,
-            params string[] words) where T : INode =>
-            AddOperatorToken(precedence, handler, words as IEnumerable<string>);
-
-        public void AddOperandToken(in Operand operand) =>
-            _operands.Add(operand);
-
-        public void AddOperandToken(OperandHandler handler, Regex pattern) =>
-            AddOperandToken(new Operand(new RegexToken(pattern), handler));
-
-        public void AddOperandToken(OperandHandler handler, IEnumerable<Regex> patterns) =>
-            AddOperandToken(new Operand(new RegexToken(patterns), handler));
-
-        public void AddOperandToken(OperandHandler handler, params Regex[] patterns) =>
-            AddOperandToken(handler, patterns as IEnumerable<Regex>);
+        public TokensTableBuilder Operand(in OperandDefinition definition)
+        {
+            _operands.Add(definition);
+            return this;
+        }
 
         public TokensTable Build() =>
             new(
-                RegexToken.ExactIgnoreCase(_openParenthesis),
-                RegexToken.ExactIgnoreCase(_closeParenthesis),
+                _openParenthesis.ToCompositeToken(),
+                _closeParenthesis.ToCompositeToken(),
                 _operators,
                 _operands
                 );
+    }
 
-        private static Regex ExactIgnoreCase(string word) =>
-            RegexToken.CreateExactIgnoreCaseRegex(word);
+    public static class TokensTableBuilderExtensions
+    {
+        public static TokensTableBuilder OpenParenthesis(this TokensTableBuilder builder, IEnumerable<IToken> tokens)
+        {
+            foreach (IToken token in tokens)
+                builder.OpenParenthesis(token);
+            
+            return builder;
+        }
+        
+        public static TokensTableBuilder CloseParenthesis(this TokensTableBuilder builder, IEnumerable<IToken> tokens)
+        {
+            foreach (IToken token in tokens)
+                builder.CloseParenthesis(token);
+            
+            return builder;
+        }
+
+        public static TokensTableBuilder Operator(this TokensTableBuilder builder, int precedence,
+            OperatorInvoker invoker, IToken token) =>
+            builder.Operator(new OperatorDefinition(token, precedence, invoker));
+
+        public static TokensTableBuilder Operator(this TokensTableBuilder builder, int precedence,
+            OperatorInvoker invoker, IEnumerable<IToken> tokens) =>
+            builder.Operator(precedence, invoker, tokens.ToCompositeToken());
+
+        public static TokensTableBuilder BinaryOperator<TLeft, TRight>(this TokensTableBuilder builder, int precedence, 
+            BinaryInvocationHandler<TLeft, TRight> handler, IToken token) where TLeft : INode where TRight : INode =>
+            builder.Operator(precedence, OperatorInvoker.Binary(handler), token);
+
+        public static TokensTableBuilder BinaryOperator<TLeft, TRight>(this TokensTableBuilder builder, int precedence,
+            BinaryInvocationHandler<TLeft, TRight> handler, IEnumerable<IToken> tokens)
+            where TLeft : INode where TRight : INode =>
+            builder.BinaryOperator(precedence, handler, tokens.ToCompositeToken());
+
+        public static TokensTableBuilder PrefixUnaryOperator<T>(this TokensTableBuilder builder, int precedence, 
+            UnaryInvocationHandler<T> handler, IToken token) where T : INode =>
+            builder.Operator(precedence, OperatorInvoker.PrefixUnary(handler), token);
+
+        public static TokensTableBuilder PrefixUnaryOperator<T>(this TokensTableBuilder builder, int precedence, 
+            UnaryInvocationHandler<T> handler, IEnumerable<IToken> tokens) where T : INode =>
+            builder.PrefixUnaryOperator(precedence, handler, tokens.ToCompositeToken());
+
+        public static TokensTableBuilder PostfixUnaryOperator<T>(this TokensTableBuilder builder, int precedence, 
+            UnaryInvocationHandler<T> handler, IToken token) where T : INode =>
+            builder.Operator(precedence, OperatorInvoker.PostfixUnary(handler), token);
+
+        public static TokensTableBuilder PostfixUnaryOperator<T>(this TokensTableBuilder builder, int precedence, 
+            UnaryInvocationHandler<T> handler, IEnumerable<IToken> tokens) where T : INode =>
+            builder.PostfixUnaryOperator(precedence, handler, tokens.ToCompositeToken());
+
+        public static TokensTableBuilder CompositionOperator(this TokensTableBuilder builder, int precedence,
+            IToken token, CompositionHandler handler) =>
+            builder.Operator(new OperatorDefinition(token, precedence, new CompositionInvoker(handler)));
+
+        public static TokensTableBuilder CompositionOperator(this TokensTableBuilder builder, int precedence,
+            in CompositionDefinition definition) =>
+            builder.CompositionOperator(precedence, definition.Token, definition.CompositionHandler);
+
+        public static TokensTableBuilder Operand(this TokensTableBuilder builder, OperandHandler handler, IToken token) =>
+            builder.Operand(new OperandDefinition(token, handler));
+        public static TokensTableBuilder Operand(this TokensTableBuilder builder, OperandHandler handler, IEnumerable<IToken> tokens) =>
+            builder.Operand(handler, tokens.ToCompositeToken());
     }
 }

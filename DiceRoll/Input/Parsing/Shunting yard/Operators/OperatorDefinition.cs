@@ -3,17 +3,15 @@
 namespace DiceRoll.Input.Parsing
 {
     [StructLayout(LayoutKind.Auto)]
-    internal readonly struct OperatorToken
+    public readonly struct OperatorDefinition
     {
-        public static readonly OperatorToken OpenParenthesis = new();
-        
+        public readonly IToken Token;
         public readonly int Precedence;
         public readonly OperatorInvoker Invoker;
-
-        public bool IsOpenParenthesis => Invoker is null;
-
-        public OperatorToken(int precedence, OperatorInvoker invoker)
+            
+        public OperatorDefinition(IToken token, int precedence, OperatorInvoker invoker)
         {
+            Token = token;
             Precedence = precedence;
             Invoker = invoker;
         }

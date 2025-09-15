@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -40,7 +39,7 @@ namespace DiceRoll.Input.Parsing
 
             ValueMatch match = enumerator.Current;
             
-            matchSubstring = new Substring(input, match.Index, match.Length);
+            matchSubstring = new Substring(in input, match.Index, match.Length);
             return true;
         }
 

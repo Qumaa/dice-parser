@@ -19,10 +19,10 @@
             where TLeft : INode where TRight : INode =>
             new BinaryOperatorInvoker<TLeft, TRight>(handler);
 
-        public static OperatorInvoker RightUnary<T>(UnaryInvocationHandler<T> handler) where T : INode =>
-            new RightUnaryOperatorInvoker<T>(handler);
+        public static OperatorInvoker PrefixUnary<T>(UnaryInvocationHandler<T> handler) where T : INode =>
+            new PrefixUnaryOperatorInvoker<T>(handler);
         
-        public static OperatorInvoker ReversedUnary<T>(UnaryInvocationHandler<T> handler) where T : INode =>
-            new LeftUnaryOperatorInvoker<T>(handler);
+        public static OperatorInvoker PostfixUnary<T>(UnaryInvocationHandler<T> handler) where T : INode =>
+            new PostfixUnaryOperatorInvoker<T>(handler);
     }
 }

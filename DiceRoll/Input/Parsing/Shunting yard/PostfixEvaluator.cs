@@ -25,7 +25,7 @@
         {
             ThrowIfAnyTrailingOperators();
 
-            while(_operators.TryPop(out Mapped<OperatorToken> context))
+            while(_operators.TryPop(out Mapped<Operator> context))
                 _operators.InvokeOperatorOrThrow(in context);
 
             Mapped<LinkedNode> result = _operands.Pop();
@@ -38,7 +38,7 @@
         
         private void ThrowIfAnyTrailingOperators()
         {
-            if (_operators.TryPeek(out Mapped<DelayedOperatorToken> operatorToken))
+            if (_operators.TryPeek(out Mapped<DelayedOperator> operatorToken))
                 _state.MapAndThrow(in operatorToken, ParsingErrorMessages.TRAILING_DELAYED_OPERATOR);
         }
         

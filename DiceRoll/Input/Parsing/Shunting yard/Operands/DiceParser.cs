@@ -1,17 +1,16 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace DiceRoll.Input.Parsing
 {
     [StructLayout(LayoutKind.Auto)]
     public readonly struct DiceParser
     {
-        private readonly string[] _delimiters;
-        private readonly CompositionToken[] _compositionTokens;
+        private readonly IToken _delimiter;
+        private readonly CompositionDefinition[] _compositionTokens;
         
-        public DiceParser(string[] delimiters, CompositionToken[] compositionTokens)
+        public DiceParser(IToken delimiter, CompositionDefinition[] compositionTokens)
         {
-            _delimiters = delimiters;
+            _delimiter = delimiter;
             _compositionTokens = compositionTokens;
         }
 
@@ -34,38 +33,38 @@ namespace DiceRoll.Input.Parsing
         [StructLayout(LayoutKind.Auto)]
         private readonly struct Helper
         {
-            private readonly CompositionToken[] _compositionTokens;
+            private readonly CompositionDefinition[] _compositionTokens;
             private readonly Substring _expression;
-            private readonly int _delimiterIndex;
+            private readonly Substring _delimiter;
             private readonly int _diceNotationEnd;
             
             public Helper(DiceParser context, Substring expression)
             {
                 _expression = expression;
                 _compositionTokens = context._compositionTokens;
-                _delimiterIndex = IndexOfDelimiter(expression, context._delimiters);
-                _diceNotationEnd = IndexOfDiceNotationEnd(expression, _delimiterIndex);
+                _delimiter = FindDelimiter(expression, context._delimiter);
+                _diceNotationEnd = IndexOfDiceNotationEnd(expression, _delimiter.End);
             }
             
             public int DiceCount()
             {
                 int diceCount = 1;
             
-                if (_delimiterIndex is not 0)
-                    diceCount = int.Parse(_expression[.._delimiterIndex].AsSpan());
+                if (_delimiter is { IsEmpty: false, Start: > 0 })
+                    diceCount = int.Parse(_expression[.._delimiter.RelativeStart(in _expression)].AsSpan());
 
                 return diceCount;
             }
             
             public int FacesCount() =>
-                int.Parse(_expression.AsSpan(_delimiterIndex + 1, _diceNotationEnd - _delimiterIndex - 1));
+                int.Parse(_expression[_delimiter.RelativeEnd(in _expression).._diceNotationEnd].AsSpan());
             
             public CompositionHandler CompositionHandler()
             {
                 if (!ExpressionEndsWithCompositionToken(out Substring compositionToken))
                     return DefaultCompositionHandler();
 
-                foreach (CompositionToken token in _compositionTokens)
+                foreach (CompositionDefinition token in _compositionTokens)
                     if (token.Token.Matches(compositionToken))
                         return token.CompositionHandler;
 
@@ -87,24 +86,14 @@ namespace DiceRoll.Input.Parsing
             private CompositionHandler DefaultCompositionHandler() =>
                 _compositionTokens[0].CompositionHandler;
             
-            private static int IndexOfDelimiter(Substring expression, string[] delimiters)
-            {
-                foreach (string delimiter in delimiters)
-                {
-                    int index = expression.IndexOf(delimiter, StringComparison.OrdinalIgnoreCase);
+            private static Substring FindDelimiter(in Substring expression, IToken delimiter) =>
+                delimiter.Matches(in expression, out Substring match) ? match : Substring.Empty(in expression);
 
-                    if (index >= 0)
-                        return index;
-                }
-
-                return -1;
-            }
-            
-            private static int IndexOfDiceNotationEnd(Substring expression, int delimiterIndex)
+            private static int IndexOfDiceNotationEnd(in Substring expression, int delimiterEndIndex)
             {
                 int notationEnd = expression.Length;
             
-                for (int i = delimiterIndex + 1; i < notationEnd; i++)
+                for (int i = delimiterEndIndex; i < notationEnd; i++)
                     if (!char.IsDigit(expression[i]))
                         notationEnd = i;
 

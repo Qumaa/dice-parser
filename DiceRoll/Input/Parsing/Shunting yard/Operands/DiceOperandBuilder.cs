@@ -1,93 +1,64 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 
 namespace DiceRoll.Input.Parsing
 {
     public class DiceOperandBuilder
     {
-        private readonly List<string> _delimiterTokens;
-        private readonly List<CompositionTokenDescriptor> _compositionTokens;
-        
-        public DiceOperandBuilder(IEnumerable<string> delimiterTokens, in CompositionTokenDescriptor defaultComposition)
+        private readonly List<IToken> _delimiters = new();
+        private readonly List<CompositionDefinition> _compositionDefinitions = new();
+
+        public DiceOperandBuilder Delimiter(IToken token)
         {
-            _delimiterTokens = new List<string>(delimiterTokens);
-            _compositionTokens = new List<CompositionTokenDescriptor> { defaultComposition };
-        }
-        public DiceOperandBuilder(string delimiterToken, in CompositionTokenDescriptor defaultComposition)
-        {
-            _delimiterTokens = new List<string> { delimiterToken };
-            _compositionTokens = new List<CompositionTokenDescriptor> { defaultComposition };
+            _delimiters.Add(token);
+            return this;
         }
 
-        public DiceOperandBuilder AddDelimiter(string token)
+        public DiceOperandBuilder Composition(in CompositionDefinition definition)
         {
-            if (!_delimiterTokens.Contains(token))
-                _delimiterTokens.Add(token);
+            _compositionDefinitions.Add(definition);
+            return this;
+        }
+
+        public DiceOperandBuilder DefaultComposition(in CompositionDefinition definition)
+        {
+            if (_compositionDefinitions.Count is 0)
+                _compositionDefinitions.Add(definition);
+            else
+                _compositionDefinitions.Insert(0, definition);
 
             return this;
         }
 
-        public DiceOperandBuilder AddDelimiter(char token) =>
-            AddDelimiter(char.ToString(token));
-
-        public DiceOperandBuilder AddComposition(in CompositionTokenDescriptor descriptor)
+        public OperandDefinition Build()
         {
-            _compositionTokens.Add(descriptor);
-            return this;
-        }
-
-        public DiceOperandBuilder AddComposition(IEnumerable<string> tokens, CompositionHandler handler) =>
-            AddComposition(new CompositionTokenDescriptor(tokens, handler));
-
-        public DiceOperandBuilder AddComposition(string token, CompositionHandler handler) =>
-            AddComposition(new[] { token }, handler);
-
-        public Operand Build()
-        {
-            DiceParser parser = new(_delimiterTokens.ToArray(), _compositionTokens.Select(x => x.Convert()).ToArray());
-            return new Operand(CreateToken(), diceExpression => parser.Parse(diceExpression));
-        }
-
-        private IToken CreateToken()
-        {
-            string regexPattern = BuildRegexPattern();
-            Regex patterns = new(regexPattern, RegexOptions.IgnoreCase);
-            return new RegexToken(patterns);
-        }
-
-        private string BuildRegexPattern()
-        {
-            const char separator = '|';
+            IToken delimiterToken = _delimiters.ToCompositeToken();
             
-            // @"(?:(\d+)(delimiter1|...)(\d+)|(delimiter1|...)(\d+))((composition1|...)|...)?"
-            StringBuilder stringBuilder = new(64);
-            stringBuilder.Append(@"(?:(\d+)(");
+            DiceParser parser = new(delimiterToken, _compositionDefinitions.ToArray());
+            return new OperandDefinition(CreateDiceToken(delimiterToken), diceExpression => parser.Parse(diceExpression));
+        }
 
-            stringBuilder.AppendJoin(separator, _delimiterTokens);
+        private DiceToken CreateDiceToken(IToken delimiterToken) =>
+            new(delimiterToken, _compositionDefinitions.Select(x => x.Token).ToCompositeToken());
+    }
 
-            stringBuilder.Append(@")(\d+)|(");
+    public static class DiceOperandBuilderExtensions
+    {
+        public static DiceOperandBuilder Delimiter(this DiceOperandBuilder builder, IEnumerable<IToken> tokens)
+        {
+            foreach (IToken token in tokens)
+                builder.Delimiter(token);
             
-            stringBuilder.AppendJoin(separator, _delimiterTokens);
+            return builder;
+        }
 
-            stringBuilder.Append(@")(\d+))(");
+        public static DiceOperandBuilder Composition(this DiceOperandBuilder builder,
+            IEnumerable<CompositionDefinition> definitions)
+        {
+            foreach (CompositionDefinition definition in definitions)
+                builder.Composition(in definition);
 
-            for (int i = 0; i < _compositionTokens.Count; i++)
-            {
-                stringBuilder.Append('(');
-                
-                stringBuilder.AppendJoin(separator, _compositionTokens[i].Tokens);
-                
-                stringBuilder.Append(')');
-
-                if (i < _compositionTokens.Count - 1)
-                    stringBuilder.Append(separator);
-            }
-
-            stringBuilder.Append(")?");
-
-            return stringBuilder.ToString();
+            return builder;
         }
     }
 }

@@ -1,10 +1,10 @@
 ﻿namespace DiceRoll.Input.Parsing
 {
-    internal sealed class RightUnaryOperatorInvoker<T> : OperatorInvoker where T : INode
+    internal sealed class PrefixUnaryOperatorInvoker<T> : OperatorInvoker where T : INode
     {
         private readonly UnaryInvocationHandler<T> _handler;
         
-        public RightUnaryOperatorInvoker(UnaryInvocationHandler<T> handler) : base(0, 1)
+        public PrefixUnaryOperatorInvoker(UnaryInvocationHandler<T> handler) : base(0, 1)
         {
             _handler = handler;
         }

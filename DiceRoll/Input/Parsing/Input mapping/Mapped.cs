@@ -23,12 +23,7 @@ namespace DiceRoll.Input.Parsing
         public Range Merge(in Mapped<T> other) =>
             Merge(in other.Range);
         
-        public Range Merge(in Range other)
-        {
-            int start = int.Min(Range.Start.Value, other.Start.Value);
-            int end = int.Max(Range.End.Value, other.End.Value);
-
-            return new Range(new Index(start), new Index(end));
-        }
+        public Range Merge(in Range other) =>
+            Range.And(other);
     }
 }

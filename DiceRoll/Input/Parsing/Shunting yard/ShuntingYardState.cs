@@ -7,9 +7,9 @@ namespace DiceRoll.Input.Parsing
         public TokensTable Tokens { get; }
         public int ParenthesisLevel { get; private set; }
         public InputMapper Mapper { get; }
-        public MappedStack<OperatorToken> Operators { get; }
+        public MappedStack<Operator> Operators { get; }
         public MappedStack<LinkedNode> Operands { get; }
-        public MappedStack<DelayedOperatorToken> DelayedOperators { get; }
+        public MappedStack<DelayedOperator> DelayedOperators { get; }
         public TokenKind PrecedingTokenKind { get; private set; }
 
         public bool ClosingParenthesisWouldImposeImbalance => ParenthesisLevel is 0;
@@ -20,9 +20,9 @@ namespace DiceRoll.Input.Parsing
             
             Mapper = new InputMapper();
             
-            Operators = Mapper.CreateLinkedStack<OperatorToken>();
+            Operators = Mapper.CreateLinkedStack<Operator>();
             Operands = Mapper.CreateLinkedStack<LinkedNode>();
-            DelayedOperators = Mapper.CreateLinkedStack<DelayedOperatorToken>();
+            DelayedOperators = Mapper.CreateLinkedStack<DelayedOperator>();
 
             PrecedingTokenKind = TokenKind.ExpressionStart;
             ParenthesisLevel = 0;
