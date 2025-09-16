@@ -3,7 +3,7 @@
     public interface IOperation : INode<Optional<Outcome>>,
         IDistributable<OptionalRollProbabilityDistribution, OptionalRoll>
     {
-        IAssertion AsAssertion();
+        IAssertion AsAssertion { get; }
     }
 
     public static class OperationExtensions

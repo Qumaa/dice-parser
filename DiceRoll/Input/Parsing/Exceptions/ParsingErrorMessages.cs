@@ -10,6 +10,8 @@ namespace DiceRoll.Input.Parsing
         public const string UNBALANCED_PARENTHESIS = "This parenthesis has no matching opening pair.";
         public const string PUSHING_PREMATURELY =
             "This operator returned a result before consuming all required operands.";
+        public const string NO_SUITABLE_OVERLOAD = 
+            "None of this operator's definitions match the signature of its operands.";
 
         public static string ExceedingArity(int arity)
         {
@@ -34,7 +36,7 @@ namespace DiceRoll.Input.Parsing
         
         public static string OperandTypeMismatch(Type expectedOperandType, Type receivedOperandType)
         {
-            const string format = "This operator's operand evaluates to {0}, but {1} was expected.";
+            const string format = "This operator's operand signature is {0}, but {1} was expected.";
             
             return string.Format(format, _FormatTypeName(receivedOperandType), _FormatTypeName(expectedOperandType));
             

@@ -6,9 +6,9 @@ namespace DiceRoll.Input.Parsing
     {
         private readonly ShuntingYard _nodeBuilder;
 
-        public ExpressionParser(TokensTable diceFormulaTokens)
+        public ExpressionParser(TokensTable diceFormulaTokens, OperandCastersTable castersTable)
         {
-            _nodeBuilder = new ShuntingYard(diceFormulaTokens);
+            _nodeBuilder = new ShuntingYard(diceFormulaTokens, castersTable);
         }
 
         public NodeTree Parse(string expression)

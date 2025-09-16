@@ -7,10 +7,7 @@ namespace DiceRoll
 {
     internal static class ExpressionParsingHelper
     {
-        private static ExpressionParser _expressionParser = new(TokensTable.Default);
-
-        public static void SetTokens(TokensTable tokens) =>
-            _expressionParser = new ExpressionParser(tokens);
+        private static readonly ExpressionParser _expressionParser = new(TokensTable.Default, OperandCastersTable.Default);
 
         public static bool Try(IEnumerable<string> expression, IConsole exceptionOutput, out NodeTree output)
         {

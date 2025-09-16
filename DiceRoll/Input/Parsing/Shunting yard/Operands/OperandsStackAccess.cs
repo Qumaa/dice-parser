@@ -4,6 +4,7 @@ namespace DiceRoll.Input.Parsing
 {
     public sealed class OperandsStackAccess
     {
+        private readonly OperandCastersTable _castersTable;
         private readonly MappedStack<LinkedNode> _operands;
         private readonly int _arity;
         private readonly int _popLimit;
@@ -15,15 +16,16 @@ namespace DiceRoll.Input.Parsing
 
         private int _operatorParentsCount => _arity - (_operands.Count - _popLimit);
 
-        public OperandsStackAccess(MappedStack<LinkedNode> operands, int arity, in Range operatorRange)
+        public OperandsStackAccess(MappedStack<LinkedNode> operands, OperandCastersTable castersTable, int arity,
+            in Range operatorRange)
         {
             _operands = operands;
+            _castersTable = castersTable;
             _arity = arity;
-            _operatorRange = operatorRange;
+            _operatorRange = _resultRange = operatorRange;
+            
             _popLimit = operands.Count - arity;
             _operatorParents = new Mapped<LinkedNode>[arity];
-
-            _resultRange = operatorRange;
         }
 
         public T Pop<T>() where T : INode
@@ -39,7 +41,7 @@ namespace DiceRoll.Input.Parsing
             return CastOrThrow<T>(operand.Value.Node);
         }
 
-        public void PushResult(INode operand)
+        internal void PushResult(INode operand)
         {
             ArgumentNullException.ThrowIfNull(operand);
             ThrowIfPushingPrematurely();
@@ -52,12 +54,11 @@ namespace DiceRoll.Input.Parsing
             _operands.Push(linkedOperand, in _resultRange);
         }
 
-        public void Reset()
+        internal void Reset()
         {
             _resultRange = _operatorRange;
 
             for (int i = _operatorParentsCount - 1; i >= 0; i--)
-                if (_operatorParents[i].Value.IsOperand)
                     _operands.Push(_operatorParents[i]);
         }
 
@@ -73,8 +74,8 @@ namespace DiceRoll.Input.Parsing
                 throw new OperatorInvocationException(ParsingErrorMessages.PUSHING_PREMATURELY);
         }
 
-        private static T CastOrThrow<T>(INode node) where T : INode =>
-            node is T operand ?
+        private T CastOrThrow<T>(INode node) where T : INode =>
+            node is T operand || _castersTable.TryCast(node, out operand) ?
                 operand :
                 throw new OperatorInvocationException(
                     ParsingErrorMessages.OperandTypeMismatch(typeof(T), node.GetType())

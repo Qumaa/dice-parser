@@ -5,10 +5,12 @@ namespace DiceRoll.Input.Parsing
     internal sealed class ShuntingYardOperators
     {
         private readonly ShuntingYardState _state;
+        private readonly OperandCastersTable _castersTable;
 
-        public ShuntingYardOperators(ShuntingYardState state)
+        public ShuntingYardOperators(ShuntingYardState state, OperandCastersTable castersTable)
         {
             _state = state;
+            _castersTable = castersTable;
         }
 
         public void Push(in Operator @operator, in Substring context)
@@ -101,7 +103,7 @@ namespace DiceRoll.Input.Parsing
             if (_state.Operands.Count < arity)
                 throw new OperatorInvocationException(ParsingErrorMessages.OperandsExpected(arity, _state.Operands.Count));
 
-            OperandsStackAccess access = new(_state.Operands, arity, in operatorRange);
+            OperandsStackAccess access = new(_state.Operands, _castersTable, arity, in operatorRange);
             
             INode result = invoker.Invoke(access);
             

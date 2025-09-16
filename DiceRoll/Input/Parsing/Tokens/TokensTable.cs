@@ -181,6 +181,7 @@ namespace DiceRoll.Input.Parsing
                 .BinaryOperator<INumeric, INumeric>(80, static (left, right) => left.GreaterThan(right), Token(">"))
                 .BinaryOperator<INumeric, INumeric>(80, static (left, right) => left.LessThan(right), Token("<"))
                 
+                // todo: overload syntax (overload = equal precedence, equal token)
                 .BinaryOperator<INumeric, INumeric>(70, static (left, right) => left.Equal(right), Token("==", "="))
                 .BinaryOperator<INumeric, INumeric>(70, static (left, right) => left.NotEqual(right), Token("!=", "=/="))
                 
@@ -192,7 +193,7 @@ namespace DiceRoll.Input.Parsing
 
                 .Build();
 
-        private static IToken Token(params string[] values) =>
+        private static ComparisonToken Token(params string[] values) =>
             ComparisonToken.CaseInsensitive(values);
         
         private sealed class OverloadInvoker : OperatorInvoker
@@ -209,22 +210,19 @@ namespace DiceRoll.Input.Parsing
 
             public override INode Invoke(OperandsStackAccess operands)
             {
-                Exception lastException = null;
-                
                 foreach (OperatorInvoker operatorInvoker in _invokers)
                 {
                     try
                     {
                         return operatorInvoker.Invoke(operands);
                     }
-                    catch (OperatorInvocationException e)
+                    catch (OperatorInvocationException)
                     {
-                        lastException = e;
                         operands.Reset();
                     }
                 }
 
-                throw lastException;
+                throw new OperatorInvocationException(ParsingErrorMessages.NO_SUITABLE_OVERLOAD);
             }
         }
     }

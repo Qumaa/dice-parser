@@ -127,7 +127,7 @@ namespace DiceRoll.Input.Parsing
 
         private void Operand(INode operand, in Substring context)
         {
-            _operands.PushParentless(operand, in context);
+            _operands.Push(operand, in context);
                 
             _state.Annotate().OperandProcessing();
             
