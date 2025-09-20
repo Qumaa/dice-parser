@@ -23,7 +23,7 @@ namespace DiceRoll.Input.Parsing
         {
             ArgumentNullException.ThrowIfNull(source);
             ArgumentOutOfRangeException.ThrowIfLessThan(start, 0);
-            ArgumentOutOfRangeException.ThrowIfGreaterThan(start + length, source.Length, nameof(length));
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(start + length, source.Length);
             
             Start = start;
             Length = length;

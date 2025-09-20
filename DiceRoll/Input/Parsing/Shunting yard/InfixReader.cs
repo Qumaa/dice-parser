@@ -31,40 +31,36 @@ namespace DiceRoll.Input.Parsing
         
         private Substring ParseSubstringStartOrThrow(in Substring notParsed)
         {
-            Substring output = notParsed;
+            Substring parsed = notParsed;
 
             try
             {
-                ParseSubstring(in notParsed, out output);
-                return notParsed.MoveStart(output.Length).TrimStart();
-            }
-            catch (ParsingException)
-            {
-                throw;
+                ParseSubstring(in notParsed, out parsed);
+                return notParsed.MoveStart(parsed.Length).TrimStart();
             }
             catch (Exception e)
             {
-                throw _state.MapException(in output, e);
+                throw _state.MapException(in parsed, e);
             }
         }
 
-        private void ParseSubstring(in Substring notParsed, out Substring output)
+        private void ParseSubstring(in Substring notParsed, out Substring parsed)
         {
-            if (_state.Tokens.StartsWithOpenParenthesis(in notParsed, out output))
+            if (_state.Tokens.StartsWithOpenParenthesis(in notParsed, out parsed))
             {
-                OpenParenthesis(in output);
+                OpenParenthesis(in parsed);
                 return;
             }
 
-            if (_state.Tokens.StartsWithCloseParenthesis(in notParsed, out output))
+            if (_state.Tokens.StartsWithCloseParenthesis(in notParsed, out parsed))
             {
-                CloseParenthesis(in output);
+                CloseParenthesis();
                 return;
             }
             
-            if (_state.Tokens.StartsWithOperand(in notParsed, out Operand operand, out output))
+            if (_state.Tokens.StartsWithOperand(in notParsed, out Operand operand, out parsed))
             {
-                Operand(in operand, in output);
+                Operand(in operand, in parsed);
                 return;
             }
 
@@ -72,15 +68,15 @@ namespace DiceRoll.Input.Parsing
                     in notParsed,
                     GetCurrentOperatorUsageForm(),
                     out Operator @operator,
-                    out output
+                    out parsed
                     ))
             {
-                Operator(in @operator, in output);
+                Operator(in @operator, in parsed);
                 return;
             }
 
-            output = _state.Tokens.UntilFirstKnownToken(in notParsed, GetCurrentOperatorUsageForm()).Trim();
-            throw new UnknownTokenException(in output);
+            parsed = _state.Tokens.UntilFirstKnownToken(in notParsed, GetCurrentOperatorUsageForm()).Trim();
+            throw new UnknownTokenException(in parsed);
         }
 
         private OperatorUsageForm GetCurrentOperatorUsageForm() =>
@@ -95,9 +91,9 @@ namespace DiceRoll.Input.Parsing
             _operators.Push(in Parsing.Operator.OpenParenthesis, in substring);
         }
 
-        private void CloseParenthesis(in Substring substring)
+        private void CloseParenthesis()
         {
-            ThrowIfUnbalancedParenthesis(in substring);
+            ThrowIfUnbalancedParenthesis();
 
             while (_operators.TryPop(out Mapped<Operator> operatorToken))
             {
@@ -133,10 +129,10 @@ namespace DiceRoll.Input.Parsing
             _operators.TryInvokeDelayedOperators();
         }
         
-        private void ThrowIfUnbalancedParenthesis(in Substring parenthesisToken)
+        private void ThrowIfUnbalancedParenthesis()
         {
             if (_state.ClosingParenthesisWouldImposeImbalance)
-                _state.MapAndThrow(in parenthesisToken, ParsingErrorMessages.UNBALANCED_PARENTHESIS);
+                throw new UnbalancedParenthesisException();
         }
     }
 }

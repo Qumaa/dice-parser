@@ -4,25 +4,25 @@ namespace DiceRoll.Input.Parsing
 {
     public sealed class ExpressionParser
     {
-        private readonly ShuntingYard _nodeBuilder;
+        private readonly ShuntingYard _shuntingYard;
 
-        public ExpressionParser(TokensTable diceFormulaTokens, OperandCastingTable castingTable)
+        public ExpressionParser(TokensTable tokensTable, OperandCastingTable castingTable)
         {
-            _nodeBuilder = new ShuntingYard(diceFormulaTokens, castingTable);
+            _shuntingYard = new ShuntingYard(tokensTable, castingTable);
         }
 
         public NodeTree Parse(string expression)
         {
-            _nodeBuilder.Append(expression);
-            return _nodeBuilder.Parse();
+            _shuntingYard.Append(expression);
+            return _shuntingYard.Parse();
         }
 
         public NodeTree Parse(IEnumerable<string> expression)
         {
             foreach (string segment in expression)
-                _nodeBuilder.Append(segment);
+                _shuntingYard.Append(segment);
 
-            return _nodeBuilder.Parse();
+            return _shuntingYard.Parse();
         }
     }
 }

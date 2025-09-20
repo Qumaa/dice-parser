@@ -1,5 +1,4 @@
-﻿using System;
-using System.CommandLine;
+﻿using System.CommandLine;
 using System.Linq;
 using System.Runtime.InteropServices;
 using DiceRoll.Input.Parsing;

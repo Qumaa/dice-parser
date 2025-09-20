@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace DiceRoll
 {
-    public static class EnumValueNotDefinedException
+    internal static class EnumValueNotDefinedException
     {
         public static void ThrowIfValueNotDefined<TEnum>(
             TEnum value,

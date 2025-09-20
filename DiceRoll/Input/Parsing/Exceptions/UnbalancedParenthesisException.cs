@@ -2,8 +2,8 @@
 
 namespace DiceRoll.Input.Parsing
 {
-    public sealed class UnbalancedParenthesisException : Exception
+    internal sealed class UnbalancedParenthesisException : Exception
     {
-        public UnbalancedParenthesisException() : base(ParsingErrorMessages.UNBALANCED_PARENTHESIS) { }
+        public UnbalancedParenthesisException() : base("This parenthesis has no matching opening pair.") { }
     }
 }

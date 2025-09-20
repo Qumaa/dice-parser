@@ -1,6 +1,6 @@
 ﻿namespace DiceRoll.Input.Parsing
 {
-    public sealed class CompositionInvoker : OperatorInvoker
+    internal sealed class CompositionInvoker : OperatorInvoker
     {
         private readonly CompositionHandler _handler;
 

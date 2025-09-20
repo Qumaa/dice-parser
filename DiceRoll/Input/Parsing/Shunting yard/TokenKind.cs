@@ -1,6 +1,6 @@
 ﻿namespace DiceRoll.Input.Parsing
 {
-    public enum TokenKind
+    internal enum TokenKind
     {
         ExpressionStart,
         Operator,

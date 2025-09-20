@@ -3,22 +3,63 @@ using System.Linq;
 
 namespace DiceRoll.Input.Parsing
 {
-    public sealed class OperatorInvocationException : Exception
+    internal sealed class OperatorInvocationException : Exception
     {
         public OperatorInvocationException(string message) : base(message) { }
 
-        public static OperatorInvocationException BadSignature(BadSignatureException e,
-            in OperatorInvocationBehaviour invocationBehaviour, in Substring operatorSubstring)
+        public static OperatorInvocationException InvalidOperandCast(int operandIndex,
+            Signature operatorSignature, Type requestedType)
         {
-            const char separator = ',';
-            
-            string leftArguments = string.Join(separator, e.ExpectedTypes.Take(invocationBehaviour.LeftArity).Select(x => x.Name));
-            string rightArguments = string.Join(separator, e.ExpectedTypes.Skip(invocationBehaviour.LeftArity).Select(x => x.Name));
-            
-            string message =
-                $"This operator has bad signature; <{leftArguments} {operatorSubstring.ToString()} {rightArguments}> is expected.";
+            string signature = $"<{string.Join(',', operatorSignature.EnumerateOperandTypes().Select(x => x.Name))}>";
+
+            string message = 
+                $"This operator defines a {signature} signature where operand number {operandIndex} type is {operatorSignature.GetOperandTypes()[operandIndex].Name}, but {requestedType} was asked instead. Invocation behaviour is flawed.";
             
             return new OperatorInvocationException(message);
         }
+
+        public static OperatorInvocationException NoMatchingSignature(OperatorInvocationBehaviour invocationBehaviour,
+            Mapped<LinkedNode>[] captureOperands, in Substring operatorSubstring)
+        {
+            string operatorString = operatorSubstring.ToString();
+            string receivedSignature = _SignatureToString(
+                captureOperands.Select(x => x.Value.EvaluationType.Name).ToArray(),
+                invocationBehaviour.LeftArity,
+                operatorString
+                );
+
+            string expectedSignatures = string.Join(
+                ',',
+                invocationBehaviour.Invokers
+                    .Select(invoker => _SignatureToString(
+                            invoker.Signature.EnumerateOperandTypes().Select(type => type.Name).ToArray(),
+                            invocationBehaviour.LeftArity,
+                            operatorString
+                            )
+                        )
+                );
+            
+            string message =
+                $"None of this operator's defined signatures could handle {receivedSignature} arguments. Candidates are {expectedSignatures}.";
+            
+            return new OperatorInvocationException(message);
+            
+            static string _SignatureToString(string[] argumentTypeNames, int leftArity, string operatorString)
+            {
+                string leftArguments = string.Join(
+                    ',',
+                    argumentTypeNames.Take(leftArity)
+                    );
+                string rightArguments = string.Join(
+                    ',',
+                    argumentTypeNames.Skip(leftArity)
+                    );
+
+                return $"<{leftArguments} {operatorString} {rightArguments}>";
+            }
+        }
+
+        public static OperatorInvocationException BadArity(int arity, int operandsCount) =>
+            new($"This operator expected {arity} operand(-s), but received {operandsCount}.");
     }
 }

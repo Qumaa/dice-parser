@@ -3,23 +3,12 @@
     public enum OperatorUsageForm
     {
         /// <summary>
-        /// Operator is in between its arguments
+        /// Operator is in between its arguments. Used when a previously parsed token is an operand.
         /// </summary>
         Infix,
         /// <summary>
-        /// Operator is in front of its arguments
+        /// Operator is in front of its arguments. Used when a previously parsed token is also an operator.
         /// </summary>
         Prefix
-    }
-
-    public static class OperatorKindExtensions
-    {
-        public static OperatorUsageForm Opposite(this OperatorUsageForm operatorUsageForm) =>
-            operatorUsageForm switch
-            {
-                OperatorUsageForm.Infix => OperatorUsageForm.Prefix,
-                OperatorUsageForm.Prefix => OperatorUsageForm.Infix,
-                _ => throw new EnumValueNotDefinedException<OperatorUsageForm>(nameof(operatorUsageForm))
-            };
     }
 }

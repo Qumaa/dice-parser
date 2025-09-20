@@ -1,13 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace DiceRoll.Input.Parsing
 {
-    // todo
-    public sealed class Signatures
-    {
-        
-    }
-    
     public sealed class Signature
     {
         private readonly Type[] _operandTypes;
@@ -17,11 +12,18 @@ namespace DiceRoll.Input.Parsing
 
         public Signature(Type returnType, params Type[] operandTypes)
         {
+            ConstructorException.ThrowIfTypeIsNotNode(returnType);
+            ConstructorException.ThrowIfParamsArrayIsEmpty(operandTypes);
+            ConstructorException.ThrowIfAnyTypeIsNotNode(operandTypes);
+            
             _returnType = returnType;
             _operandTypes = operandTypes;
         }
 
         public ReadOnlySpan<Type> GetOperandTypes() =>
+            _operandTypes;
+
+        public IEnumerable<Type> EnumerateOperandTypes() =>
             _operandTypes;
 
         public Type GetReturnType() =>

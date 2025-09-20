@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace DiceRoll
 {
-    public sealed class DiceFacesException : ArgumentException
+    internal sealed class DiceFacesException : ArgumentException
     {
         public DiceFacesException() { }
         public DiceFacesException(int facesNumber) : base(GetErrorMessage(facesNumber)) { }

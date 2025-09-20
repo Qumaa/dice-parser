@@ -12,14 +12,16 @@ namespace DiceRoll.Input.Parsing
 
         public bool IsOperand => Parents.Length is 0;
 
-        public LinkedNode(INode node, Type evaluationType, Mapped<LinkedNode>[] parents)
+        internal LinkedNode(INode node, Type evaluationType, Mapped<LinkedNode>[] parents)
         {
+            ConstructorException.ThrowIfTypeIsNotNode(evaluationType);
+            
             Node = node;
             Parents = parents;
             EvaluationType = evaluationType;
         }
 
-        public LinkedNode(INode node, Type evaluationType) : this(
+        internal LinkedNode(INode node, Type evaluationType) : this(
             node,
             evaluationType,
             Array.Empty<Mapped<LinkedNode>>()

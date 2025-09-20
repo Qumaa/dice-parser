@@ -2,11 +2,11 @@
 
 namespace DiceRoll.Input.Parsing
 {
-    public readonly struct SubstringMapper
+    public sealed class SubstringMapper
     {
         private readonly string _source;
-        
-        public SubstringMapper(string source)
+
+        internal SubstringMapper(string source)
         {
             _source = source;
         }

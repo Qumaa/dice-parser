@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace DiceRoll.Input.Parsing
 {
@@ -9,8 +8,10 @@ namespace DiceRoll.Input.Parsing
         public readonly OperandParsingHandler ParsingHandler;
         public readonly Type EvaluationType;
 
-        private OperandDefinition(IToken token, OperandParsingHandler parsingHandler, Type evaluationType)
+        public OperandDefinition(IToken token, OperandParsingHandler parsingHandler, Type evaluationType)
         {
+            ConstructorException.ThrowIfTypeIsNotNode(evaluationType);
+            
             Token = token;
             ParsingHandler = parsingHandler;
             EvaluationType = evaluationType;

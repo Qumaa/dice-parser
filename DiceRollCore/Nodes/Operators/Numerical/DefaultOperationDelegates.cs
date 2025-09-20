@@ -1,5 +1,7 @@
 ﻿using System.Linq;
 
+#pragma warning disable CS8524
+
 namespace DiceRoll
 {
     public static class DefaultOperationDelegates
@@ -9,15 +11,15 @@ namespace DiceRoll
             EnumValueNotDefinedException.ThrowIfValueNotDefined(operationType);
 
             return new OperationDelegates(
-                Evaluation.Get(operationType),
-                RollsProbability.Get(operationType),
-                ProbabilityDistribution.Get(operationType)
+                Evaluation.GetDelegate(operationType),
+                RollsProbability.GetDelegate(operationType),
+                ProbabilityDistribution.GetDelegate(operationType)
                 );
         }
 
         private static class Evaluation
         {
-            public static OperationEvaluationDelegate Get(OperationType operationType) =>
+            public static OperationEvaluationDelegate GetDelegate(OperationType operationType) =>
                 operationType switch
                 {
                     OperationType.Equal => static (left, right) => Equal(left, right),
@@ -55,7 +57,7 @@ namespace DiceRoll
             private static readonly LogicalProbabilityDistribution _zero = new(Probability.Zero);
             private static readonly LogicalProbabilityDistribution _hundred = new(Probability.Hundred);
 
-            public static AssertionEvaluationDelegate Get(OperationType operationType) =>
+            public static AssertionEvaluationDelegate GetDelegate(OperationType operationType) =>
                 operationType switch
                 {
                     OperationType.Equal => static (left, right) => Equal(left, right),
@@ -195,7 +197,7 @@ namespace DiceRoll
 
         private static class RollsProbability
         {
-            public static OperationDistributionDelegate Get(OperationType operationType) =>
+            public static OperationDistributionDelegate GetDelegate(OperationType operationType) =>
                 operationType switch
                 {
                     OperationType.Equal => static (left, right) => Equal(left, right),

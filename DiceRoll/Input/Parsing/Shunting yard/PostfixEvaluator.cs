@@ -29,7 +29,7 @@
                 _operators.InvokeOperator(in context);
 
             Mapped<LinkedNode> result = _operands.Pop();
-            SubstringMapper mapper = _state.Mapper.BuildSubstringSource();
+            SubstringMapper mapper = _state.Mapper.BuildSubstringMapper();
             
             ThrowIfAnyOperandLeft();
 
@@ -38,14 +38,22 @@
         
         private void ThrowIfAnyTrailingOperators()
         {
-            if (_operators.TryPeek(out Mapped<DelayedOperator> operatorToken))
-                _state.MapAndThrow(in operatorToken, ParsingErrorMessages.TRAILING_DELAYED_OPERATOR);
+            if (!_operators.TryPeek(out Mapped<DelayedOperator> delayedOperator))
+                return;
+
+            int received = _state.Operands.Count - delayedOperator.Value.CapturedOperands;
+            int expected = delayedOperator.Value.InvocationBehaviour.RightArity;
+
+            string message =
+                $"This operator didn't receive enough right-side operands. Expected {expected}, but received {received}.";
+            
+            _state.MapAndThrow(in delayedOperator, message);
         }
         
         private void ThrowIfAnyOperandLeft()
         {
             if (_operands.TryPeek(out Mapped<LinkedNode> operandToken))
-                _state.MapAndThrow(in operandToken, ParsingErrorMessages.UNUSED_OPERAND);
+                _state.MapAndThrow(in operandToken, "This operand doesn't take part in the expression.");
         }
     }
 }

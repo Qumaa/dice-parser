@@ -5,7 +5,7 @@ namespace DiceRoll.Input.Parsing
 {
     public class TokensTable
     {
-        public static readonly TokensTable Default = BuildDefaultTable();
+        public static readonly TokensTable Default = BuilderWithDefaults().Build();
 
         private readonly IToken _openParenthesis;
 
@@ -15,7 +15,7 @@ namespace DiceRoll.Input.Parsing
 
         private readonly OperandDefinition[] _operands;
 
-        public TokensTable(IToken openParenthesis, IToken closeParenthesis, IEnumerable<OperatorDefinition> operators,
+        internal TokensTable(IToken openParenthesis, IToken closeParenthesis, IEnumerable<OperatorDefinition> operators,
             IEnumerable<OperandDefinition> operands)
         {
             _openParenthesis = openParenthesis;
@@ -96,7 +96,7 @@ namespace DiceRoll.Input.Parsing
         private static bool MatchesUsageForm(OperatorInvocationBehaviour invocationBehaviour, OperatorUsageForm usageForm) =>
             invocationBehaviour is { LeftArity: 0, RightArity: > 0 } == usageForm is OperatorUsageForm.Prefix;
 
-        private static TokensTable BuildDefaultTable() =>
+        public static TokensTableBuilder BuilderWithDefaults() =>
             new TokensTableBuilder(Token("("), Token(")"))
                 .Operand(in DiceOperand.Default)
                 .Operand(in NumericOperand.Default)
@@ -132,9 +132,7 @@ namespace DiceRoll.Input.Parsing
                     .Finish()
                 
                 .BinaryOperator(Token("&&", "&", "and"), 60, static (IAssertion left, IAssertion right) => left.And(right))
-                .BinaryOperator(Token("||", "|", "or"), 60, static (IAssertion left, IAssertion right) => left.Or(right))
-
-                .Build();
+                .BinaryOperator(Token("||", "|", "or"), 60, static (IAssertion left, IAssertion right) => left.Or(right));
 
         private static StringBasedToken Token(params string[] values) =>
             StringBasedToken.CaseInsensitive(values);

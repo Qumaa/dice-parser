@@ -8,14 +8,14 @@ namespace DiceRoll.Input.Parsing
     {
         public readonly INode Node;
         public readonly Type EvaluationType;
-        
-        public Operand(INode node, Type evaluationType)
+
+        internal Operand(INode node, Type evaluationType)
         {
             Node = node;
             EvaluationType = evaluationType;
         }
 
-        public Operand(OperandDefinition definition, in Substring substring) : this(
+        internal Operand(OperandDefinition definition, in Substring substring) : this(
             definition.ParsingHandler(substring),
             definition.EvaluationType
             ) { }

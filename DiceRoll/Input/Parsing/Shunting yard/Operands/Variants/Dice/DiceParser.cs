@@ -3,7 +3,7 @@
 namespace DiceRoll.Input.Parsing
 {
     [StructLayout(LayoutKind.Auto)]
-    public readonly struct DiceParser
+    internal readonly struct DiceParser
     {
         private readonly IToken _delimiter;
         private readonly CompositionDefinition[] _compositionTokens;

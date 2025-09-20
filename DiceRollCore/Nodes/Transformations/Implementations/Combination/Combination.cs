@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
+#pragma warning disable CS8524
+
 namespace DiceRoll
 {
     public sealed class Combination : BinaryTransformation

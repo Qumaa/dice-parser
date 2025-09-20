@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace DiceRoll
 {
-    public sealed class ZeroDivisorException : DivideByZeroException
+    internal sealed class ZeroDivisorException : DivideByZeroException
     {
         public ZeroDivisorException() { }
         public ZeroDivisorException(string message) : base(message) { }

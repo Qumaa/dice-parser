@@ -10,7 +10,7 @@ namespace DiceRoll
         
         protected ProbabilityDistribution(IEnumerable<T> probabilities) 
         {
-            EmptyEnumerableException.ThrowIfNullOrEmpty(probabilities);
+            ArgumentNullException.ThrowIfNull(probabilities);
             
             _probabilities = probabilities;
         }

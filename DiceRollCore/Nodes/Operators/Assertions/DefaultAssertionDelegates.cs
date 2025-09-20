@@ -1,4 +1,6 @@
-﻿namespace DiceRoll
+﻿#pragma warning disable CS8524
+
+namespace DiceRoll
 {
     public static class DefaultAssertionDelegates
     {
@@ -7,14 +9,14 @@
             EnumValueNotDefinedException.ThrowIfValueNotDefined(assertionType);
 
             return new BinaryOperationDelegates(
-                Evaluation.Get(assertionType),
-                ProbabilityEvaluation.Get(assertionType)
+                Evaluation.GetDelegate(assertionType),
+                ProbabilityEvaluation.GetDelegate(assertionType)
                 );
         }
 
         private static class Evaluation
         {
-            public static BinaryAssertionEvaluationDelegate Get(BinaryAssertionType assertionType) =>
+            public static BinaryAssertionEvaluationDelegate GetDelegate(BinaryAssertionType assertionType) =>
                 assertionType switch
                 {
                     BinaryAssertionType.And => static (left, right) => And(left, right),
@@ -38,7 +40,7 @@
 
         private static class ProbabilityEvaluation
         {
-            public static BinaryAssertionProbabilityDelegate Get(BinaryAssertionType assertionType) =>
+            public static BinaryAssertionProbabilityDelegate GetDelegate(BinaryAssertionType assertionType) =>
                 assertionType switch
                 {
                     BinaryAssertionType.And => static (left, right) => And(left, right),

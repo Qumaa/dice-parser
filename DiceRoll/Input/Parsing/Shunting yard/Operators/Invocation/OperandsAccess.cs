@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace DiceRoll.Input.Parsing
+﻿namespace DiceRoll.Input.Parsing
 {
     public sealed class OperandsAccess
     {
@@ -8,7 +6,7 @@ namespace DiceRoll.Input.Parsing
         private readonly OperandCaster[] _casters;
         private readonly Signature _operatorSignature;
 
-        public OperandsAccess(Mapped<LinkedNode>[] operands, OperandCaster[] casters, Signature operatorSignature)
+        internal OperandsAccess(Mapped<LinkedNode>[] operands, OperandCaster[] casters, Signature operatorSignature)
         {
             _operands = operands;
             _casters = casters;
@@ -23,8 +21,7 @@ namespace DiceRoll.Input.Parsing
                 (_casters[operandIndex].CastsTo(out OperandCaster<T> caster) && caster.TryCast(node, out operand)))
                 return this;
 
-            // todo exceptions
-            throw new Exception();
+            throw OperatorInvocationException.InvalidOperandCast(operandIndex, _operatorSignature, typeof(T));
         }
     }
 }

@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace DiceRoll.Input.Parsing
 {
-    public sealed class InputMapper
+    internal sealed class InputMapper
     {
         private readonly List<string> _accumulatedInput = new();
-        private int _inputLength = 0;
-        private int _previousLength = 0;
+        private int _inputLength;
+        private int _previousLength;
 
         public Mapped<T> Map<T>(in T element, in Substring token) =>
             Map(in element, token.Start, token.Length);
@@ -52,7 +52,7 @@ namespace DiceRoll.Input.Parsing
         public MappedStack<T> CreateLinkedStack<T>() =>
             new(this);
 
-        public SubstringMapper BuildSubstringSource()
+        public SubstringMapper BuildSubstringMapper()
         {
             if (_inputLength is 0)
                 return new SubstringMapper(string.Empty);
@@ -68,13 +68,13 @@ namespace DiceRoll.Input.Parsing
         }
     }
 
-    public static class InputMapperExtensions
+    internal static class InputMapperExtensions
     {
         public static Substring GetSubstringOf<T>(this InputMapper mapper, in Mapped<T> mapped) =>
-            mapper.BuildSubstringSource().Apply(mapped);
+            mapper.BuildSubstringMapper().Apply(mapped);
         
         public static Substring GetSubstringOf(this InputMapper mapper, in Range mapped) =>
-            mapper.BuildSubstringSource().Apply(mapped);
+            mapper.BuildSubstringMapper().Apply(mapped);
 
         public static Substring MapAndGetSubstringOf(this InputMapper mapper, in Substring substring) =>
             mapper.GetSubstringOf(mapper.Map(in substring));

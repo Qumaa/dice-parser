@@ -9,21 +9,15 @@ namespace DiceRoll.Input.Parsing
         public readonly Range Range;
         public readonly T Value;
 
-        public Mapped(in T value, int contextStart, int contextLength) : this(
+        internal Mapped(in T value, int substringStart, int substringLength) : this(
             in value,
-            new Range(new Index(contextStart), new Index(contextStart + contextLength))
+            new Range(new Index(substringStart), new Index(substringStart + substringLength))
             ) { }
 
-        public Mapped(in T value, in Range range)
+        internal Mapped(in T value, in Range range)
         {
             Value = value;
             Range = range;
         }
-
-        public Range Merge(in Mapped<T> other) =>
-            Merge(in other.Range);
-        
-        public Range Merge(in Range other) =>
-            Range.And(other);
     }
 }

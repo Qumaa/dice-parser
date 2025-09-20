@@ -5,14 +5,9 @@ namespace DiceRoll.Input.Parsing
 {
     public sealed class ParsingException : Exception
     {
-        private const char _ERROR_ARROW_TIP = '\u2514';
-        private const char _ERROR_ARROW_HEAD = '\u2500';
-        private const char _ERROR_ARROW_NECK = '\u2534';
-        private const char _ERROR_ARROW_TAIL = '\u2500';
-        
-        public ParsingException(in Substring context, string message) : base(GetMessage(in context, message)) { }
+        internal ParsingException(in Substring context, string message) : base(GetMessage(in context, message)) { }
 
-        public ParsingException(in Substring context, Exception innerException) :
+        internal ParsingException(in Substring context, Exception innerException) :
             base(GetMessage(in context, innerException), innerException) { }
         
         private static string GetMessage(string message) =>
@@ -26,6 +21,11 @@ namespace DiceRoll.Input.Parsing
 
         private static string ContextToString(in Substring context, string errorMessage)
         {
+            const char error_arrow_tip = '\u2514';  // └
+            const char error_arrow_head = '\u2500'; // ─
+            const char error_arrow_neck = '\u2534'; // ┴
+            const char error_arrow_tail = error_arrow_head;
+            
             StringBuilder stringBuilder = new();
 
             // header
@@ -48,15 +48,15 @@ namespace DiceRoll.Input.Parsing
             // the arrow pointer
             stringBuilder.Append('>');
             stringBuilder.Append(' ', 1 + context.Start);
-            stringBuilder.Append(_ERROR_ARROW_TIP); // └
+            stringBuilder.Append(error_arrow_tip); 
 
             if (context.Length > 1)
             {
-                stringBuilder.Append(_ERROR_ARROW_HEAD, context.Length - 2); // ─
-                stringBuilder.Append(_ERROR_ARROW_NECK); // ┴
+                stringBuilder.Append(error_arrow_head, context.Length - 2); 
+                stringBuilder.Append(error_arrow_neck); 
             }
             
-            stringBuilder.Append(_ERROR_ARROW_TAIL, context.UntilSourceEnd); // ─
+            stringBuilder.Append(error_arrow_tail, context.UntilSourceEnd); 
             stringBuilder.Append(' ');
 
             // the error message

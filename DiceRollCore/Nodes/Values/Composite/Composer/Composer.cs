@@ -46,50 +46,22 @@ namespace DiceRoll
             return source[^1];
         }
 
-        public static Composer FromDelegate(CompositionDelegate compositionDelegate) =>
-            new FuncComposer(compositionDelegate);
+        public static Composer FromDelegate(ComposerDelegate composerDelegate) =>
+            new FuncComposer(composerDelegate);
 
         private sealed class FuncComposer : Composer
         {
-            private readonly CompositionDelegate _compositionDelegate;
+            private readonly ComposerDelegate _composerDelegate;
             
-            public FuncComposer(CompositionDelegate func)
+            public FuncComposer(ComposerDelegate func)
             {
                 ArgumentNullException.ThrowIfNull(func);
                 
-                _compositionDelegate = func;
+                _composerDelegate = func;
             }
 
             protected override INumeric Compose(INumeric[] source, ComposerContext context) =>
-                _compositionDelegate.Invoke(source);
-        }
-
-        private sealed class Composite : IComposite
-        {
-            private readonly ComposerContext _context;
-            private CompositeEvaluation _evaluation;
-            
-            public INumeric AsNumeric { get; }
-
-            public CompositeEvaluation Evaluation =>
-                _evaluation ??= new CompositeEvaluation(AsNumeric.Evaluation, _context.Read());
-
-            public Composite(INumeric @base, ComposerContext context)
-            {
-                AsNumeric = @base;
-                _context = context;
-            }
-
-            public void Visit<T>(T visitor) where T : INodeVisitor =>
-                AsNumeric.Visit(visitor);
-
-            public void Next()
-            {
-                _context.Reset();
-                _evaluation = null;
-                
-                AsNumeric.Next();
-            }
+                _composerDelegate.Invoke(source);
         }
 
         protected delegate INumeric PairCompositionDelegate(INumeric left, INumeric right);

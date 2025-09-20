@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace DiceRoll
 {
-    public sealed class CompositeRepetitionArgumentException : ArgumentException
+    internal sealed class CompositeRepetitionArgumentException : ArgumentException
     {
         public CompositeRepetitionArgumentException() { }
         public CompositeRepetitionArgumentException(string message) : base(message) { }

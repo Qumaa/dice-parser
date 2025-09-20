@@ -6,7 +6,7 @@ namespace DiceRoll.Input.Parsing
 {
     public sealed class OperandCastingTable
     {
-        public static readonly OperandCastingTable Default = BuildDefault();
+        public static readonly OperandCastingTable Default = BuilderWithDefaults().Build();
 
         private readonly OperandCaster[] _casters;
 
@@ -40,11 +40,11 @@ namespace DiceRoll.Input.Parsing
             return caster is not null;
         }
 
-        private static OperandCastingTable BuildDefault() =>
+        public static OperandCastersTableBuilder BuilderWithDefaults() =>
             new OperandCastersTableBuilder()
                 .Caster(new CompositeOperandCaster())
-                .Caster(new OperationOperandCaster())
-                .Build();
+                .Caster(new OperationOperandCaster());
+
     }
 
     public static class OperandCastingTableExtensions
