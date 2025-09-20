@@ -1,9 +1,6 @@
-﻿using System.Runtime.InteropServices;
-
-namespace DiceRoll.Input.Parsing
+﻿namespace DiceRoll.Input.Parsing
 {
-    [StructLayout(LayoutKind.Auto)]
-    public readonly struct CompositionDefinition
+    public sealed class CompositionDefinition
     {
         public static readonly CompositionDefinition Summation = new(
             Tokenize("summation", "sum", "s"),
@@ -29,7 +26,7 @@ namespace DiceRoll.Input.Parsing
             CompositionHandler = compositionHandler;
         }
         
-        private static ComparisonToken Tokenize(params string[] args) =>
-            ComparisonToken.CaseInsensitive(args);
+        private static StringBasedToken Tokenize(params string[] args) =>
+            StringBasedToken.CaseInsensitive(args);
     }
 }

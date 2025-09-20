@@ -4,17 +4,17 @@
     {
         private readonly CompositionHandler _handler;
 
-        public CompositionInvoker(CompositionHandler handler) : base(2, 0)
+        public CompositionInvoker(CompositionHandler handler) : 
+            base(Signature.Define<INumeric, INumeric>().Returns<INumeric>())
         {
             _handler = handler;
         }
         
-        public override INode Invoke(OperandsStackAccess operands)
+        public override INode Invoke(OperandsAccess operandsAccess)
         {
-            INumeric node = operands.Pop<INumeric>();
-            int times = operands.Pop<INumeric>().Evaluate().Value;
+            operandsAccess.Get(1, out INumeric node).Get(0, out INumeric times);
             
-            return _handler(node, times);
+            return _handler(node, times.Evaluate().Value);
         }
     }
 }

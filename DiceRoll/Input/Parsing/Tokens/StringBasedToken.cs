@@ -2,12 +2,12 @@
 
 namespace DiceRoll.Input.Parsing
 {
-    public sealed class ComparisonToken : IToken
+    public sealed class StringBasedToken : IToken
     {
         private readonly string[] _values;
         private readonly StringComparison _comparison;
         
-        public ComparisonToken(string[] values, StringComparison comparison)
+        public StringBasedToken(string[] values, StringComparison comparison)
         {
             ConstructorException.ThrowIfParamsArrayIsEmpty(values);
             
@@ -15,7 +15,7 @@ namespace DiceRoll.Input.Parsing
             _comparison = comparison;
         }
 
-        public ComparisonToken(string value, StringComparison comparison) : this(new[] { value }, comparison) { }
+        public StringBasedToken(string value, StringComparison comparison) : this(new[] { value }, comparison) { }
 
         public bool Matches(in Substring input, out Substring match)
         {
@@ -34,16 +34,16 @@ namespace DiceRoll.Input.Parsing
             return false;
         }
 
-        public static ComparisonToken CaseInsensitive(params string[] values) =>
+        public static StringBasedToken CaseInsensitive(params string[] values) =>
             new(values, StringComparison.OrdinalIgnoreCase);
         
-        public static ComparisonToken CaseInsensitive(string value) =>
+        public static StringBasedToken CaseInsensitive(string value) =>
             new(value, StringComparison.OrdinalIgnoreCase);
         
-        public static ComparisonToken CaseSensitive(params string[] values) =>
+        public static StringBasedToken CaseSensitive(params string[] values) =>
             new(values, StringComparison.Ordinal);
         
-        public static ComparisonToken CaseSensitive(string value) =>
+        public static StringBasedToken CaseSensitive(string value) =>
             new(value, StringComparison.Ordinal);
     }
 }

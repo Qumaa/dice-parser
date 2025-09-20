@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace DiceRoll.Input.Parsing
 {
@@ -73,50 +74,93 @@ namespace DiceRoll.Input.Parsing
             return builder;
         }
 
-        public static TokensTableBuilder Operator(this TokensTableBuilder builder, int precedence,
-            OperatorInvoker invoker, IToken token) =>
-            builder.Operator(new OperatorDefinition(token, precedence, invoker));
+        public static TokensTableBuilder Operator(this TokensTableBuilder builder, IToken token, int precedence,
+            OperatorInvocationBehaviour invocationBehaviour) =>
+            builder.Operator(new OperatorDefinition(token, precedence, invocationBehaviour));
 
-        public static TokensTableBuilder Operator(this TokensTableBuilder builder, int precedence,
-            OperatorInvoker invoker, IEnumerable<IToken> tokens) =>
-            builder.Operator(precedence, invoker, tokens.ToCompositeToken());
+        public static OverloadBuilder OverloadedOperator(this TokensTableBuilder builder, IToken token, int precedence,
+            int leftArity, int rightArity) =>
+            new(builder, token, precedence, leftArity, rightArity);
 
-        public static TokensTableBuilder BinaryOperator<TLeft, TRight>(this TokensTableBuilder builder, int precedence, 
-            BinaryInvocationHandler<TLeft, TRight> handler, IToken token) where TLeft : INode where TRight : INode =>
-            builder.Operator(precedence, OperatorInvoker.Binary(handler), token);
+        public static TokensTableBuilder BinaryOperator<TReturn, TLeft, TRight>(this TokensTableBuilder builder,
+            IToken token, int precedence,
+            BinaryInvocationHandler<TReturn, TLeft, TRight> handler) 
+            where TReturn : INode where TLeft : INode where TRight : INode =>
+            builder.Operator(
+                token,
+                precedence,
+                OperatorInvocationBehaviour.WithoutOverloads(OperatorInvoker.Binary(handler), 1, 1)
+                );
 
-        public static TokensTableBuilder BinaryOperator<TLeft, TRight>(this TokensTableBuilder builder, int precedence,
-            BinaryInvocationHandler<TLeft, TRight> handler, IEnumerable<IToken> tokens)
-            where TLeft : INode where TRight : INode =>
-            builder.BinaryOperator(precedence, handler, tokens.ToCompositeToken());
+        public static OverloadBuilder OverloadedBinaryOperator(this TokensTableBuilder builder,
+            IToken token, int precedence) =>
+            OverloadedOperator(builder, token, precedence, 1, 1);
 
-        public static TokensTableBuilder PrefixUnaryOperator<T>(this TokensTableBuilder builder, int precedence, 
-            UnaryInvocationHandler<T> handler, IToken token) where T : INode =>
-            builder.Operator(precedence, OperatorInvoker.PrefixUnary(handler), token);
+        public static TokensTableBuilder PrefixUnaryOperator<TReturn, T>(this TokensTableBuilder builder, IToken token,
+            int precedence, UnaryInvocationHandler<TReturn, T> handler) where TReturn : INode where T : INode =>
+            builder.Operator(
+                token,
+                precedence,
+                OperatorInvocationBehaviour.WithoutOverloads(OperatorInvoker.Unary(handler), 0, 1)
+                );
 
-        public static TokensTableBuilder PrefixUnaryOperator<T>(this TokensTableBuilder builder, int precedence, 
-            UnaryInvocationHandler<T> handler, IEnumerable<IToken> tokens) where T : INode =>
-            builder.PrefixUnaryOperator(precedence, handler, tokens.ToCompositeToken());
+        public static OverloadBuilder OverloadedPrefixUnaryOperator(this TokensTableBuilder builder,
+            IToken token, int precedence) =>
+            OverloadedOperator(builder, token, precedence, 0, 1);
 
-        public static TokensTableBuilder PostfixUnaryOperator<T>(this TokensTableBuilder builder, int precedence, 
-            UnaryInvocationHandler<T> handler, IToken token) where T : INode =>
-            builder.Operator(precedence, OperatorInvoker.PostfixUnary(handler), token);
-
-        public static TokensTableBuilder PostfixUnaryOperator<T>(this TokensTableBuilder builder, int precedence, 
-            UnaryInvocationHandler<T> handler, IEnumerable<IToken> tokens) where T : INode =>
-            builder.PostfixUnaryOperator(precedence, handler, tokens.ToCompositeToken());
-
-        public static TokensTableBuilder CompositionOperator(this TokensTableBuilder builder, int precedence,
-            IToken token, CompositionHandler handler) =>
-            builder.Operator(new OperatorDefinition(token, precedence, new CompositionInvoker(handler)));
+        public static TokensTableBuilder PostfixUnaryOperator<TReturn, T>(this TokensTableBuilder builder, IToken token,
+            int precedence, UnaryInvocationHandler<TReturn, T> handler) where TReturn : INode where T : INode =>
+            builder.Operator(
+                token,
+                precedence,
+                OperatorInvocationBehaviour.WithoutOverloads(OperatorInvoker.Unary(handler), 1, 0)
+                );
+        
+        public static OverloadBuilder OverloadedPostfixUnaryOperator(this TokensTableBuilder builder,
+            IToken token, int precedence) =>
+            OverloadedOperator(builder, token, precedence, 1, 0);
 
         public static TokensTableBuilder CompositionOperator(this TokensTableBuilder builder, int precedence,
             in CompositionDefinition definition) =>
-            builder.CompositionOperator(precedence, definition.Token, definition.CompositionHandler);
+            builder.CompositionOperator(definition.Token, precedence, definition.CompositionHandler);
 
-        public static TokensTableBuilder Operand(this TokensTableBuilder builder, OperandHandler handler, IToken token) =>
-            builder.Operand(new OperandDefinition(token, handler));
-        public static TokensTableBuilder Operand(this TokensTableBuilder builder, OperandHandler handler, IEnumerable<IToken> tokens) =>
-            builder.Operand(handler, tokens.ToCompositeToken());
+        public static TokensTableBuilder CompositionOperator(this TokensTableBuilder builder, IToken token, 
+            int precedence, CompositionHandler handler) =>
+            builder.Operator(token, precedence, OperatorInvocationBehaviour.Composition(handler));
+
+        public static TokensTableBuilder Operand<T>(this TokensTableBuilder builder, OperandParsingHandler parsingHandler,
+            IToken token) where T : INode =>
+            builder.Operand(OperandDefinition.New<T>(token, parsingHandler));
+
+        public static TokensTableBuilder Operand<T>(this TokensTableBuilder builder, OperandParsingHandler parsingHandler,
+            IEnumerable<IToken> tokens) where T : INode =>
+            builder.Operand<T>(parsingHandler, tokens.ToCompositeToken());
+
+        public sealed class OverloadBuilder
+        {
+            private readonly IToken _token;
+            private readonly int _precedence;
+            private readonly TokensTableBuilder _tableBuilder;
+            private readonly OperatorInvocationBehaviour.Builder _behaviourBuilder;
+
+            public OverloadBuilder(TokensTableBuilder tableBuilder, IToken token, int precedence, int leftArity,
+                int rightArity)
+            {
+                _tableBuilder = tableBuilder;
+                _token = token;
+                _precedence = precedence;
+                
+                _behaviourBuilder = OperatorInvocationBehaviour.WithOverloads(leftArity, rightArity);
+            }
+
+            public OverloadBuilder Overload(OperatorInvoker overload)
+            {
+                _behaviourBuilder.Overload(overload);
+                return this;
+            }
+
+            public TokensTableBuilder Finish() =>
+                _tableBuilder.Operator(_token, _precedence, _behaviourBuilder.Build());
+        }
     }
 }

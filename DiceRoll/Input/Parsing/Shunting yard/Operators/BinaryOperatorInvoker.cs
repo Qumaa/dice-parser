@@ -1,19 +1,19 @@
 ﻿namespace DiceRoll.Input.Parsing
 {
-    internal sealed class BinaryOperatorInvoker<TLeft, TRight> : OperatorInvoker
-        where TLeft : INode where TRight : INode
+    internal sealed class BinaryOperatorInvoker<TReturn, TLeft, TRight> : OperatorInvoker
+        where TReturn : INode where TLeft : INode where TRight : INode
     {
-        private readonly BinaryInvocationHandler<TLeft, TRight> _handler;
-        
-        public BinaryOperatorInvoker(BinaryInvocationHandler<TLeft, TRight> handler) : base(1, 1)
+        private readonly BinaryInvocationHandler<TReturn, TLeft, TRight> _handler;
+
+        public BinaryOperatorInvoker(BinaryInvocationHandler<TReturn, TLeft, TRight> handler) : 
+            base(Signature.Define<TLeft, TRight>().Returns<TReturn>())
         {
             _handler = handler;
         }
 
-        public override INode Invoke(OperandsStackAccess operands)
+        public override INode Invoke(OperandsAccess operandsAccess)
         {
-            TRight right = operands.Pop<TRight>();
-            TLeft left = operands.Pop<TLeft>();
+            operandsAccess.Get(0, out TLeft left).Get(1, out TRight right);
             
             return _handler.Invoke(left, right);
         }

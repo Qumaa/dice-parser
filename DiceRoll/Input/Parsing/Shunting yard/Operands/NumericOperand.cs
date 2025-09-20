@@ -5,6 +5,6 @@
         public static readonly OperandDefinition Default = BuildDefault();
 
         private static OperandDefinition BuildDefault() =>
-            new(NumericToken.Shared, x => Node.Value.Constant(int.Parse(x.AsSpan())));
+            OperandDefinition.New<INumeric>(NumericToken.Shared, x => Node.Value.Constant(int.Parse(x.AsSpan())));
     }
 }

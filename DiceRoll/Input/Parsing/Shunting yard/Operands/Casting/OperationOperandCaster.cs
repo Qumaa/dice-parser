@@ -2,7 +2,7 @@
 {
     public sealed class OperationOperandCaster : OperandCaster<IOperation, IAssertion>
     {
-        protected override IAssertion Cast(IOperation source) =>
-            source.AsAssertion;
+        protected override bool TryCast(IOperation source, out IAssertion result) =>
+            (result = source.AsAssertion) is not null;
     }
 }

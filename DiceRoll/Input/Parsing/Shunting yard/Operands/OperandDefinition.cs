@@ -1,32 +1,22 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 
 namespace DiceRoll.Input.Parsing
 {
-    [StructLayout(LayoutKind.Auto)]
-    public readonly struct OperandDefinition
+    public sealed class OperandDefinition
     {
         public readonly IToken Token;
-        public readonly OperandHandler Handler;
-            
-        public OperandDefinition(IToken token, OperandHandler handler)
+        public readonly OperandParsingHandler ParsingHandler;
+        public readonly Type OperandType;
+
+        private OperandDefinition(IToken token, OperandParsingHandler parsingHandler, Type operandType)
         {
             Token = token;
-            Handler = handler;
+            ParsingHandler = parsingHandler;
+            OperandType = operandType;
         }
 
-        public INode Parse(Substring match) =>
-            Handler(match);
-
-        public bool TryParse(Substring match, out INode node)
-        {
-            if (!Token.Matches(match))
-            {
-                node = null;
-                return false;
-            }
-
-            node = Parse(match);
-            return true;
-        }
+        public static OperandDefinition New<T>(IToken token, OperandParsingHandler parsingHandler) where T : INode =>
+            new(token, parsingHandler, typeof(T));
     }
 }

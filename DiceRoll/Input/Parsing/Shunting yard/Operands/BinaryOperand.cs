@@ -5,6 +5,9 @@
         public static readonly OperandDefinition Default = BuildDefault();
 
         private static OperandDefinition BuildDefault() =>
-            new(ComparisonToken.CaseInsensitive("true", "false"), x => Node.Value.Constant(bool.Parse(x.AsSpan())));
+            OperandDefinition.New<IAssertion>(
+                StringBasedToken.CaseInsensitive("true", "false"),
+                x => Node.Value.Constant(bool.Parse(x.AsSpan()))
+                );
     }
 }

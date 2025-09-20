@@ -9,7 +9,7 @@
 
         private static OperandDefinition BuildDefault() =>
             StartBuilding()
-                .Delimiter(ComparisonToken.CaseInsensitive("d"))
+                .Delimiter(StringBasedToken.CaseInsensitive("d"))
                 .DefaultComposition(in CompositionDefinition.Summation)
                 .Composition(in CompositionDefinition.Highest)
                 .Composition(in CompositionDefinition.Lowest)

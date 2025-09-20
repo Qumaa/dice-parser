@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
+using System.Runtime.InteropServices;
 
 namespace DiceRoll.Input.Parsing
 {
@@ -34,43 +34,29 @@ namespace DiceRoll.Input.Parsing
             _closeParenthesis.MatchesStart(in expression, out tokenMatch);
 
         public bool StartsWithOperator(in Substring expression, OperatorUsageForm usageForm, out Substring tokenMatch, 
-            out int precedence, out OperatorInvoker invoker)
-        {
-            if (!TryGetMatchingOperatorInvokers(
-                    in expression,
-                    usageForm,
-                    out tokenMatch,
-                    out OperatorInvoker[] invokers,
-                    out precedence
-                    ))
-            {
-                invoker = null;
-                return false;
-            }
+            out int precedence, out OperatorInvocationBehaviour invocationBehaviour) =>
+            new StartsWithOperatorLookup(_operators, stackalloc int[_operators.Length], in expression, usageForm)
+                .IsSuccessful(out invocationBehaviour, out precedence, out tokenMatch);
 
-            invoker = invokers.Length is 1 ? invokers[0] : new OverloadInvoker(invokers);
-            return true;
-        }
-
-        public bool StartsWithOperand(in Substring expression, out Substring tokenMatch, out INode operand)
+        public bool StartsWithOperand(in Substring expression, out Substring tokenMatch, out Operand operand)
         {
-            foreach (OperandDefinition operandToken in _operands)
+            foreach (OperandDefinition operandDefinition in _operands)
             {
-                if (!operandToken.Token.MatchesStart(in expression, out tokenMatch))
+                if (!operandDefinition.Token.MatchesStart(in expression, out tokenMatch))
                     continue;
 
-                operand = operandToken.Parse(tokenMatch);
+                operand = new Operand(operandDefinition.ParsingHandler(tokenMatch), operandDefinition.OperandType);
                 return true;
             }
 
-            operand = null;
+            operand = default;
             tokenMatch = default;
             return false;
         }
 
-        public Substring UntilFirstKnownToken(in Substring expression, OperatorUsageForm usageForm)
+        public Substring UntilFirstKnownToken(in Substring expression, OperatorUsageForm currentOperatorUsageForm)
         {
-            return _MatchesAnyToken(in expression, usageForm, out Substring match) ?
+            return _MatchesAnyToken(in expression, currentOperatorUsageForm, out Substring match) ?
                 expression.SetLength(match.Start - expression.Start) :
                 expression;
 
@@ -82,79 +68,31 @@ namespace DiceRoll.Input.Parsing
                 if (_closeParenthesis.Matches(in expression, out match))
                     return true;
 
-                foreach (OperatorDefinition tokenizedOperator in _operators)
-                    if (OperatorMatches(in tokenizedOperator, usageForm, in expression, out match))
+                foreach (OperatorDefinition operatorDefinition in _operators)
+                    if (StartsWithOperator(in expression, in operatorDefinition, usageForm, out match))
                         return true;
                 
-                foreach (OperandDefinition tokenizedOperand in _operands)
-                    if (tokenizedOperand.Token.Matches(in expression, out match))
+                foreach (OperandDefinition operandDefinition in _operands)
+                    if (operandDefinition.Token.Matches(in expression, out match))
                         return true;
 
                 return false;
             }
         }
 
-        private bool TryGetMatchingOperatorInvokers(in Substring expression, OperatorUsageForm usageForm,
-            out Substring tokenMatch, out OperatorInvoker[] invokers, out int precedence)
+        private static bool StartsWithOperator(in Substring expression, in OperatorDefinition definition,
+            OperatorUsageForm usageForm, out Substring tokenMatch)
         {
-            precedence = 0;
-            tokenMatch = default;
-            
-            int matches = 0;
-            Span<int> matchesPtr = stackalloc int[_operators.Length];
-            
-            for (int i = 0; i < _operators.Length; i++)
-            {
-                OperatorDefinition matchCandidate = _operators[i];
-                
-                if (!OperatorMatches(in matchCandidate, usageForm, in expression, out Substring match))
-                    continue;
-                
-                bool isFirstMatch = matches is 0;
-
-                if (!(isFirstMatch || _IsOverload(in _operators[matchesPtr[0]], in matchCandidate)))
-                    continue;
-                
-                if (isFirstMatch)
-                {
-                    precedence = matchCandidate.Precedence;
-                    tokenMatch = match;
-                }
-
-                matchesPtr[matches++] = i;
-            }
-
-            if (matches is 0)
-            {
-                invokers = Array.Empty<OperatorInvoker>();
-                return false;
-            }
-            
-            invokers = new OperatorInvoker[matches];
-
-            for (int i = 0; i < matches; i++)
-                invokers[i] = _operators[matchesPtr[i]].Invoker;
-
-            return true;
-
-            bool _IsOverload(in OperatorDefinition mainDefinition, in OperatorDefinition matchCandidate) =>
-                matchCandidate.Precedence == mainDefinition.Precedence &&
-                matchCandidate.Invoker.LeftArity == mainDefinition.Invoker.LeftArity &&
-                matchCandidate.Invoker.RightArity == mainDefinition.Invoker.RightArity;
-        }
-
-        private static bool OperatorMatches(in OperatorDefinition matchCandidate, OperatorUsageForm usageForm, in Substring expression, out Substring tokenMatch)
-        {
-            if (MatchesUsageForm(matchCandidate.Invoker, usageForm) &&
-                matchCandidate.Token.MatchesStart(in expression, out tokenMatch))
+            if (MatchesUsageForm(definition.InvocationBehaviour, usageForm) &&
+                definition.Token.MatchesStart(in expression, out tokenMatch))
                 return true;
 
             tokenMatch = default;
             return false;
         }
 
-        private static bool MatchesUsageForm(OperatorInvoker invoker, OperatorUsageForm usageForm) =>
-            invoker is { LeftArity: 0, RightArity: > 0 } == usageForm is OperatorUsageForm.Prefix;
+        private static bool MatchesUsageForm(OperatorInvocationBehaviour invocationBehaviour, OperatorUsageForm usageForm) =>
+            invocationBehaviour is { LeftArity: 0, RightArity: > 0 } == usageForm is OperatorUsageForm.Prefix;
 
         private static TokensTable BuildDefaultTable() =>
             new TokensTableBuilder(Token("("), Token(")"))
@@ -162,67 +100,144 @@ namespace DiceRoll.Input.Parsing
                 .Operand(in NumericOperand.Default)
                 .Operand(in BinaryOperand.Default)
                 
-                .PrefixUnaryOperator<IAssertion>(110, static node => node.Not(), Token("!", "not"))
-                .PrefixUnaryOperator<INumeric>(110, static node => node.Negate(), Token("-"))
+                .PrefixUnaryOperator(Token("!", "not"), 120, static (IAssertion node) => node.Not())
+                .PrefixUnaryOperator(Token("-"), 120, static (INumeric node) => node.Negate())
                 
-                .CompositionOperator(120, in CompositionDefinition.Summation)
-                .CompositionOperator(120, in CompositionDefinition.Highest)
-                .CompositionOperator(120, in CompositionDefinition.Lowest)
+                .CompositionOperator(110, in CompositionDefinition.Summation)
+                .CompositionOperator(110, in CompositionDefinition.Highest)
+                .CompositionOperator(110, in CompositionDefinition.Lowest)
                 
-                .BinaryOperator<INumeric, INumeric>(100, static (left, right) => left.Multiply(right), Token("*"))
-                .BinaryOperator<INumeric, INumeric>(100, static (left, right) => left.DivideRoundUp(right), Token("//"))
-                .BinaryOperator<INumeric, INumeric>(100, static (left, right) => left.DivideRoundDown(right), Token("/"))
+                .BinaryOperator(Token("*"), 100, static (INumeric left, INumeric right) => left.Multiply(right))
+                .BinaryOperator(Token("//"), 100, static (INumeric left, INumeric right) => left.DivideRoundUp(right))
+                .BinaryOperator(Token("/"), 100, static (INumeric left, INumeric right) => left.DivideRoundDown(right))
                 
-                .BinaryOperator<INumeric, INumeric>(90, static (left, right) => left.Add(right), Token("+"))
-                .BinaryOperator<INumeric, INumeric>(90, static (left, right) => left.Subtract(right), Token("-"))
+                .BinaryOperator(Token("+"), 90, static (INumeric left, INumeric right) => left.Add(right))
+                .BinaryOperator(Token("-"), 90, static (INumeric left, INumeric right) => left.Subtract(right))
                 
-                .BinaryOperator<INumeric, INumeric>(80, static (left, right) => left.GreaterThanOrEqual(right), Token(">="))
-                .BinaryOperator<INumeric, INumeric>(80, static (left, right) => left.LessThanOrEqual(right), Token("<="))
-                .BinaryOperator<INumeric, INumeric>(80, static (left, right) => left.GreaterThan(right), Token(">"))
-                .BinaryOperator<INumeric, INumeric>(80, static (left, right) => left.LessThan(right), Token("<"))
+                .BinaryOperator(Token(">="), 80, static (INumeric left, INumeric right) => left.GreaterThanOrEqual(right))
+                .BinaryOperator(Token("<="), 80, static (INumeric left, INumeric right) => left.LessThanOrEqual(right))
+                .BinaryOperator(Token(">"), 80, static (INumeric left, INumeric right) => left.GreaterThan(right))
+                .BinaryOperator(Token("<"), 80, static (INumeric left, INumeric right) => left.LessThan(right))
                 
                 // todo: overload syntax (overload = equal precedence, equal token)
-                .BinaryOperator<INumeric, INumeric>(70, static (left, right) => left.Equal(right), Token("==", "="))
-                .BinaryOperator<INumeric, INumeric>(70, static (left, right) => left.NotEqual(right), Token("!=", "=/="))
+                .OverloadedBinaryOperator(Token("==", "="), 70)
+                    .Overload(OperatorInvoker.Binary(static (INumeric left, INumeric right) => left.Equal(right)))
+                    .Overload(OperatorInvoker.Binary(static (IAssertion left, IAssertion right) => left.Equal(right)))
+                    .Finish()
                 
-                .BinaryOperator<IAssertion, IAssertion>(70, static (left, right) => left.Equal(right), Token("==", "="))
-                .BinaryOperator<IAssertion, IAssertion>(70, static (left, right) => left.NotEqual(right), Token("!=", "=/="))
+                .OverloadedBinaryOperator(Token("!=", "=/="), 70)
+                    .Overload(OperatorInvoker.Binary(static (INumeric left, INumeric right) => left.NotEqual(right)))
+                    .Overload(OperatorInvoker.Binary(static (IAssertion left, IAssertion right) => left.NotEqual(right)))
+                    .Finish()
                 
-                .BinaryOperator<IAssertion, IAssertion>(60, static (left, right) => left.And(right), Token("&&", "&", "and"))
-                .BinaryOperator<IAssertion, IAssertion>(60, static (left, right) => left.Or(right), Token("||", "|", "or"))
+                .BinaryOperator(Token("&&", "&", "and"), 60, static (IAssertion left, IAssertion right) => left.And(right))
+                .BinaryOperator(Token("||", "|", "or"), 60, static (IAssertion left, IAssertion right) => left.Or(right))
 
                 .Build();
 
-        private static ComparisonToken Token(params string[] values) =>
-            ComparisonToken.CaseInsensitive(values);
-        
-        private sealed class OverloadInvoker : OperatorInvoker
-        {
-            private readonly OperatorInvoker[] _invokers;
+        private static StringBasedToken Token(params string[] values) =>
+            StringBasedToken.CaseInsensitive(values);
 
-            public OverloadInvoker(OperatorInvoker[] invokers) : base(
-                invokers[0].LeftArity,
-                invokers[0].RightArity
-                )
+        [StructLayout(LayoutKind.Auto)]
+        // todo: simplify. This no longer merges multiple invokers into the overload variant
+        private readonly ref struct StartsWithOperatorLookup
+        {
+            private readonly OperatorDefinition[] _definitions;
+
+            private readonly Bag _bag;
+
+            public StartsWithOperatorLookup(OperatorDefinition[] definitions, Span<int> operatorsLengthBuffer,
+                in Substring expression, OperatorUsageForm usageForm)
             {
-                _invokers = invokers;
+                _definitions = definitions;
+
+                _bag = BuildBag(definitions, operatorsLengthBuffer, in expression, usageForm);
             }
 
-            public override INode Invoke(OperandsStackAccess operands)
+            public bool IsSuccessful(out OperatorInvocationBehaviour invocationBehaviour, out int precedence, out Substring operatorSubstring)
             {
-                foreach (OperatorInvoker operatorInvoker in _invokers)
+                if (!TryGetInvokerBasedOnMatches(out invocationBehaviour))
                 {
-                    try
-                    {
-                        return operatorInvoker.Invoke(operands);
-                    }
-                    catch (OperatorInvocationException)
-                    {
-                        operands.Reset();
-                    }
+                    operatorSubstring = default;
+                    precedence = 0;
+                    return false;
                 }
 
-                throw new OperatorInvocationException(ParsingErrorMessages.NO_SUITABLE_OVERLOAD);
+                operatorSubstring = _bag.OperatorSubstring;
+                precedence = _bag.OperatorPrecedence;
+                return true;
+            }
+
+            private bool TryGetInvokerBasedOnMatches(out OperatorInvocationBehaviour invocationBehaviour) =>
+                (invocationBehaviour = _bag.MatchesCount switch
+                {
+                    0 => NoMatch(),
+                    1 => SingleMatch(),
+                    _ => ManyMatches()
+                }) is not null;
+
+            private static OperatorInvocationBehaviour NoMatch() =>
+                null;
+
+            private OperatorInvocationBehaviour SingleMatch() =>
+                _definitions[_bag.MatchesPtrs[0]].InvocationBehaviour;
+
+            private static OperatorInvocationBehaviour ManyMatches() => // todo: several behaviours matched the same token 
+                throw new Exception();
+
+            private static Bag BuildBag(OperatorDefinition[] definitions, Span<int> matchPtrsBuffer,
+                in Substring expression, OperatorUsageForm usageForm)
+            {
+                int matchesCount = 0;
+                int precedence = 0;
+                Substring tokenMatch = Substring.Empty(in expression);
+                
+                for (int i = 0; i < definitions.Length; i++)
+                {
+                    OperatorDefinition @operator = definitions[i];
+                
+                    if (!StartsWithOperator(in expression, in @operator, usageForm, out Substring match))
+                        continue;
+                
+                    bool isFirstMatch = matchesCount is 0;
+
+                    if (!(isFirstMatch || IsOverload(in definitions[matchPtrsBuffer[0]], in @operator)))
+                        continue;
+                    
+                    if (isFirstMatch)
+                    {
+                        precedence = @operator.Precedence;
+                        tokenMatch = match;
+                    }
+
+                    matchPtrsBuffer[matchesCount++] = i;
+                }
+
+                return new Bag(matchesCount, matchPtrsBuffer, tokenMatch, precedence);
+            }
+            
+            private static bool IsOverload(in OperatorDefinition mainDefinition, in OperatorDefinition matchCandidate) =>
+                matchCandidate.Precedence == mainDefinition.Precedence &&
+                matchCandidate.InvocationBehaviour.LeftArity == mainDefinition.InvocationBehaviour.LeftArity &&
+                matchCandidate.InvocationBehaviour.RightArity == mainDefinition.InvocationBehaviour.RightArity;
+
+            [StructLayout(LayoutKind.Auto)]
+            private readonly ref struct Bag
+            {
+                public readonly int MatchesCount;
+                public readonly Span<int> MatchesPtrs;
+
+                public readonly Substring OperatorSubstring;
+                public readonly int OperatorPrecedence;
+
+                public Bag(int matchesCount, Span<int> matchPtrs, Substring operatorSubstring,
+                    int operatorPrecedence)
+                {
+                    MatchesCount = matchesCount;
+                    MatchesPtrs = matchPtrs;
+                    OperatorSubstring = operatorSubstring;
+                    OperatorPrecedence = operatorPrecedence;
+                }
             }
         }
     }

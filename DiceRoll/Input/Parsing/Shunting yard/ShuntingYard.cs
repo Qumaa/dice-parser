@@ -5,10 +5,10 @@
         private readonly InfixReader _infixReader;
         private readonly PostfixEvaluator _postfixEvaluator;
 
-        public ShuntingYard(TokensTable tokensTable, OperandCastersTable castersTable)
+        public ShuntingYard(TokensTable tokensTable, OperandCastingTable castingTable)
         {
             ShuntingYardState state = new(tokensTable);
-            ShuntingYardOperators operators = new(state, castersTable);
+            ShuntingYardOperators operators = new(state, castingTable);
             ShuntingYardOperands operands = new(state);
             
             _infixReader = new InfixReader(state, operators, operands);

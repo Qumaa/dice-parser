@@ -8,14 +8,14 @@ namespace DiceRoll.Input.Parsing
         public static readonly Operator OpenParenthesis = new();
         
         public readonly int Precedence;
-        public readonly OperatorInvoker Invoker;
+        public readonly OperatorInvocationBehaviour InvocationBehaviour;
 
-        public bool IsOpenParenthesis => Invoker is null;
+        public bool IsOpenParenthesis => InvocationBehaviour is null;
 
-        public Operator(int precedence, OperatorInvoker invoker)
+        public Operator(int precedence, OperatorInvocationBehaviour invocationBehaviour)
         {
             Precedence = precedence;
-            Invoker = invoker;
+            InvocationBehaviour = invocationBehaviour;
         }
     }
 }

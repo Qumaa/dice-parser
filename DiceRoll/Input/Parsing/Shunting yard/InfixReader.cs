@@ -62,7 +62,7 @@ namespace DiceRoll.Input.Parsing
                 return;
             }
             
-            if (_state.Tokens.StartsWithOperand(in notParsed, out output, out INode operand))
+            if (_state.Tokens.StartsWithOperand(in notParsed, out output, out Operand operand))
             {
                 Operand(operand, in output);
                 return;
@@ -73,7 +73,7 @@ namespace DiceRoll.Input.Parsing
                     GetCurrentOperatorUsageForm(),
                     out output,
                     out int precedence,
-                    out OperatorInvoker invoker
+                    out OperatorInvocationBehaviour invoker
                     ))
             {
                 Operator(precedence, invoker, in output);
@@ -105,7 +105,7 @@ namespace DiceRoll.Input.Parsing
                 if (operatorToken.Value.IsOpenParenthesis)
                     break;
 
-                _operators.InvokeOperatorOrThrow(in operatorToken);
+                _operators.InvokeOperator(in operatorToken);
             }
             
             _state.Annotate().ParenthesisClosing();
@@ -113,21 +113,21 @@ namespace DiceRoll.Input.Parsing
             _operators.TryInvokeDelayedOperators();
         }
 
-        private void Operator(int precedence, OperatorInvoker invoker, in Substring context)
+        private void Operator(int precedence, OperatorInvocationBehaviour invocationBehaviour, in Substring context)
         {
             while (_operators.TryPeek(out Operator lastOperator) &&
                    !lastOperator.IsOpenParenthesis &&
                    precedence < lastOperator.Precedence)
                 _operators.InvokeAfterDelayedOperators(_operators.Pop());
 
-            _operators.Push(new Operator(precedence, invoker), in context);
+            _operators.Push(new Operator(precedence, invocationBehaviour), in context);
 
             _state.Annotate().OperatorProcessing();
         }
 
-        private void Operand(INode operand, in Substring context)
+        private void Operand(in Operand operand, in Substring context)
         {
-            _operands.Push(operand, in context);
+            _operands.Push(in operand, in context);
                 
             _state.Annotate().OperandProcessing();
             

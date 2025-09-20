@@ -2,27 +2,24 @@
 {
     public abstract class OperatorInvoker
     {
-        public readonly int LeftArity;
-        public readonly int RightArity;
-
-        public int Arity => LeftArity + RightArity;
-
-        protected OperatorInvoker(int leftArity, int rightArity)
+        public readonly Signature Signature;
+        
+        protected OperatorInvoker(Signature signature)
         {
-            LeftArity = leftArity;
-            RightArity = rightArity;
+            Signature = signature;
         }
 
-        public abstract INode Invoke(OperandsStackAccess operands);
+        public abstract INode Invoke(OperandsAccess operandsAccess);
         
-        public static OperatorInvoker Binary<TLeft, TRight>(BinaryInvocationHandler<TLeft, TRight> handler)
-            where TLeft : INode where TRight : INode =>
-            new BinaryOperatorInvoker<TLeft, TRight>(handler);
+        public static OperatorInvoker Binary<TReturn, TLeft, TRight>(BinaryInvocationHandler<TReturn, TLeft, TRight> handler)
+            where TReturn : INode where TLeft : INode where TRight : INode =>
+            new BinaryOperatorInvoker<TReturn, TLeft, TRight>(handler);
 
-        public static OperatorInvoker PrefixUnary<T>(UnaryInvocationHandler<T> handler) where T : INode =>
-            new PrefixUnaryOperatorInvoker<T>(handler);
-        
-        public static OperatorInvoker PostfixUnary<T>(UnaryInvocationHandler<T> handler) where T : INode =>
-            new PostfixUnaryOperatorInvoker<T>(handler);
+        public static OperatorInvoker Unary<TReturn, T>(UnaryInvocationHandler<TReturn, T> handler) 
+            where TReturn : INode where T : INode =>
+            new UnaryOperatorInvoker<TReturn, T>(handler);
+
+        public static OperatorInvoker Composition(CompositionHandler handler) =>
+            new CompositionInvoker(handler);
     }
 }

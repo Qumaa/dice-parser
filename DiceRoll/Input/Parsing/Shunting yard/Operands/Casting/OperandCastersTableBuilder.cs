@@ -16,7 +16,7 @@ namespace DiceRoll.Input.Parsing
             return this;
         }
 
-        public OperandCastersTable Build() =>
+        public OperandCastingTable Build() =>
             new(_casters);
     }
 }

@@ -30,16 +30,22 @@ namespace DiceRoll.Input.Parsing
 
         public Annotator Annotate() =>
             new(this);
-        
-        public void MapAndThrow<T>(in Mapped<T> context, string message) =>
+
+        public void MapAndThrow(in Range context, string message) =>
             throw new ParsingException(Mapper.GetSubstringOf(in context), message);
-        
+
+        public void MapAndThrow<T>(in Mapped<T> context, string message) =>
+            MapAndThrow(in context.Range, message);
+
         public void MapAndThrow(in Substring context, string message) =>
             throw new ParsingException(Mapper.MapAndGetSubstringOf(in context), message);
 
-        public ParsingException MapException<T>(in Mapped<T> context, Exception innerException) =>
+        public ParsingException MapException(in Range context, Exception innerException) =>
             new(Mapper.GetSubstringOf(in context), innerException);
-        
+
+        public ParsingException MapException<T>(in Mapped<T> context, Exception innerException) =>
+            MapException(in context.Range, innerException);
+
         public ParsingException MapException(in Substring context, Exception innerException) =>
             new(Mapper.MapAndGetSubstringOf(in context), innerException);
 

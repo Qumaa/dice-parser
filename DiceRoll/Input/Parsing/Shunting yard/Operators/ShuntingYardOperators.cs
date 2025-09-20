@@ -1,16 +1,17 @@
 ﻿using System;
+using System.Linq;
 
 namespace DiceRoll.Input.Parsing
 {
     internal sealed class ShuntingYardOperators
     {
         private readonly ShuntingYardState _state;
-        private readonly OperandCastersTable _castersTable;
+        private readonly OperandCastingTable _castingTable;
 
-        public ShuntingYardOperators(ShuntingYardState state, OperandCastersTable castersTable)
+        public ShuntingYardOperators(ShuntingYardState state, OperandCastingTable castingTable)
         {
             _state = state;
-            _castersTable = castersTable;
+            _castingTable = castingTable;
         }
 
         public void Push(in Operator @operator, in Substring context)
@@ -23,16 +24,16 @@ namespace DiceRoll.Input.Parsing
 
             Mapped<Operator> mapped = _state.Mapper.Map(in @operator, in context);
 
-            OperatorInvoker invoker = @operator.Invoker;
+            OperatorInvocationBehaviour invocationBehaviour = @operator.InvocationBehaviour;
 
-            if (invoker.RightArity is 0)
+            if (invocationBehaviour.RightArity is 0)
             {
                 // invoke immediately using existing operands
-                InvokeOperatorOrThrow(in mapped);
+                InvokeOperator(in mapped);
                 return;
             }
 
-            if (invoker is { RightArity: 1, LeftArity: > 0 })
+            if (invocationBehaviour is { RightArity: 1, LeftArity: > 0 })
             {
                 // resolve using default shunting-yard mechanism
                 _state.Operators.Push(in mapped);
@@ -41,7 +42,7 @@ namespace DiceRoll.Input.Parsing
 
             // delay until more operands are pushed
             _state.DelayedOperators.MapAndPush(
-                new DelayedOperator(@operator.Invoker, _state.ParenthesisLevel, _state.Operands.Count),
+                new DelayedOperator(@operator.InvocationBehaviour, _state.ParenthesisLevel, _state.Operands.Count),
                 in context
                 );
         }
@@ -58,56 +59,27 @@ namespace DiceRoll.Input.Parsing
         public Mapped<Operator> Pop() =>
             _state.Operators.Pop();
 
-        public void InvokeOperatorOrThrow(in Mapped<Operator> operatorToken)
-        {
-            try
-            {
-                InvokeOperator(operatorToken.Value.Invoker, in operatorToken.Range);
-            }
-            catch (Exception e)
-            {
-                throw _state.MapException(in operatorToken, e);
-            }
-        }
+        public void InvokeOperator(in Mapped<Operator> operatorToken) =>
+            InvokeOperatorOrThrow(operatorToken.Value.InvocationBehaviour, in operatorToken.Range);
 
         public void TryInvokeDelayedOperators()
         {
             while (_state.DelayedOperators.TryPeek(out DelayedOperator token) &&
                    token.CapturedParenthesisLevel >= _state.ParenthesisLevel &&
-                   token.CapturedOperands + token.Invoker.RightArity <= _state.Operands.Count)
-                InvokeOperatorOrThrow(_state.DelayedOperators.Pop());
+                   token.CapturedOperands + token.InvocationBehaviour.RightArity <= _state.Operands.Count)
+                InvokeOperator(_state.DelayedOperators.Pop());
         }
 
         public void InvokeAfterDelayedOperators(in Mapped<Operator> invoker)
         {
             TryInvokeDelayedOperators();
-            InvokeOperatorOrThrow(in invoker);
+            InvokeOperator(in invoker);
         }
 
-        private void InvokeOperatorOrThrow(in Mapped<DelayedOperator> operatorToken)
-        {
-            try
-            {
-                InvokeOperator(operatorToken.Value.Invoker, in operatorToken.Range);
-            }
-            catch (Exception e)
-            {
-                throw _state.MapException(in operatorToken, e);
-            }
-        }
+        private void InvokeOperator(in Mapped<DelayedOperator> operatorToken) =>
+            InvokeOperatorOrThrow(operatorToken.Value.InvocationBehaviour, in operatorToken.Range);
 
-        private void InvokeOperator(OperatorInvoker invoker, in Range operatorRange)
-        {
-            int arity = invoker.Arity;
-            
-            if (_state.Operands.Count < arity)
-                throw new OperatorInvocationException(ParsingErrorMessages.OperandsExpected(arity, _state.Operands.Count));
-
-            OperandsStackAccess access = new(_state.Operands, _castersTable, arity, in operatorRange);
-            
-            INode result = invoker.Invoke(access);
-            
-            access.PushResult(result);
-        }
+        private void InvokeOperatorOrThrow(OperatorInvocationBehaviour invocationBehaviour, in Range operatorMappedRange) =>
+            new OperatorInvocation(_state, _castingTable, invocationBehaviour, in operatorMappedRange).Perform();
     }
 }

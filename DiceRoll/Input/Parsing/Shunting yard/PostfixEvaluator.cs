@@ -26,7 +26,7 @@
             ThrowIfAnyTrailingOperators();
 
             while(_operators.TryPop(out Mapped<Operator> context))
-                _operators.InvokeOperatorOrThrow(in context);
+                _operators.InvokeOperator(in context);
 
             Mapped<LinkedNode> result = _operands.Pop();
             SubstringMapper mapper = _state.Mapper.BuildSubstringSource();

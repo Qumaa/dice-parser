@@ -3,17 +3,17 @@
 namespace DiceRoll.Input.Parsing
 {
     [StructLayout(LayoutKind.Auto)]
-    public readonly struct OperatorDefinition
+    public sealed class OperatorDefinition
     {
         public readonly IToken Token;
         public readonly int Precedence;
-        public readonly OperatorInvoker Invoker;
-            
-        public OperatorDefinition(IToken token, int precedence, OperatorInvoker invoker)
+        public readonly OperatorInvocationBehaviour InvocationBehaviour;
+
+        public OperatorDefinition(IToken token, int precedence, OperatorInvocationBehaviour invocationBehaviour)
         {
             Token = token;
             Precedence = precedence;
-            Invoker = invoker;
+            InvocationBehaviour = invocationBehaviour;
         }
     }
 }
