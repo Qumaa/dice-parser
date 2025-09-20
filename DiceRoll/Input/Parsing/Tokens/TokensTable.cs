@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace DiceRoll.Input.Parsing
@@ -65,32 +66,26 @@ namespace DiceRoll.Input.Parsing
             return false;
         }
 
-        //todo:
         public Substring UntilFirstKnownToken(in Substring expression, OperatorUsageForm currentOperatorUsageForm)
         {
-            return _MatchesAnyToken(in expression, currentOperatorUsageForm, out Substring match) ?
-                expression.SetLength(match.Start - expression.Start) :
-                expression;
-
-            bool _MatchesAnyToken(in Substring expression, OperatorUsageForm usageForm, out Substring match)
-            {
-                if (_openParenthesis.Matches(in expression, out match))
-                    return true;
+            int firstKnownTokenStart = expression.End;
+            
+            if (_openParenthesis.Matches(in expression, out Substring knownSubstring))
+                firstKnownTokenStart = Math.Min(firstKnownTokenStart, knownSubstring.Start);
                 
-                if (_closeParenthesis.Matches(in expression, out match))
-                    return true;
+            if (_closeParenthesis.Matches(in expression, out knownSubstring))
+                firstKnownTokenStart = Math.Min(firstKnownTokenStart, knownSubstring.Start);
 
-                foreach (OperatorDefinition operatorDefinition in _operators)
-                    if (MatchesUsageForm(operatorDefinition.InvocationBehaviour, usageForm) &&
-                        operatorDefinition.Token.Matches(in expression, out match))
-                        return true;
+            foreach (OperatorDefinition operatorDefinition in _operators)
+                if (MatchesUsageForm(operatorDefinition.InvocationBehaviour, currentOperatorUsageForm) &&
+                    operatorDefinition.Token.Matches(in expression, out knownSubstring))
+                    firstKnownTokenStart = Math.Min(firstKnownTokenStart, knownSubstring.Start);
                 
-                foreach (OperandDefinition operandDefinition in _operands)
-                    if (operandDefinition.Token.Matches(in expression, out match))
-                        return true;
+            foreach (OperandDefinition operandDefinition in _operands)
+                if (operandDefinition.Token.Matches(in expression, out knownSubstring))
+                    firstKnownTokenStart = Math.Min(firstKnownTokenStart, knownSubstring.Start);
 
-                return false;
-            }
+            return new Substring(expression.Source, expression.Start, firstKnownTokenStart);
         }
 
         private static bool MatchesUsageForm(OperatorInvocationBehaviour invocationBehaviour, OperatorUsageForm usageForm) =>
