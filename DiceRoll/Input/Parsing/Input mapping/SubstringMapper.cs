@@ -16,9 +16,9 @@ namespace DiceRoll.Input.Parsing
 
         public Substring Apply(in Range mappedRange)
         {
-            (int Offset, int Length) tuple = mappedRange.GetOffsetAndLength(_source.Length);
+            (int offset, int length) = mappedRange.GetOffsetAndLength(_source.Length);
 
-            return new Substring(_source, tuple.Offset, tuple.Length);
+            return new Substring(_source, offset, length);
         }
     }
 }

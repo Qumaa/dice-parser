@@ -17,10 +17,7 @@ namespace DiceRoll.Input.Parsing
 
         public OperandsAccess Get<T>(int operandIndex, out T operand) where T : INode
         {
-            if (!_operands[operandIndex].Value.IsOperand(out INode node))
-            {
-                throw new Exception();
-            }
+            INode node = _operands[operandIndex].Value.Node;
 
             if ((_casters[operandIndex] is null && OperandCaster.Default<INode, T>().TryCast(node, out operand)) ||
                 (_casters[operandIndex].CastsTo(out OperandCaster<T> caster) && caster.TryCast(node, out operand)))

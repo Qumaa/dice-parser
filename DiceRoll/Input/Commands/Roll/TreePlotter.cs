@@ -20,8 +20,7 @@ namespace DiceRoll
         
         public void Plot()
         {
-            if (_tree.Root.Value.IsOperand(out INode node))
-                node.Next();
+            _tree.Root.Value.Node.Next();
             
             PlotNodeRecursively(in _tree.Root, new Visitor());
         }
@@ -47,12 +46,14 @@ namespace DiceRoll
 
         private string NodeToString(in Mapped<LinkedNode> node, Visitor visitor, int indent, out int nodeStringLength)
         {
-            if (!node.Value.IsOperand(out INode operand))
-                return _Indent($"({_tree.SubstringMapper.Apply(in node).ToString()})", out nodeStringLength);
-
+            INode operand = node.Value.Node;
+            
             operand.Visit(visitor);
 
             string output = visitor.Output;
+            
+            if (node.Value.IsOperator)
+                return _Indent($"{output} ({_tree.SubstringMapper.Apply(in node).ToString()})", out nodeStringLength);
 
             if (operand is not (Dice or IComposite))
                 return _Indent(output, out nodeStringLength);

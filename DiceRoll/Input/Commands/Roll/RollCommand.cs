@@ -43,8 +43,7 @@ namespace DiceRoll
                 return;
             }
 
-            if (!nodeTree.Root.Value.IsOperand(out INode node))
-                return;
+            INode node = nodeTree.Root.Value.Node;
             
             Visitor visitor = new(context.Console, strings.FailedToPass);
             

@@ -26,7 +26,7 @@ namespace DiceRoll.Input.Parsing
             
             ThrowIfBadArity(arity);
 
-            InvocationCapture capture = new(_state.Operands, arity, in _operatorMappedRange);
+            InvocationCapture capture = new(_state.Operands, arity);
 
             InvocationAbilityTest test = new(_castingTable, in capture);
             
@@ -52,32 +52,22 @@ namespace DiceRoll.Input.Parsing
         {
             ArgumentNullException.ThrowIfNull(operand.Node);
 
-            LinkedNode linkedOperator = LinkedNode.Operator(capture.Operands, operand.EvaluationType);
-
-            Mapped<LinkedNode> mappedOperator = new(linkedOperator, in _operatorMappedRange);
-            LinkedNode linkedOperand = LinkedNode.Operand(in operand, mappedOperator);
+            LinkedNode linkedNode = new(operand.Node, operand.EvaluationType, capture.Operands);
             
-            _state.Operands.Push(linkedOperand, in capture.MappedRange);
+            _state.Operands.Push(linkedNode, in _operatorMappedRange);
         }
 
         [StructLayout(LayoutKind.Auto)]
         private readonly struct InvocationCapture
         {
             public readonly Mapped<LinkedNode>[] Operands;
-            public readonly Range MappedRange;
             
-            public InvocationCapture(MappedStack<LinkedNode> operands, int arity, in Range operatorMappedRange)
+            public InvocationCapture(MappedStack<LinkedNode> operands, int arity)
             {
                 Operands = new Mapped<LinkedNode>[arity];
-
-                MappedRange = operatorMappedRange;
-
+                
                 for (int i = arity - 1; i >= 0; i--)
-                {
-                    Mapped<LinkedNode> operand = operands.Pop();
-                    Operands[i] = operand;
-                    MappedRange = MappedRange.And(operand.Range);
-                }
+                    Operands[i] = operands.Pop();
             }
         }
 

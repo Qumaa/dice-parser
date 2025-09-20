@@ -10,7 +10,7 @@
         }
 
         public void Push(in Operand operand, in Substring context) =>
-            _state.Operands.MapAndPush(LinkedNode.Operand(operand.Node, operand.EvaluationType), in context);
+            _state.Operands.MapAndPush(new LinkedNode(operand.Node, operand.EvaluationType), in context);
 
         public bool TryPeek(out Mapped<LinkedNode> mapped) =>
             _state.Operands.TryPeek(out mapped);
