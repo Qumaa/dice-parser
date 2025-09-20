@@ -62,21 +62,20 @@ namespace DiceRoll.Input.Parsing
                 return;
             }
             
-            if (_state.Tokens.StartsWithOperand(in notParsed, out output, out Operand operand))
+            if (_state.Tokens.StartsWithOperand(in notParsed, out Operand operand, out output))
             {
-                Operand(operand, in output);
+                Operand(in operand, in output);
                 return;
             }
 
             if (_state.Tokens.StartsWithOperator(
                     in notParsed,
                     GetCurrentOperatorUsageForm(),
-                    out output,
-                    out int precedence,
-                    out OperatorInvocationBehaviour invoker
+                    out Operator @operator,
+                    out output
                     ))
             {
-                Operator(precedence, invoker, in output);
+                Operator(in @operator, in output);
                 return;
             }
 
@@ -89,16 +88,16 @@ namespace DiceRoll.Input.Parsing
                 OperatorUsageForm.Infix :
                 OperatorUsageForm.Prefix;
 
-        private void OpenParenthesis(in Substring context)
+        private void OpenParenthesis(in Substring substring)
         {
             _state.Annotate().ParenthesisOpening();
             
-            _operators.Push(in Parsing.Operator.OpenParenthesis, in context);
+            _operators.Push(in Parsing.Operator.OpenParenthesis, in substring);
         }
 
-        private void CloseParenthesis(in Substring token)
+        private void CloseParenthesis(in Substring substring)
         {
-            ThrowIfUnbalancedParenthesis(in token);
+            ThrowIfUnbalancedParenthesis(in substring);
 
             while (_operators.TryPop(out Mapped<Operator> operatorToken))
             {
@@ -113,14 +112,14 @@ namespace DiceRoll.Input.Parsing
             _operators.TryInvokeDelayedOperators();
         }
 
-        private void Operator(int precedence, OperatorInvocationBehaviour invocationBehaviour, in Substring context)
+        private void Operator(in Operator @operator, in Substring operatorSubstring)
         {
             while (_operators.TryPeek(out Operator lastOperator) &&
                    !lastOperator.IsOpenParenthesis &&
-                   precedence < lastOperator.Precedence)
+                   @operator.Precedence < lastOperator.Precedence)
                 _operators.InvokeAfterDelayedOperators(_operators.Pop());
 
-            _operators.Push(new Operator(precedence, invocationBehaviour), in context);
+            _operators.Push(in @operator, in operatorSubstring);
 
             _state.Annotate().OperatorProcessing();
         }

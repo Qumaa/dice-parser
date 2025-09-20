@@ -3,19 +3,21 @@
 namespace DiceRoll.Input.Parsing
 {
     [StructLayout(LayoutKind.Auto)]
-    internal readonly struct Operator
+    public readonly struct Operator
     {
-        public static readonly Operator OpenParenthesis = new();
+        internal static readonly Operator OpenParenthesis = new();
         
         public readonly int Precedence;
         public readonly OperatorInvocationBehaviour InvocationBehaviour;
 
-        public bool IsOpenParenthesis => InvocationBehaviour is null;
+        internal bool IsOpenParenthesis => InvocationBehaviour is null;
 
         public Operator(int precedence, OperatorInvocationBehaviour invocationBehaviour)
         {
             Precedence = precedence;
             InvocationBehaviour = invocationBehaviour;
         }
+
+        public Operator(OperatorDefinition definition) : this(definition.Precedence, definition.InvocationBehaviour) { }
     }
 }

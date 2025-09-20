@@ -126,7 +126,11 @@ namespace DiceRoll.Input.Parsing
 
         public static TokensTableBuilder CompositionOperator(this TokensTableBuilder builder, IToken token, 
             int precedence, CompositionHandler handler) =>
-            builder.Operator(token, precedence, OperatorInvocationBehaviour.Composition(handler));
+            builder.Operator(
+                token,
+                precedence,
+                OperatorInvocationBehaviour.WithoutOverloads(OperatorInvoker.Composition(handler), 2, 0)
+                );
 
         public static TokensTableBuilder Operand<T>(this TokensTableBuilder builder, OperandParsingHandler parsingHandler,
             IToken token) where T : INode =>

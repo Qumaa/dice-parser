@@ -4,7 +4,7 @@
     {
         public static readonly NumericToken Shared = new();
         
-        public bool Matches(in Substring input, out Substring match)
+        public bool Matches(in Substring input, out Substring matchSubstring)
         {
             for (int i = 0; i < input.Length; i++)
             {
@@ -13,11 +13,11 @@
                 if (!char.IsNumber(c))
                     continue;
 
-                match = ExtractNumberSubstring(input.MoveStart(i));
+                matchSubstring = ExtractNumberSubstring(input.MoveStart(i));
                 return true;
             }
 
-            match = default;
+            matchSubstring = default;
             return false;
         }
 

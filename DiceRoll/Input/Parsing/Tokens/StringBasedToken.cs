@@ -17,7 +17,7 @@ namespace DiceRoll.Input.Parsing
 
         public StringBasedToken(string value, StringComparison comparison) : this(new[] { value }, comparison) { }
 
-        public bool Matches(in Substring input, out Substring match)
+        public bool Matches(in Substring input, out Substring matchSubstring)
         {
             foreach (string value in _values)
             {
@@ -26,11 +26,11 @@ namespace DiceRoll.Input.Parsing
                 if (i < 0)
                     continue;
                 
-                match = new Substring(in input, i, value.Length);
+                matchSubstring = new Substring(in input, i, value.Length);
                 return true;
             }
 
-            match = default;
+            matchSubstring = default;
             return false;
         }
 

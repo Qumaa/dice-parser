@@ -17,13 +17,13 @@ namespace DiceRoll.Input.Parsing
 
         public RegexToken(Regex pattern) : this(new [] {pattern}) { }
 
-        public bool Matches(in Substring input, out Substring match)
+        public bool Matches(in Substring input, out Substring matchSubstring)
         {
             for (int i = 0; i < _patterns.Length; i++)
-                if (Matches(in input, _patterns[i], out match))
+                if (Matches(in input, _patterns[i], out matchSubstring))
                     return true;
 
-            match = default;
+            matchSubstring = default;
             return false;
         }
 

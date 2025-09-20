@@ -14,13 +14,13 @@ namespace DiceRoll.Input.Parsing
             _tokens = tokens;
         }
 
-        public bool Matches(in Substring input, out Substring match)
+        public bool Matches(in Substring input, out Substring matchSubstring)
         {
             foreach (IToken token in _tokens)
-                if (token.Matches(in input, out match))
+                if (token.Matches(in input, out matchSubstring))
                     return true;
 
-            match = default;
+            matchSubstring = default;
             return false;
         }
     }

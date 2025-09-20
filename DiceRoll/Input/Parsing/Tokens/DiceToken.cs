@@ -13,7 +13,7 @@ namespace DiceRoll.Input.Parsing
             _composition = compositionToken;
         }
 
-        public bool Matches(in Substring input, out Substring match)
+        public bool Matches(in Substring input, out Substring matchSubstring)
         {
             // xdyc
             // x = dice number (optional)
@@ -55,11 +55,11 @@ namespace DiceRoll.Input.Parsing
             //
             (int start, int length) = matchRange.GetOffsetAndLength(input.Length);
             
-            match = new Substring(in input, start, length);
+            matchSubstring = new Substring(in input, start, length);
             return true;
             
             matchFailed:
-            match = default;
+            matchSubstring = default;
             return false;
         }
     }

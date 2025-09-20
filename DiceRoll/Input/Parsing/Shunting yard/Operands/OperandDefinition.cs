@@ -7,13 +7,13 @@ namespace DiceRoll.Input.Parsing
     {
         public readonly IToken Token;
         public readonly OperandParsingHandler ParsingHandler;
-        public readonly Type OperandType;
+        public readonly Type EvaluationType;
 
-        private OperandDefinition(IToken token, OperandParsingHandler parsingHandler, Type operandType)
+        private OperandDefinition(IToken token, OperandParsingHandler parsingHandler, Type evaluationType)
         {
             Token = token;
             ParsingHandler = parsingHandler;
-            OperandType = operandType;
+            EvaluationType = evaluationType;
         }
 
         public static OperandDefinition New<T>(IToken token, OperandParsingHandler parsingHandler) where T : INode =>
