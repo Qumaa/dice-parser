@@ -42,22 +42,29 @@ namespace DiceRoll.Input.Parsing
             {
                 _expression = expression;
                 _compositionTokens = context._compositionTokens;
-                _delimiter = FindDelimiter(expression, context._delimiter);
-                _diceNotationEnd = IndexOfDiceNotationEnd(expression, _delimiter.End);
+                _delimiter = FindDelimiter(in expression, context._delimiter);
+                _diceNotationEnd = IndexOfDiceNotationEnd(
+                    in expression,
+                    expression.SourceIndexToRelativeIndex(_delimiter.End)
+                    );
             }
             
             public int DiceCount()
             {
                 int diceCount = 1;
             
-                if (_delimiter is { IsEmpty: false, Start: > 0 })
-                    diceCount = int.Parse(_expression[.._delimiter.RelativeStart(in _expression)].AsSpan());
+                if (!_delimiter.IsEmpty && _delimiter.Start != _expression.Start)
+                    diceCount = int.Parse(
+                        _expression[.._expression.SourceIndexToRelativeIndex(_delimiter.Start)].AsSpan()
+                        );
 
                 return diceCount;
             }
             
             public int FacesCount() =>
-                int.Parse(_expression[_delimiter.RelativeEnd(in _expression).._diceNotationEnd].AsSpan());
+                int.Parse(
+                    _expression[_expression.SourceIndexToRelativeIndex(_delimiter.End).._diceNotationEnd].AsSpan()
+                    );
             
             public CompositionHandler CompositionHandler()
             {

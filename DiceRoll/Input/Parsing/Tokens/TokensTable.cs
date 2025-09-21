@@ -47,7 +47,7 @@ namespace DiceRoll.Input.Parsing
 
             operatorSubstring = default;
             @operator = default;
-            return true;
+            return false;
         }
 
         public bool StartsWithOperand(in Substring expression, out Operand operand, out Substring operandSubstring)
@@ -85,7 +85,7 @@ namespace DiceRoll.Input.Parsing
                 if (operandDefinition.Token.Matches(in expression, out knownSubstring))
                     firstKnownTokenStart = Math.Min(firstKnownTokenStart, knownSubstring.Start);
 
-            return new Substring(expression.Source, expression.Start, firstKnownTokenStart);
+            return expression[..expression.SourceIndexToRelativeIndex(firstKnownTokenStart)];
         }
 
         private static bool MatchesUsageForm(OperatorInvocationBehaviour invocationBehaviour, OperatorUsageForm usageForm) =>

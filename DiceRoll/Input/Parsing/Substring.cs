@@ -13,7 +13,7 @@ namespace DiceRoll.Input.Parsing
         public int End => Start + Length;
         public int UntilSourceEnd => Source.Length - End;
 
-        public bool IsEmpty => Start == End;
+        public bool IsEmpty => Length is 0;
 
         public char this[int i] => IndexThis(i);
         public char this[Index i] => IndexThis(i);
@@ -47,29 +47,13 @@ namespace DiceRoll.Input.Parsing
             MoveStart(start).AsRange();
         public Range AsRange(int start, int length) =>
             MoveStart(start).SetLength(length).AsRange();
-        
-        public Range AsRelativeRange(in Substring parent) =>
-            IsSharedSource(in parent) ? new Range(Start - parent.Start, End - parent.Start) : AsRange();
-        public Range AsRelativeRange(in Substring parent, int start) =>
-            MoveStart(start).AsRelativeRange(in parent);
-        public Range AsRelativeRange(in Substring parent, int start, int length) =>
-            MoveStart(start).SetLength(length).AsRelativeRange(in parent);
 
-        public int RelativeStart(in Substring parent)
-        {
-            if (!IsSharedSource(in parent))
-                return Start;
-
-            return Start - parent.Start;
-        }
-
-        public int RelativeEnd(in Substring parent)
-        {
-            if (!IsSharedSource(in parent))
-                return End;
-
-            return End - parent.Start;
-        }
+        public int SourceIndexToRelativeIndex(int sourceIndex) =>
+            sourceIndex - Start;
+        public Range SourceRangeToRelativeRange(in Range sourceRange) =>
+            SourceIndexToRelativeIndex(sourceRange.Start.GetOffset(Source.Length))
+                ..
+                SourceIndexToRelativeIndex(sourceRange.End.GetOffset(Source.Length));
 
         public Substring MoveStart(int offset) =>
             new(Source, Start + offset, Length - offset);
@@ -112,9 +96,6 @@ namespace DiceRoll.Input.Parsing
 
             return trim >= 0 ? MoveEnd(trim) : this;
         }
-        
-        private bool IsSharedSource(in Substring parent) =>
-            ReferenceEquals(Source, parent.Source) || Source.Equals(parent.Source, StringComparison.OrdinalIgnoreCase);
 
         public override string ToString() =>
             Source.Substring(Start, Length);
@@ -125,7 +106,7 @@ namespace DiceRoll.Input.Parsing
         public int IndexOf(string value, StringComparison stringComparison) =>
             IndexOf(value.AsSpan(), stringComparison);
 
-        public int IndexOf(Substring value, StringComparison stringComparison) =>
+        public int IndexOf(in Substring value, StringComparison stringComparison) =>
             IndexOf(value.AsSpan(), stringComparison);
 
         public int IndexOf(ReadOnlySpan<char> value, StringComparison stringComparison) =>
@@ -138,9 +119,9 @@ namespace DiceRoll.Input.Parsing
             
             return Source[Start + i];
         }
-        
+
         private char IndexThis(Index i) =>
-            IndexThis(i.IsFromEnd ? Length - i.Value : i.Value);
+            IndexThis(i.GetOffset(Length));
 
         private Substring IndexThis(Range range)
         {
@@ -151,7 +132,7 @@ namespace DiceRoll.Input.Parsing
 
         public static Substring Empty(string source) =>
             new(source, 0, 0);
-        
+
         public static Substring Empty(in Substring source) =>
             new(in source, 0, 0);
 
