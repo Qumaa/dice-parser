@@ -4,21 +4,21 @@ namespace DiceRoll.Input.Parsing
 {
     public sealed class SubstringMapper
     {
-        private readonly string _source;
+        public readonly string Source;
 
         internal SubstringMapper(string source)
         {
-            _source = source;
+            Source = source;
         }
         
-        public Substring Apply<T>(in Mapped<T> mapped) =>
-            Apply(mapped.Range);
+        public Substring GetSubstringOf<T>(in Mapped<T> mapped) =>
+            GetSubstringOf(mapped.Range);
 
-        public Substring Apply(in Range mappedRange)
+        public Substring GetSubstringOf(in Range mappedRange)
         {
-            (int offset, int length) = mappedRange.GetOffsetAndLength(_source.Length);
+            (int offset, int length) = mappedRange.GetOffsetAndLength(Source.Length);
 
-            return new Substring(_source, offset, length);
+            return new Substring(Source, offset, length);
         }
     }
 }

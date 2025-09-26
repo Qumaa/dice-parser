@@ -71,10 +71,10 @@ namespace DiceRoll.Input.Parsing
     internal static class InputMapperExtensions
     {
         public static Substring GetSubstringOf<T>(this InputMapper mapper, in Mapped<T> mapped) =>
-            mapper.BuildSubstringMapper().Apply(mapped);
+            mapper.BuildSubstringMapper().GetSubstringOf(mapped);
         
         public static Substring GetSubstringOf(this InputMapper mapper, in Range mapped) =>
-            mapper.BuildSubstringMapper().Apply(mapped);
+            mapper.BuildSubstringMapper().GetSubstringOf(mapped);
 
         public static Substring MapAndGetSubstringOf(this InputMapper mapper, in Substring substring) =>
             mapper.GetSubstringOf(mapper.Map(in substring));

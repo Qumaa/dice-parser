@@ -1,91 +1,250 @@
-﻿using System.CommandLine;
+﻿using System;
+using System.CommandLine;
 using System.Linq;
 using System.Runtime.InteropServices;
 using DiceRoll.Input.Parsing;
 
 namespace DiceRoll
 {
-    [StructLayout(LayoutKind.Auto)]
-    public readonly struct TreePlotter
+    // todo: make tree plotter replaceable
+    internal sealed class TreePlotter
     {
         private readonly NodeTree _tree;
         private readonly IConsole _console;
+        private readonly Visitor _visitor;
 
         public TreePlotter(NodeTree tree, IConsole console)
         {
             _tree = tree;
             _console = console;
+
+            _visitor = new Visitor();
         }
-        
+
         public void Plot()
         {
             _tree.Root.Value.Node.Next();
-            
-            PlotNodeRecursively(in _tree.Root, new Visitor());
+
+            Header();
+            PlotNodeRecursively(in _tree.Root);
         }
 
-        private void PlotNodeRecursively(in Mapped<LinkedNode> node, Visitor visitor, int indent = 0, bool ignoreIndent = false)
-        {
-            string evaluationString = NodeToString(in node, visitor, ignoreIndent ? 0 : indent, out int length);
-            _console.Write(evaluationString);
-            _console.Space();
-            indent += length + 1;
+        private void Header() =>
+            _console.WriteLine($"Input: \'{_tree.SubstringMapper.Source}\'");
 
+        private void PlotNodeRecursively(in Mapped<LinkedNode> node, int depth = 0, string indent = null, int emptyIndent = 0)
+        {
+            WriteNode(NodeToString(in node), indent);
+            _console.WriteLine();
+            
             Mapped<LinkedNode>[] parents = node.Value.Parents;
-            
-            if (parents.Length is 0)
-            {
-                _console.WriteLine();
-                return;
-            }
 
-            for (int i = parents.Length - 1; i >= 0; i--)
-                PlotNodeRecursively(in parents[i], visitor, indent, i == parents.Length - 1);
+            if (node.Value is { Parents: { Length: 0 } } or { IsOperator: true, Node: IComposite })
+                return;
+
+            for (int i = 0; i < parents.Length; i++)
+            {
+                bool isLastChild = i == (parents.Length - 1);
+
+                int nextEmptyIndent = emptyIndent;
+
+                if (isLastChild && nextEmptyIndent == depth)
+                    nextEmptyIndent++;
+                
+                PlotNodeRecursively(
+                    in parents[i],
+                    depth + 1,
+                    IndentForNextChild(depth, isLastChild, emptyIndent),
+                    nextEmptyIndent
+                    );
+            }
         }
 
-        private string NodeToString(in Mapped<LinkedNode> node, Visitor visitor, int indent, out int nodeStringLength)
+        private string NodeToString(in Mapped<LinkedNode> treeNode)
         {
-            INode operand = node.Value.Node;
-            
-            operand.Visit(visitor);
+            INode node = treeNode.Value.Node;
 
-            string output = visitor.Output;
-            
-            if (node.Value.IsOperator)
-                return _Indent($"{output} ({_tree.SubstringMapper.Apply(in node).ToString()})", out nodeStringLength);
+            string value = _visitor.VisitAndGetEvaluationString(node);
 
-            if (operand is not (Dice or IComposite))
-                return _Indent(output, out nodeStringLength);
-
-            output += $" ({_tree.SubstringMapper.Apply(in node.Range).ToString()}";
-
-            if (operand is IComposite composite)
-                output += $" = [{string.Join(", ", composite.Evaluation.Select(x => x.ToString()))}]";
-                
-            output += ")";
-
-            return _Indent(output, out nodeStringLength);
-
-            string _Indent(string input, out int inputLength)
+            if (treeNode.Value.IsOperator)
             {
-                inputLength = input.Length;
-                
-                return indent is 0 ? input : new string(' ', indent) + input;
+                string operatorString = ToOperatorString(in treeNode);
+
+                if (string.Equals(value, operatorString, StringComparison.OrdinalIgnoreCase))
+                    operatorString = ToExpressionString(in treeNode);
+
+                return $"{value} ({operatorString})";
             }
+
+            if (node is not (Dice or IComposite))
+                return value;
+
+            value = $"{ToExpressionString(in treeNode)} = {value}";
+
+            if (node is IComposite composite)
+                value += $" (rolled [{string.Join(", ", composite.Evaluation.Select(x => x.ToString()))}])";
+
+            return value;
+        }
+
+        private void WriteNode(string nodeString, string indent = null)
+        {
+            if (indent is { Length: > 0 })
+                _console.Write(indent);
+
+            _console.Write("*");
+            _console.Space();
+
+            _console.Write(nodeString);
+        }
+
+        private string ToExpressionString(in Range range) =>
+            _tree.SubstringMapper.GetSubstringOf(in range).ToString();
+
+        private string ToExpressionString(in Mapped<LinkedNode> treeNode) =>
+            ToExpressionString(in treeNode.Range);
+
+        private string ToOperatorString(in Mapped<LinkedNode> operatorNode) =>
+            new OperatorToStringConversion(this, in operatorNode).Execute();
+
+        private static string IndentForNextChild(int depth, bool isLastChild, int skipIndent)
+        {
+            const string indent = "│ ";
+            const string child = "├─";
+            const string last_child = "└─";
+
+            int bodyLength = indent.Length;
+            int tipLength = child.Length;
+            char[] chars = new char[(depth * bodyLength) + tipLength];
+
+            int skipUntil = skipIndent * bodyLength;
+            for (int i = 0; i < skipUntil; i++)
+                chars[i] = ' ';
+
+            for (int i = skipUntil; i < depth * bodyLength; i+= bodyLength)
+                indent.CopyTo(0, chars, i, bodyLength);
+            
+            (isLastChild ? last_child : child).CopyTo(0, chars, chars.Length - tipLength, tipLength);
+
+            return new string(chars);
         }
 
         private class Visitor : INodeVisitor
         {
-            public string Output;
-            
+            private string _output;
+
             public void ForNumeric(INumeric numeric) =>
-                Output = numeric.Evaluation.ToString();
+                _output = numeric.Evaluation.ToString();
 
             public void ForAssertion(IAssertion assertion) =>
-                Output = assertion.Evaluation.ToString();
+                _output = assertion.Evaluation.ToString();
 
             public void ForOperation(IOperation operation) =>
-                Output = operation.Evaluation.ToString();
+                ForAssertion(operation.AsAssertion);
+
+            public string VisitAndGetEvaluationString(INode node)
+            {
+                node.Visit(this);
+                return _output;
+            }
+        }
+
+        [StructLayout(LayoutKind.Auto)]
+        private readonly struct OperatorToStringConversion
+        {
+            private readonly TreePlotter _context;
+            private readonly Mapped<LinkedNode> _operatorNode;
+
+            private int _operandsCount => _operatorNode.Value.Parents.Length;
+
+            private SubstringMapper _substringMapper => _context._tree.SubstringMapper;
+
+            public OperatorToStringConversion(TreePlotter context, in Mapped<LinkedNode> operatorNode)
+            {
+                _operatorNode = operatorNode;
+                _context = context;
+            }
+
+            public string Execute() =>
+                _operandsCount is 1 ?
+                    UnaryLikeString() :
+                    _operatorNode.Value.Node is IComposite composite ?
+                        CompositionString(composite) :
+                        GenericSpacedString();
+
+            private string UnaryLikeString()
+            {
+                string first = GetStringOf(in _operatorNode);
+                string second = GetStringOfEvaluation(GetOperand(0));
+
+                if (GetOperandPosition(0) is OperandPosition.Left)
+                    _SwapValues(ref first, ref second);
+
+                return $"{first}{second}";
+
+                static void _SwapValues(ref string first, ref string second) =>
+                    (first, second) = (second, first);
+            }
+
+            private string CompositionString(IComposite confirmed) =>
+                $"[{string.Join(',', confirmed.Evaluation.Select(x => x.ToString()))}] {GetStringOf(in _operatorNode)}";
+
+            private string GenericSpacedString()
+            {
+                OperandPosition previousPosition = OperandPosition.Left;
+                string operatorString = GetStringOf(in _operatorNode);
+                string accumulated = null;
+
+                for (int i = 0; i < _operandsCount; i++)
+                {
+                    Mapped<LinkedNode> operand = GetOperand(i);
+
+                    string s = GetStringOfEvaluation(operand);
+
+                    OperandPosition position = GetOperandPosition(i);
+                    if (position != previousPosition)
+                        s = $"{operatorString} {s}";
+                    previousPosition = position;
+
+                    accumulated = accumulated is null ? s : $"{accumulated} {s}";
+                }
+
+                if (previousPosition is OperandPosition.Left)
+                    accumulated = $"{accumulated} {operatorString}";
+
+                return accumulated;
+            }
+
+            private string GetStringOfEvaluation(Mapped<LinkedNode> operand) =>
+                _context._visitor.VisitAndGetEvaluationString(operand.Value.Node);
+
+            private string GetStringOf(in Mapped<LinkedNode> node) =>
+                _substringMapper.GetSubstringOf(in node).ToString();
+
+            private Mapped<LinkedNode> GetOperand(int operandIndex) =>
+                _operatorNode.Value.Parents[operandIndex];
+
+            private OperandPosition GetOperandPosition(int operandIndex)
+            {
+                Range operandRange = GetOperand(operandIndex).Range;
+                Range operatorRange = _operatorNode.Range;
+
+                return AverageFromRange(in operandRange) < AverageFromRange(in operatorRange) ?
+                    OperandPosition.Left :
+                    OperandPosition.Right;
+            }
+
+            private int AverageFromRange(in Range range)
+            {
+                (int offset, int length) = range.GetOffsetAndLength(_substringMapper.Source.Length);
+                return offset + (length / 2);
+            }
+
+            private enum OperandPosition
+            {
+                Left,
+                Right
+            }
         }
     }
 }
