@@ -86,9 +86,9 @@ namespace DiceRoll.Input.Parsing
 
         private void OpenParenthesis(in Substring substring)
         {
-            _state.Annotate().ParenthesisOpening();
+            _operators.OpenParenthesis(in substring);
             
-            _operators.Push(in Parsing.Operator.OpenParenthesis, in substring);
+            _state.Annotate().ParenthesisOpening();
         }
 
         private void CloseParenthesis()
@@ -115,9 +115,9 @@ namespace DiceRoll.Input.Parsing
                    @operator.Precedence < lastOperator.Precedence)
                 _operators.InvokeAfterDelayedOperators(_operators.Pop());
 
-            _operators.Push(in @operator, in operatorSubstring);
+            OperatorProcessingResult processingResult = _operators.Process(in @operator, in operatorSubstring);
 
-            _state.Annotate().OperatorProcessing();
+            _state.Annotate().OperatorProcessing(processingResult);
         }
 
         private void Operand(in Operand operand, in Substring context)

@@ -16,12 +16,18 @@ namespace DiceRoll.Input.Parsing
 
         public bool Matches(in Substring input, out Substring matchSubstring)
         {
+            matchSubstring = Substring.Empty(in input);
+            
             foreach (IToken token in _tokens)
-                if (token.Matches(in input, out matchSubstring))
-                    return true;
+            {
+                if (!token.Matches(in input, out Substring newMatch))
+                    continue;
 
-            matchSubstring = default;
-            return false;
+                if (matchSubstring.IsEmpty || newMatch.Start < matchSubstring.Start)
+                    matchSubstring = newMatch;
+            }
+
+            return !matchSubstring.IsEmpty;
         }
     }
 

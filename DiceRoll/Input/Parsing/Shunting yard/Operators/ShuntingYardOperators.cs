@@ -13,14 +13,11 @@ namespace DiceRoll.Input.Parsing
             _castingTable = castingTable;
         }
 
-        public void Push(in Operator @operator, in Substring context)
-        {
-            if (@operator.IsOpenParenthesis)
-            {
-                _state.Operators.MapAndPush(in @operator, context);
-                return;
-            }
+        public void OpenParenthesis(in Substring context) =>
+            _state.Operators.MapAndPush(in Operator.OpenParenthesis, context);
 
+        public OperatorProcessingResult Process(in Operator @operator, in Substring context)
+        {
             Mapped<Operator> mapped = _state.Mapper.Map(in @operator, in context);
 
             OperatorInvocationBehaviour invocationBehaviour = @operator.InvocationBehaviour;
@@ -29,14 +26,14 @@ namespace DiceRoll.Input.Parsing
             {
                 // invoke immediately using existing operands
                 InvokeOperator(in mapped);
-                return;
+                return OperatorProcessingResult.Invoked;
             }
 
             if (invocationBehaviour is { RightArity: 1, LeftArity: > 0 })
             {
                 // resolve using default shunting-yard mechanism
                 _state.Operators.Push(in mapped);
-                return;
+                return OperatorProcessingResult.Pushed;
             }
 
             // delay until more operands are pushed
@@ -44,6 +41,8 @@ namespace DiceRoll.Input.Parsing
                 new DelayedOperator(@operator.InvocationBehaviour, _state.ParenthesisLevel, _state.Operands.Count),
                 in context
                 );
+
+            return OperatorProcessingResult.Delayed;
         }
 
         public bool TryPeek(out Operator @operator) =>

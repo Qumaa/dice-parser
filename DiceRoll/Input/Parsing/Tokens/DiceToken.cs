@@ -40,17 +40,19 @@ namespace DiceRoll.Input.Parsing
 
             matchRange = matchRange.And(input.SourceRangeToRelativeRange(diceFaces.AsRange()));
 
-            // c
-            postDelimiter = postDelimiter.MoveStart(diceFaces.Length).TrimStart();
-            
-            if (_composition.MatchesStart(in postDelimiter, out Substring composition))
-                matchRange = matchRange.And(input.SourceRangeToRelativeRange(composition.AsRange()));
-            
             // x
             Substring preDelimiter = input[..input.SourceIndexToRelativeIndex(delimiter.Start)];
             
             if (number.MatchesEnd(in preDelimiter, out Substring diceNumber))
+            {
                 matchRange = matchRange.And(input.SourceRangeToRelativeRange(diceNumber.AsRange()));
+                
+                // c
+                postDelimiter = postDelimiter.MoveStart(diceFaces.Length);
+            
+                if (_composition.MatchesStart(in postDelimiter, out Substring composition))
+                    matchRange = matchRange.And(input.SourceRangeToRelativeRange(composition.AsRange()));
+            }
 
             //
             matchSubstring = input[matchRange];

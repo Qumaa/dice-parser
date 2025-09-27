@@ -126,6 +126,9 @@ namespace DiceRoll.Input.Parsing
                     Type targetType = targetTypes[i];
                     Type type = _operands[i].Value.EvaluationType;
                     
+                    if (targetType == type)
+                        continue;
+                    
                     if (!(_castingTable.IsCasterDefined(
                             type,
                             targetType,
