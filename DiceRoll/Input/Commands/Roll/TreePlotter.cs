@@ -23,7 +23,7 @@ namespace DiceRoll
 
         public void Plot()
         {
-            _tree.Root.Value.Node.Next();
+            _tree.Next();
 
             Header();
             PlotNodeRecursively(in _tree.Root);
@@ -32,31 +32,22 @@ namespace DiceRoll
         private void Header() =>
             _console.WriteLine($"Input: \'{_tree.SubstringMapper.Source}\'");
 
-        private void PlotNodeRecursively(in Mapped<LinkedNode> node, int depth = 0, string indent = null, int emptyIndent = 0)
+        private void PlotNodeRecursively(in Mapped<LinkedNode> node, string indent = null, bool isLast = false)
         {
-            WriteNode(NodeToString(in node), indent);
-            _console.WriteLine();
+            string nodeString = NodeToString(in node);
+
+            indent = WriteNodeAndUpdateIndent(nodeString, indent, isLast);
             
             Mapped<LinkedNode>[] parents = node.Value.Parents;
 
             if (node.Value is { Parents: { Length: 0 } } or { IsOperator: true, Node: IComposite })
-                return;
+                return; // todo: list every composite result as if they were distinct nodes
 
             for (int i = 0; i < parents.Length; i++)
             {
                 bool isLastChild = i == (parents.Length - 1);
-
-                int nextEmptyIndent = emptyIndent;
-
-                if (isLastChild && nextEmptyIndent == depth)
-                    nextEmptyIndent++;
                 
-                PlotNodeRecursively(
-                    in parents[i],
-                    depth + 1,
-                    IndentForNextChild(depth, isLastChild, emptyIndent),
-                    nextEmptyIndent
-                    );
+                PlotNodeRecursively(in parents[i], indent, isLastChild);
             }
         }
 
@@ -87,15 +78,41 @@ namespace DiceRoll
             return value;
         }
 
-        private void WriteNode(string nodeString, string indent = null)
+        private string WriteNodeAndUpdateIndent(string nodeString, string indent, bool isLast)
         {
-            if (indent is { Length: > 0 })
-                _console.Write(indent);
+            const string child_tip = "├─";
+            const string child_indent = "│ ";
+            
+            const string last_child_tip = "└─";
+            const string last_child_indent = "  ";
+            
+            if (indent is not null)
+            {
+                if (indent is { Length: > 0 })
+                    _console.Write(indent);
+
+                if (isLast)
+                {
+                    _console.Write(last_child_tip);
+                    indent += last_child_indent;
+                }
+                else
+                {
+                    _console.Write(child_tip);
+                    indent += child_indent;
+                }
+            }
+            else
+                indent = string.Empty;
 
             _console.Write("*");
             _console.Space();
 
             _console.Write(nodeString);
+            
+            _console.WriteLine();
+
+            return indent;
         }
 
         private string ToExpressionString(in Range range) =>
@@ -106,28 +123,6 @@ namespace DiceRoll
 
         private string ToOperatorString(in Mapped<LinkedNode> operatorNode) =>
             new OperatorToStringConversion(this, in operatorNode).Execute();
-
-        private static string IndentForNextChild(int depth, bool isLastChild, int skipIndent)
-        {
-            const string indent = "│ ";
-            const string child = "├─";
-            const string last_child = "└─";
-
-            int bodyLength = indent.Length;
-            int tipLength = child.Length;
-            char[] chars = new char[(depth * bodyLength) + tipLength];
-
-            int skipUntil = skipIndent * bodyLength;
-            for (int i = 0; i < skipUntil; i++)
-                chars[i] = ' ';
-
-            for (int i = skipUntil; i < depth * bodyLength; i+= bodyLength)
-                indent.CopyTo(0, chars, i, bodyLength);
-            
-            (isLastChild ? last_child : child).CopyTo(0, chars, chars.Length - tipLength, tipLength);
-
-            return new string(chars);
-        }
 
         private class Visitor : INodeVisitor
         {
