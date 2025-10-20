@@ -29,28 +29,28 @@ namespace DiceRoll.Input.Parsing
         public Type GetReturnType() =>
             _returnType;
 
-        public static Builder Define<T1>() where T1 : INode =>
+        public static Builder Arguments<T1>() where T1 : INode =>
             new(typeof(T1));
 
-        public static Builder Define<T1, T2>() where T1 : INode where T2 : INode =>
+        public static Builder Arguments<T1, T2>() where T1 : INode where T2 : INode =>
             new(typeof(T1), typeof(T2));
 
-        public static Builder Define<T1, T2, T3>() where T1 : INode where T2 : INode where T3 : INode =>
+        public static Builder Arguments<T1, T2, T3>() where T1 : INode where T2 : INode where T3 : INode =>
             new(typeof(T1), typeof(T2), typeof(T3));
 
-        public static Builder Define<T1, T2, T3, T4>()
+        public static Builder Arguments<T1, T2, T3, T4>()
             where T1 : INode where T2 : INode where T3 : INode where T4 : INode =>
             new(typeof(T1), typeof(T2), typeof(T3), typeof(T4));
 
-        public static Builder Define<T1, T2, T3, T4, T5>()
+        public static Builder Arguments<T1, T2, T3, T4, T5>()
             where T1 : INode where T2 : INode where T3 : INode where T4 : INode where T5 : INode =>
             new(typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5));
 
-        public static Builder Define<T1, T2, T3, T4, T5, T6>()
+        public static Builder Arguments<T1, T2, T3, T4, T5, T6>()
             where T1 : INode where T2 : INode where T3 : INode where T4 : INode where T5 : INode where T6 : INode =>
             new(typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6));
 
-        public static Builder Define<T1, T2, T3, T4, T5, T6, T7>()
+        public static Builder Arguments<T1, T2, T3, T4, T5, T6, T7>()
             where T1 : INode
             where T2 : INode
             where T3 : INode
@@ -68,7 +68,7 @@ namespace DiceRoll.Input.Parsing
                 typeof(T7)
                 );
 
-        public static Builder Define<T1, T2, T3, T4, T5, T6, T7, T8>()
+        public static Builder Arguments<T1, T2, T3, T4, T5, T6, T7, T8>()
             where T1 : INode
             where T2 : INode
             where T3 : INode
@@ -88,7 +88,7 @@ namespace DiceRoll.Input.Parsing
                 typeof(T8)
                 );
 
-        public static Builder Define<T1, T2, T3, T4, T5, T6, T7, T8, T9>()
+        public static Builder Arguments<T1, T2, T3, T4, T5, T6, T7, T8, T9>()
             where T1 : INode
             where T2 : INode
             where T3 : INode
@@ -110,7 +110,7 @@ namespace DiceRoll.Input.Parsing
                 typeof(T9)
                 );
 
-        public static Builder Define<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>()
+        public static Builder Arguments<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>()
             where T1 : INode
             where T2 : INode
             where T3 : INode
@@ -134,7 +134,7 @@ namespace DiceRoll.Input.Parsing
                 typeof(T10)
                 );
 
-        public static Builder Define<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>()
+        public static Builder Arguments<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>()
             where T1 : INode
             where T2 : INode
             where T3 : INode
@@ -160,7 +160,7 @@ namespace DiceRoll.Input.Parsing
                 typeof(T11)
                 );
 
-        public static Builder Define<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>()
+        public static Builder Arguments<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>()
             where T1 : INode
             where T2 : INode
             where T3 : INode
@@ -188,7 +188,7 @@ namespace DiceRoll.Input.Parsing
                 typeof(T12)
                 );
 
-        public static Builder Define<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>()
+        public static Builder Arguments<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>()
             where T1 : INode
             where T2 : INode
             where T3 : INode
@@ -218,7 +218,7 @@ namespace DiceRoll.Input.Parsing
                 typeof(T13)
                 );
 
-        public static Builder Define<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>()
+        public static Builder Arguments<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>()
             where T1 : INode
             where T2 : INode
             where T3 : INode
@@ -250,7 +250,7 @@ namespace DiceRoll.Input.Parsing
                 typeof(T14)
                 );
 
-        public static Builder Define<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>()
+        public static Builder Arguments<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>()
             where T1 : INode
             where T2 : INode
             where T3 : INode
@@ -284,7 +284,7 @@ namespace DiceRoll.Input.Parsing
                 typeof(T15)
                 );
 
-        public static Builder Define<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>()
+        public static Builder Arguments<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>()
             where T1 : INode
             where T2 : INode
             where T3 : INode

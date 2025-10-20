@@ -34,11 +34,12 @@ namespace DiceRoll
 
             if (tree)
             {
-                TreePlotter plotter = new(nodeTree, context.Console);
-                
                 for (int i = 0; i < times; i++)
-                    plotter.Plot();
-                
+                {
+                    nodeTree.Next();
+                    TreePlotter.Plot(context.Console, nodeTree);
+                }
+
                 return;
             }
 
@@ -48,7 +49,7 @@ namespace DiceRoll
             
             for (int i = 0; i < times; i++)
             {
-                node.Next();
+                node.NextEvaluation();
                 node.Visit(visitor);
             }
         }
@@ -65,17 +66,17 @@ namespace DiceRoll
             }
 
             public void ForNumeric(INumeric numeric) =>
-                _console.WriteLine(numeric.Evaluation.ToString());
+                _console.WriteLine(numeric.CachedEvaluation.ToString());
 
             public void ForOperation(IOperation operation) =>
                 _console.WriteLine(
-                    operation.Evaluation.Exists(out Outcome outcome) ?
+                    operation.CachedEvaluation.Exists(out Outcome outcome) ?
                         outcome.ToString() :
                         _failedToPass
                     );
 
             public void ForAssertion(IAssertion assertion) =>
-                _console.WriteLine(assertion.Evaluation.ToString());
+                _console.WriteLine(assertion.CachedEvaluation.ToString());
         }
     }
 }

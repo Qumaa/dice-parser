@@ -15,10 +15,10 @@ namespace DiceRoll
             _right = right;
         }
 
-        public override void Next()
+        public override void NextEvaluation()
         {
-            _left.Next();
-            _right.Next();
+            _left.NextEvaluation();
+            _right.NextEvaluation();
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace DiceRoll.Input.Parsing
 {
@@ -12,7 +11,7 @@ namespace DiceRoll.Input.Parsing
 
         public OperandCastingTable(IEnumerable<OperandCaster> casters)
         {
-            _casters = casters.ToArray();
+            _casters = Syntax.ToArray(casters);
         }
 
         /*
@@ -42,7 +41,6 @@ namespace DiceRoll.Input.Parsing
 
         public static OperandCastersTableBuilder BuilderWithDefaults() =>
             new OperandCastersTableBuilder()
-                .Caster(new CompositeOperandCaster())
                 .Caster(new OperationOperandCaster());
 
     }
@@ -62,9 +60,9 @@ namespace DiceRoll.Input.Parsing
         public static bool IsCasterDefined<TSource, TResult>(this OperandCastingTable table, out OperandCaster<TResult> caster)
             where TSource : INode where TResult : INode
         {
-            if (table.IsCasterDefined(typeof(TSource), typeof(TResult), out OperandCaster caster1))
+            if (table.IsCasterDefined(typeof(TSource), typeof(TResult), out OperandCaster definedCaster))
             {
-                caster = (OperandCaster<TResult>) caster1;
+                caster = (OperandCaster<TResult>) definedCaster;
                 return true;
             }
 

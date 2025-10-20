@@ -15,6 +15,6 @@
     public static class NodeTreeExtensions
     {
         public static void Next(this NodeTree nodeTree) =>
-            nodeTree.Root.Value.Node.Next();
+            nodeTree.Root.Value.Node.NextEvaluation();
     }
 }

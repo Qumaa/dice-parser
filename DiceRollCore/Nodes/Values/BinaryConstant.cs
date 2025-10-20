@@ -7,9 +7,9 @@
             CacheEvaluation(new Binary(value));
         }
 
-        public override void Next() { }
+        public override void NextEvaluation() { }
 
         protected override LogicalProbabilityDistribution CreateProbabilityDistribution() =>
-            new(Evaluation ? Probability.Hundred : Probability.Zero);
+            new(CachedEvaluation ? Probability.Hundred : Probability.Zero);
     }
 }

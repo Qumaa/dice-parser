@@ -12,9 +12,9 @@ namespace DiceRoll.Input.Parsing
         }
         
         public Substring GetSubstringOf<T>(in Mapped<T> mapped) =>
-            GetSubstringOf(mapped.Range);
+            GetSubstring(mapped.Range);
 
-        public Substring GetSubstringOf(in Range mappedRange)
+        public Substring GetSubstring(in Range mappedRange)
         {
             (int offset, int length) = mappedRange.GetOffsetAndLength(Source.Length);
 

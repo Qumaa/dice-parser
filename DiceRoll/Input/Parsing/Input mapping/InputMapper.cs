@@ -74,7 +74,7 @@ namespace DiceRoll.Input.Parsing
             mapper.BuildSubstringMapper().GetSubstringOf(mapped);
         
         public static Substring GetSubstringOf(this InputMapper mapper, in Range mapped) =>
-            mapper.BuildSubstringMapper().GetSubstringOf(mapped);
+            mapper.BuildSubstringMapper().GetSubstring(mapped);
 
         public static Substring MapAndGetSubstringOf(this InputMapper mapper, in Substring substring) =>
             mapper.GetSubstringOf(mapper.Map(in substring));

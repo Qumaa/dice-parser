@@ -6,14 +6,14 @@
         private readonly BinaryInvocationHandler<TReturn, TLeft, TRight> _handler;
 
         public BinaryOperatorInvoker(BinaryInvocationHandler<TReturn, TLeft, TRight> handler) : 
-            base(Signature.Define<TLeft, TRight>().Returns<TReturn>())
+            base(Signature.Arguments<TLeft, TRight>().Returns<TReturn>())
         {
             _handler = handler;
         }
 
         public override INode Invoke(OperandsAccess operandsAccess)
         {
-            operandsAccess.Get(0, out TLeft left).Get(1, out TRight right);
+            operandsAccess.Sequential().Get(out TLeft left).Get(out TRight right);
             
             return _handler.Invoke(left, right);
         }

@@ -5,14 +5,14 @@
         private readonly CompositionHandler _handler;
 
         public CompositionInvoker(CompositionHandler handler) : 
-            base(Signature.Define<INumeric, INumeric>().Returns<INumeric>())
+            base(Signature.Arguments<INumeric, INumeric>().Returns<INumeric>())
         {
             _handler = handler;
         }
         
         public override INode Invoke(OperandsAccess operandsAccess)
         {
-            operandsAccess.Get(1, out INumeric node).Get(0, out INumeric times);
+            operandsAccess.Sequential().Get(out INumeric times).Get(out INumeric node);
             
             return _handler(node, times.Evaluate().Value);
         }

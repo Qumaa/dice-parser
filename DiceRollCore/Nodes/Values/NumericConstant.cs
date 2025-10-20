@@ -7,9 +7,9 @@
             CacheEvaluation(new Outcome(value));
         }
 
-        public override void Next() { }
-
+        public override void NextEvaluation() { }
+        
         protected override RollProbabilityDistribution CreateProbabilityDistribution() =>
-            new(Evaluation);
+            new(CachedEvaluation);
     }
 }

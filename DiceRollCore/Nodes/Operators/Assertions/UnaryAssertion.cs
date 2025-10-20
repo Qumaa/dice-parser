@@ -13,7 +13,7 @@ namespace DiceRoll
             _source = source;
         }
 
-        public override void Next() =>
-            _source.Next();
+        public override void NextEvaluation() =>
+            _source.NextEvaluation();
     }
 }

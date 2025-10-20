@@ -5,7 +5,7 @@
         private readonly UnaryInvocationHandler<TReturn, T> _handler;
 
         public UnaryOperatorInvoker(UnaryInvocationHandler<TReturn, T> handler) : base(
-            Signature.Define<T>().Returns<TReturn>()
+            Signature.Arguments<T>().Returns<TReturn>()
             )
         {
             _handler = handler;

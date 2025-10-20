@@ -5,9 +5,9 @@
         private LogicalProbabilityDistribution _cachedDistribution;
 
         public Probability True => GetProbabilityDistribution().True;
-        public Binary Evaluation { get; private set; }
+        public Binary CachedEvaluation { get; private set; }
 
-        public abstract void Next();
+        public abstract void NextEvaluation();
 
         public LogicalProbabilityDistribution GetProbabilityDistribution() =>
             _cachedDistribution ??= CreateProbabilityDistribution();
@@ -15,9 +15,12 @@
         public void Visit<T>(T visitor) where T : INodeVisitor =>
             visitor.ForAssertion(this);
 
+        public virtual object Clone() =>
+            MemberwiseClone();
+
         protected void CacheEvaluation(in Binary evaluation) =>
-            Evaluation = evaluation;
-        
+            CachedEvaluation = evaluation;
+
         protected abstract LogicalProbabilityDistribution CreateProbabilityDistribution();
     }
 }

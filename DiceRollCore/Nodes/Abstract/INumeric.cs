@@ -28,39 +28,6 @@
         public static INumeric Negate(this INumeric node) =>
             Node.Operator.Negate(node);
         
-        public static INumeric Composite(this INumeric node, Composer composer, INumeric other,
-            params INumeric[] sequence) =>
-            Node.Value.Composite(composer, node, other, sequence);
-            
-        public static INumeric Composite(this INumeric node, Composer composer, int repetitionCount) =>
-            Node.Value.Composite(composer, node, repetitionCount);
-
-        public static INumeric Composite<T>(this INumeric node, INumeric other, params INumeric[] sequence)
-            where T : Composer, new() =>
-            Node.Value.Composite<T>(node, other, sequence);
-            
-        public static INumeric Composite<T>(this INumeric node, int repetitionCount)
-            where T : Composer, new() =>
-            Node.Value.Composite<T>(node, repetitionCount);
-
-        public static INumeric Summation(this INumeric node, INumeric other, params INumeric[] sequence) =>
-            Node.Value.Summation(node, other, sequence);
-            
-        public static INumeric Summation(this INumeric node, int repetitionCount) =>
-            Node.Value.Summation(node, repetitionCount);
-
-        public static INumeric Highest(this INumeric node, INumeric other, params INumeric[] sequence) =>
-            Node.Value.Highest(node, other, sequence);
-            
-        public static INumeric Highest(this INumeric node, int repetitionCount) =>
-            Node.Value.Highest(node, repetitionCount);
-
-        public static INumeric Lowest(this INumeric node, INumeric other, params INumeric[] sequence) =>
-            Node.Value.Lowest(node, other, sequence);
-            
-        public static INumeric Lowest(this INumeric node, int repetitionCount) =>
-            Node.Value.Lowest(node, repetitionCount);
-        
         public static IOperation Equal(this INumeric node, INumeric other) =>
             Node.Operator.Equal(node, other);
 

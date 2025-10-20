@@ -35,7 +35,7 @@ namespace DiceRoll.Input.Parsing
             IToken delimiterToken = _delimiters.ToCompositeToken();
             
             DiceParser parser = new(delimiterToken, _compositionDefinitions.ToArray());
-            return OperandDefinition.New<INumeric>(
+            return OperandDefinition.OfType<INumeric>(
                 CreateDiceToken(delimiterToken),
                 diceExpression => parser.Parse(diceExpression)
                 );

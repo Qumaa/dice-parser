@@ -1,22 +1,31 @@
-﻿namespace DiceRoll
+﻿using System;
+
+namespace DiceRoll
 {
     public interface INode<out T> : INode
     {
-        T Evaluation { get; }
+        T CachedEvaluation { get; }
     }
 
-    public interface INode
+    public interface INode : ICloneable
     {
         void Visit<T>(T visitor) where T : INodeVisitor;
-        void Next();
+        void NextEvaluation();
     }
 
     public static class NodeExtensions
     {
         public static T Evaluate<T>(this INode<T> node)
         {
-            node.Next();
-            return node.Evaluation;
+            node.NextEvaluation();
+            return node.CachedEvaluation;
+        }
+
+        /// <inheritdoc cref="ICloneable.Clone"/>
+        public static T CloneTyped<T>(this T node) where T : INode
+        {
+            object clone = node.Clone();
+            return clone is T casted ? casted : default;
         }
     }
 }

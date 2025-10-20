@@ -1,7 +1,9 @@
-﻿namespace DiceRoll
+﻿using System.Collections.Generic;
+
+namespace DiceRoll
 {
-    public interface IComposite : INode<CompositeEvaluation>
+    public interface IComposite : INumeric
     {
-        INumeric AsNumeric { get; }
+        IEnumerable<INumeric> SourceNodes { get; }
     }
 }

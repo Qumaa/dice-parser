@@ -1,49 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace DiceRoll
 {
     public abstract class Composer
     {
-        public ComposerOutput Compose(IEnumerable<INumeric> source)
+        public abstract INumeric Compose(IEnumerable<INumeric> source);
+
+        protected static INumeric Aggregate(IEnumerable<INumeric> source, AggregationDelegate aggregationDelegate)
         {
             ArgumentNullException.ThrowIfNull(source);
+            ArgumentNullException.ThrowIfNull(aggregationDelegate);
+
+            using IEnumerator<INumeric> enumerator = source.GetEnumerator();
+
+            // check if it has at least 1 element
+            if (!enumerator.MoveNext())
+                throw new InvalidOperationException("Source nodes sequence contains no elements.");
             
-            return Compose(source.ToArray());
-        }
-
-        public ComposerOutput Compose(INumeric[] source)
-        {
-            ArgumentNullException.ThrowIfNull(source);
-            CompositeRepetitionArgumentException.ThrowIfBelowOne(source.Length);
-
-            ComposerContext context = new(source.Length);
-            INumeric compositeNode = Compose(source, context);
-
-            return new ComposerOutput(compositeNode, context);
-        }
-
-        protected abstract INumeric Compose(INumeric[] source, ComposerContext context);
-
-        protected static INumeric IteratePairs(INumeric[] source, ComposerContext context,
-            PairCompositionDelegate compositionDelegate)
-        {
-            ArgumentNullException.ThrowIfNull(source);
-            ArgumentNullException.ThrowIfNull(context);
-            ArgumentNullException.ThrowIfNull(compositionDelegate);
+            INumeric aggregated = enumerator.Current; // 1st element
             
-            source[0] = context.Include(source[0]);
+            while (enumerator.MoveNext()) // iterating from 2nd element
+                aggregated = aggregationDelegate(aggregated, enumerator.Current);
 
-            for (int i = 1; i < source.Length; i++)
-            {
-                INumeric previous = source[i - 1];
-                INumeric current = context.Include(source[i]);
-
-                source[i] = compositionDelegate(previous, current);
-            }
-
-            return source[^1];
+            ArgumentNullException.ThrowIfNull(aggregated);
+            
+            return aggregated;
         }
 
         public static Composer FromDelegate(ComposerDelegate composerDelegate) =>
@@ -60,10 +42,10 @@ namespace DiceRoll
                 _composerDelegate = func;
             }
 
-            protected override INumeric Compose(INumeric[] source, ComposerContext context) =>
+            public override INumeric Compose(IEnumerable<INumeric> source) =>
                 _composerDelegate.Invoke(source);
         }
 
-        protected delegate INumeric PairCompositionDelegate(INumeric left, INumeric right);
+        protected delegate INumeric AggregationDelegate(INumeric aggregated, INumeric current);
     }
 }

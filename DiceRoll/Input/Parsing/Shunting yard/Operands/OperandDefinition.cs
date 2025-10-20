@@ -17,7 +17,7 @@ namespace DiceRoll.Input.Parsing
             EvaluationType = evaluationType;
         }
 
-        public static OperandDefinition New<T>(IToken token, OperandParsingHandler parsingHandler) where T : INode =>
+        public static OperandDefinition OfType<T>(IToken token, OperandParsingHandler parsingHandler) where T : INode =>
             new(token, parsingHandler, typeof(T));
     }
 }

@@ -6,10 +6,10 @@ namespace DiceRoll
     {
         public Negation(INumeric node) : base(node) { }
 
-        public override void Next()
+        public override void NextEvaluation()
         {
-            base.Next();
-            CacheEvaluation(-_source.Evaluation);
+            base.NextEvaluation();
+            CacheEvaluation(-_source.CachedEvaluation);
         }
 
         protected override RollProbabilityDistribution CreateProbabilityDistribution() =>

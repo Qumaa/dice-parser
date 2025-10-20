@@ -13,9 +13,9 @@ namespace DiceRoll.Input.Parsing
             _patterns = patterns;
         }
 
-        public RegexToken(IEnumerable<Regex> patterns) : this(patterns.ToArray()) { }
+        public RegexToken(IEnumerable<Regex> patterns) : this(Syntax.ToArray(patterns)) { }
 
-        public RegexToken(Regex pattern) : this(new [] {pattern}) { }
+        public RegexToken(Regex pattern) : this(Syntax.SingleEnumerable(pattern)) { }
 
         public bool Matches(in Substring input, out Substring matchSubstring)
         {

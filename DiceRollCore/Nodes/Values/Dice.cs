@@ -10,15 +10,15 @@ namespace DiceRoll
         public Dice(Random random, int faces)
         {
             ArgumentNullException.ThrowIfNull(random);
-            DiceFacesException.ThrowIfInvalid(faces);
-            
+            ArgumentOutOfRangeException.ThrowIfLessThan(faces, 1);
+
             _random = random;
             _faces = faces;
         }
 
-        public override void Next() =>
+        public override void NextEvaluation() =>
             CacheEvaluation(new Outcome(_random.Next(0, _faces) + 1));
-
+        
         protected override RollProbabilityDistribution CreateProbabilityDistribution()
         {
             Roll[] rolls = new Roll[_faces];

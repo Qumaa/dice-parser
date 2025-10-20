@@ -9,12 +9,12 @@
             _operation = operation;
         }
 
-        public override void Next()
+        public override void NextEvaluation()
         {
-            _operation.Next();
-            CacheEvaluation(_operation.Evaluation.AsBinary());
+            _operation.NextEvaluation();
+            CacheEvaluation(_operation.CachedEvaluation.AsBinary());
         }
-
+        
         protected override LogicalProbabilityDistribution CreateProbabilityDistribution() =>
             _operation.GetProbabilityDistribution().AsLogical();
     }

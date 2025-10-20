@@ -18,7 +18,7 @@ namespace DiceRoll
             _combinationType = combinationType;
         }
 
-        public override void Next()
+        public override void NextEvaluation()
         {
             Outcome left = _left.Evaluate();
             Outcome right = _right.Evaluate();

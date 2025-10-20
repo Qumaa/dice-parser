@@ -6,7 +6,7 @@ namespace DiceRoll
     {
         private OptionalRollProbabilityDistribution _cachedDistribution;
 
-        public Optional<Outcome> Evaluation { get; private set; }
+        public Optional<Outcome> CachedEvaluation { get; private set; }
 
         public IAssertion AsAssertion { get; }
 
@@ -15,7 +15,7 @@ namespace DiceRoll
             AsAssertion = CreateAssertionWrapperSafe();
         }
 
-        public abstract void Next();
+        public abstract void NextEvaluation();
 
         public OptionalRollProbabilityDistribution GetProbabilityDistribution() =>
             _cachedDistribution ??= CreateProbabilityDistribution();
@@ -23,9 +23,12 @@ namespace DiceRoll
         public void Visit<T>(T visitor) where T : INodeVisitor =>
             visitor.ForOperation(this);
 
+        public virtual object Clone() =>
+            MemberwiseClone();
+
         protected void CacheEvaluation(in Optional<Outcome> evaluation) =>
-            Evaluation = evaluation;
-        
+            CachedEvaluation = evaluation;
+
         protected virtual IAssertion CreateAssertionWrapper() =>
             DefaultAssertionFactory();
 

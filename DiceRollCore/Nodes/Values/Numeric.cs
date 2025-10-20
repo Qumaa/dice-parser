@@ -4,9 +4,9 @@
     {
         private RollProbabilityDistribution _cachedDistribution;
 
-        public Outcome Evaluation { get; private set; }
+        public Outcome CachedEvaluation { get; private set; }
 
-        public abstract void Next();
+        public abstract void NextEvaluation();
 
         public RollProbabilityDistribution GetProbabilityDistribution() =>
             _cachedDistribution ??= CreateProbabilityDistribution();
@@ -14,8 +14,11 @@
         public void Visit<T>(T visitor) where T : INodeVisitor =>
             visitor.ForNumeric(this);
 
+        public virtual object Clone() =>
+            MemberwiseClone();
+
         protected void CacheEvaluation(in Outcome evaluation) =>
-            Evaluation = evaluation;
+            CachedEvaluation = evaluation;
 
         protected abstract RollProbabilityDistribution CreateProbabilityDistribution();
     }

@@ -9,7 +9,7 @@
             _delegates = DefaultOperationDelegates.Get(operationType);
         }
 
-        public override void Next()
+        public override void NextEvaluation()
         {
             Outcome left = _left.Evaluate();
             Outcome right = _right.Evaluate();
@@ -35,12 +35,12 @@
                 _operation = operation;
             }
             
-            public override void Next()
+            public override void NextEvaluation()
             {
-                _operation.Next();
-                CacheEvaluation(_operation.Evaluation.AsBinary());
+                _operation.NextEvaluation();
+                CacheEvaluation(_operation.CachedEvaluation.AsBinary());
             }
-
+            
             protected override LogicalProbabilityDistribution CreateProbabilityDistribution() =>
                 _operation.GetLogicalProbabilityDistribution();
         }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace DiceRoll.Input.Parsing
 {
@@ -21,9 +20,10 @@ namespace DiceRoll.Input.Parsing
         {
             _openParenthesis = openParenthesis;
             _closeParenthesis = closeParenthesis;
-            
-            _operators = operators.ToArray();
-            _operands = operands.ToArray();
+
+
+            _operators = Syntax.ToArray(operators);
+            _operands = Syntax.ToArray(operands);
         }
 
         public bool StartsWithOpenParenthesis(in Substring expression, out Substring substring) =>

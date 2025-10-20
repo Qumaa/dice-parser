@@ -1,4 +1,6 @@
-﻿namespace DiceRoll
+﻿using System.Collections.Generic;
+
+namespace DiceRoll
 {
-    public delegate INumeric ComposerDelegate(INumeric[] composed);
+    public delegate INumeric ComposerDelegate(IEnumerable<INumeric> source);
 }

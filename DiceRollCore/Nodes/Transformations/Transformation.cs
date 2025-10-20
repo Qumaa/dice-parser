@@ -15,7 +15,7 @@ namespace DiceRoll
         
         protected abstract override RollProbabilityDistribution CreateProbabilityDistribution();
 
-        public override void Next() =>
-            _source.Next();
+        public override void NextEvaluation() =>
+            _source.NextEvaluation();
     }
 }

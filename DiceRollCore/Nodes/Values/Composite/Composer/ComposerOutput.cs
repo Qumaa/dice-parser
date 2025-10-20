@@ -1,17 +1,18 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace DiceRoll
 {
     [StructLayout(LayoutKind.Auto)]
     public readonly ref struct ComposerOutput
     {
-        public readonly INumeric CompositeNode;
-        public readonly ComposerContext Context;
-        
-        public ComposerOutput(INumeric compositeNode, ComposerContext context)
+        public readonly INumeric CompositeNumeric;
+        public readonly IEnumerable<INumeric> SourceNodes;
+            
+        public ComposerOutput(INumeric compositeNumeric, IEnumerable<INumeric> sourceNodes)
         {
-            CompositeNode = compositeNode;
-            Context = context;
+            CompositeNumeric = compositeNumeric;
+            SourceNodes = sourceNodes;
         }
     }
 }

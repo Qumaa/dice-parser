@@ -6,40 +6,56 @@ namespace DiceRoll
 {
     public sealed class Composite : Numeric, IComposite
     {
-        private readonly INumeric _composite;
-        
-        private readonly ComposerContext _context;
-        private CompositeEvaluation _compositeEvaluation;
+        private readonly Composer _composer;
+        private readonly INumeric _compositeNumeric;
 
-        CompositeEvaluation INode<CompositeEvaluation>.Evaluation => _compositeEvaluation;
+        public IEnumerable<INumeric> SourceNodes { get; }
 
-        INumeric IComposite.AsNumeric => _composite;
-
-        public Composite(IEnumerable<INumeric> sequence, Composer composer)
+        // WARNING: source MUST NOT create new nodes during enumeration, but always point to the same nodes
+        public Composite(Composer composer, IEnumerable<INumeric> source)
         {
-            ArgumentNullException.ThrowIfNull(sequence);
+            ArgumentNullException.ThrowIfNull(source);
             ArgumentNullException.ThrowIfNull(composer);
 
-            ComposerOutput output = composer.Compose(sequence.ToArray());
-            
-            _composite = output.CompositeNode;
-            _context = output.Context;
+            _composer = composer;
+            SourceNodes = source;
+            _compositeNumeric = composer.Compose(SourceNodes);
         }
 
-        public Composite(INumeric node, int repetitionCount, Composer composer) :
-            this(Enumerable.Repeat(node, repetitionCount), composer) { }
-
-        public override void Next()
+        public Composite(Composer composer, INumeric numeric, int repetitionTimes)
         {
-            _composite.Next();
+            ArgumentNullException.ThrowIfNull(composer);
+            ArgumentNullException.ThrowIfNull(numeric);
+            ArgumentOutOfRangeException.ThrowIfLessThan(repetitionTimes, 1);
             
-            CacheEvaluation(_composite.Evaluation);
+            INumeric[] sourceNodes = new INumeric[repetitionTimes];
+            sourceNodes[0] = numeric;
 
-            _compositeEvaluation = new CompositeEvaluation(Evaluation, _context.Read());
-            _context.Reset();
+            for (int i = 1; i < sourceNodes.Length; i++)
+                sourceNodes[i] = numeric.CloneTyped();
+
+            _composer = composer;
+            SourceNodes = sourceNodes;
+            _compositeNumeric = composer.Compose(sourceNodes);
         }
+
+        private Composite(Composite cloneFrom)
+        {
+            SourceNodes = cloneFrom.SourceNodes.Select(x => x.CloneTyped()).ToArray();
+            _compositeNumeric = cloneFrom._composer.Compose(SourceNodes);
+        }
+
+        public override void NextEvaluation()
+        {
+            _compositeNumeric.NextEvaluation();
+            
+            CacheEvaluation(_compositeNumeric.CachedEvaluation);
+        }
+
+        public override object Clone() =>
+            new Composite(this);
 
         protected override RollProbabilityDistribution CreateProbabilityDistribution() =>
-            _composite.GetProbabilityDistribution();
+            _compositeNumeric.GetProbabilityDistribution();
     }
 }
