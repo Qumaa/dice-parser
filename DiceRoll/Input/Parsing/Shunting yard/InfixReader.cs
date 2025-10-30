@@ -21,9 +21,12 @@ namespace DiceRoll.Input.Parsing
             ParseTokensIteratively(expression);
         }
 
-        private void ParseTokensIteratively(string expression)
+        private void ParseTokensIteratively(string expression) =>
+            ParseTokensIteratively(Substring.All(expression));
+
+        private void ParseTokensIteratively(in Substring expression)
         {
-            Substring notParsed = Substring.All(expression).Trim();
+            Substring notParsed = expression.Trim();
             
             do notParsed = ParseSubstringStartOrThrow(in notParsed); 
             while (!notParsed.IsEmpty);
@@ -35,7 +38,7 @@ namespace DiceRoll.Input.Parsing
 
             try
             {
-                ParseSubstring(in notParsed, out parsed);
+                ParseSubstringStart(in notParsed, out parsed);
                 return notParsed.MoveStart(parsed.Length).TrimStart();
             }
             catch (Exception e)
@@ -44,8 +47,25 @@ namespace DiceRoll.Input.Parsing
             }
         }
 
-        private void ParseSubstring(in Substring notParsed, out Substring parsed)
+        private void ParseSubstringStart(in Substring notParsed, out Substring parsed)
         {
+            if (_state.Tokens.StartsWithOperand(in notParsed, out OperandDefinition operandDefinition, out parsed))
+            {
+                Operand(operandDefinition, in parsed);
+                return;
+            }
+
+            if (_state.Tokens.StartsWithOperator(
+                    in notParsed,
+                    GetCurrentOperatorUsageForm(),
+                    out OperatorDefinition operatorDefinition,
+                    out parsed
+                    ))
+            {
+                Operator(operatorDefinition, in parsed);
+                return;
+            }
+            
             if (_state.Tokens.StartsWithOpenParenthesis(in notParsed, out parsed))
             {
                 OpenParenthesis(in parsed);
@@ -55,23 +75,6 @@ namespace DiceRoll.Input.Parsing
             if (_state.Tokens.StartsWithCloseParenthesis(in notParsed, out parsed))
             {
                 CloseParenthesis();
-                return;
-            }
-            
-            if (_state.Tokens.StartsWithOperand(in notParsed, out Operand operand, out parsed))
-            {
-                Operand(in operand, in parsed);
-                return;
-            }
-
-            if (_state.Tokens.StartsWithOperator(
-                    in notParsed,
-                    GetCurrentOperatorUsageForm(),
-                    out Operator @operator,
-                    out parsed
-                    ))
-            {
-                Operator(in @operator, in parsed);
                 return;
             }
 
@@ -108,31 +111,75 @@ namespace DiceRoll.Input.Parsing
             _operators.TryInvokeDelayedOperators();
         }
 
-        private void Operator(in Operator @operator, in Substring operatorSubstring)
+        private void Operator(OperatorDefinition definition, in Substring substring)
         {
             while (_operators.TryPeek(out Operator lastOperator) &&
                    !lastOperator.IsOpenParenthesis &&
-                   @operator.Precedence < lastOperator.Precedence)
+                   definition.Precedence < lastOperator.Precedence)
                 _operators.InvokeAfterDelayedOperators(_operators.Pop());
 
-            OperatorProcessingResult processingResult = _operators.Process(in @operator, in operatorSubstring);
+            Operator @operator = new(definition);
+            
+            OperatorProcessingResult processingResult = _operators.Process(in @operator, in substring);
 
             _state.Annotate().OperatorProcessing(processingResult);
         }
 
-        private void Operand(in Operand operand, in Substring context)
+        private void Operand(OperandDefinition definition, in Substring substring)
         {
-            _operands.Push(in operand, in context);
+            Operand operand = ParseOperand(definition, in substring);
+            
+            _operands.Push(in operand, in substring);
                 
             _state.Annotate().OperandProcessing();
             
             _operators.TryInvokeDelayedOperators();
         }
-        
+
+        private Operand ParseOperand(OperandDefinition definition, in Substring substring)
+        {
+            OperandParser parser = definition.Parser;
+
+            INode parsedNode = parser switch
+            {
+                FlatOperandParser flatParser => flatParser.Parse(in substring),
+                RecursiveOperandParser recursiveParser => recursiveParser.Parse(in substring, new InlineParser(this)),
+                _ => throw new ArgumentException(
+                    $"Unsupported operand parser type. Implementations of either {nameof(FlatOperandParser)} or {nameof(RecursiveOperandParser)} are expected."
+                    )
+            };
+
+            return new Operand(parsedNode, definition.EvaluationType);
+        }
+
         private void ThrowIfUnbalancedParenthesis()
         {
             if (_state.ClosingParenthesisWouldImposeImbalance)
                 throw new UnbalancedParenthesisException();
+        }
+
+        // todo this lazy shit patch barely works
+        private sealed class InlineParser : FlatOperandParser
+        {
+            private readonly InfixReader _infixReader;
+            private readonly int _capturedOperands;
+            
+            public InlineParser(InfixReader infixReader)
+            {
+                _infixReader = infixReader;
+                _capturedOperands = infixReader._state.Operands.Count;
+            }
+
+            public override INode Parse(in Substring expression)
+            {
+                _infixReader.OpenParenthesis(default); // todo
+                _infixReader.ParseTokensIteratively(in expression);
+                _infixReader.CloseParenthesis();
+                
+                // todo if not 1 operands produced then throw
+
+                return _infixReader._operands.Pop().Value.Node;
+            }
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace DiceRoll.Input.Parsing
 {
@@ -14,20 +13,20 @@ namespace DiceRoll.Input.Parsing
             _tokens = tokens;
         }
 
-        public bool Matches(in Substring input, out Substring matchSubstring)
+        public bool Matches(in Substring input, out Substring firstMatch)
         {
-            matchSubstring = Substring.Empty(in input);
+            firstMatch = Substring.Empty(in input);
             
             foreach (IToken token in _tokens)
             {
                 if (!token.Matches(in input, out Substring newMatch))
                     continue;
 
-                if (matchSubstring.IsEmpty || newMatch.Start < matchSubstring.Start)
-                    matchSubstring = newMatch;
+                if (firstMatch.IsEmpty || newMatch.Start < firstMatch.Start)
+                    firstMatch = newMatch;
             }
 
-            return !matchSubstring.IsEmpty;
+            return !firstMatch.IsEmpty;
         }
     }
 

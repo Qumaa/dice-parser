@@ -26,7 +26,7 @@
             CompositionHandler = compositionHandler;
         }
         
-        private static StringBasedToken Tokenize(params string[] args) =>
-            StringBasedToken.CaseInsensitive(args);
+        private static StringComparisonToken Tokenize(params string[] args) =>
+            StringComparisonToken.CaseInsensitive(args);
     }
 }

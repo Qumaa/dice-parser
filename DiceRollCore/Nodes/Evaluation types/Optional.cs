@@ -2,6 +2,7 @@
 
 namespace DiceRoll
 {
+    // todo: make value retrievable even if exists is set to false (make fields public?)
     [StructLayout(LayoutKind.Auto)]
     public readonly struct Optional<T>
     {

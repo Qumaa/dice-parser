@@ -13,12 +13,12 @@ namespace DiceRoll.Input.Parsing
             _castingTable = castingTable;
         }
 
-        public void OpenParenthesis(in Substring context) =>
-            _state.Operators.MapAndPush(in Operator.OpenParenthesis, context);
+        public void OpenParenthesis(in Substring substring) =>
+            _state.Operators.MapAndPush(in Operator.OpenParenthesis, substring);
 
-        public OperatorProcessingResult Process(in Operator @operator, in Substring context)
+        public OperatorProcessingResult Process(in Operator @operator, in Substring substring)
         {
-            Mapped<Operator> mapped = _state.Mapper.Map(in @operator, in context);
+            Mapped<Operator> mapped = _state.Mapper.Map(in @operator, in substring);
 
             OperatorInvocationBehaviour invocationBehaviour = @operator.InvocationBehaviour;
 
@@ -39,7 +39,7 @@ namespace DiceRoll.Input.Parsing
             // delay until more operands are pushed
             _state.DelayedOperators.MapAndPush(
                 new DelayedOperator(@operator.InvocationBehaviour, _state.ParenthesisLevel, _state.Operands.Count),
-                in context
+                in substring
                 );
 
             return OperatorProcessingResult.Delayed;

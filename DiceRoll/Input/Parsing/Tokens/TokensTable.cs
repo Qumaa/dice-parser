@@ -5,7 +5,7 @@ namespace DiceRoll.Input.Parsing
 {
     public class TokensTable
     {
-        public static readonly TokensTable Default = BuilderWithDefaults().Build();
+        public static readonly TokensTable Default = BuildDefault().Build();
 
         private readonly IToken _openParenthesis;
 
@@ -33,36 +33,37 @@ namespace DiceRoll.Input.Parsing
             _closeParenthesis.MatchesStart(in expression, out substring);
 
         public bool StartsWithOperator(in Substring expression, OperatorUsageForm usageForm,
-            out Operator @operator, out Substring operatorSubstring)
+            out OperatorDefinition definition, out Substring substring)
         {
             foreach (OperatorDefinition operatorDefinition in _operators)
             {
                 if (!(MatchesUsageForm(operatorDefinition.InvocationBehaviour, usageForm) &&
-                      operatorDefinition.Token.MatchesStart(in expression, out operatorSubstring)))
+                      operatorDefinition.Token.MatchesStart(in expression, out substring)))
                     continue;
 
-                @operator = new Operator(operatorDefinition);
+                definition = operatorDefinition;
                 return true;
             }
 
-            operatorSubstring = default;
-            @operator = default;
+            substring = default;
+            definition = null;
             return false;
         }
 
-        public bool StartsWithOperand(in Substring expression, out Operand operand, out Substring operandSubstring)
+        public bool StartsWithOperand(in Substring expression, out OperandDefinition definition,
+            out Substring substring)
         {
             foreach (OperandDefinition operandDefinition in _operands)
             {
-                if (!operandDefinition.Token.MatchesStart(in expression, out operandSubstring))
+                if (!operandDefinition.Token.MatchesStart(in expression, out substring))
                     continue;
 
-                operand = new Operand(operandDefinition.ParsingHandler(operandSubstring), operandDefinition.EvaluationType);
+                definition = operandDefinition;
                 return true;
             }
 
-            operand = default;
-            operandSubstring = default;
+            substring = default;
+            definition = null;
             return false;
         }
 
@@ -91,11 +92,12 @@ namespace DiceRoll.Input.Parsing
         private static bool MatchesUsageForm(OperatorInvocationBehaviour invocationBehaviour, OperatorUsageForm usageForm) =>
             invocationBehaviour is { LeftArity: 0, RightArity: > 0 } == usageForm is OperatorUsageForm.Prefix;
 
-        public static TokensTableBuilder BuilderWithDefaults() =>
+        public static TokensTableBuilder BuildDefault() =>
             new TokensTableBuilder(Token("("), Token(")"))
                 .Operand(in DiceOperand.Default)
                 .Operand(in NumericOperand.Default)
                 .Operand(in BinaryOperand.Default)
+                .Operand(in NodePoolOperand.Default)
                 
                 .PrefixUnaryOperator(Token("!", "not"), 120, static (IAssertion node) => node.Not())
                 .PrefixUnaryOperator(Token("-"), 120, static (INumeric node) => node.Negate())
@@ -129,7 +131,7 @@ namespace DiceRoll.Input.Parsing
                 .BinaryOperator(Token("&&", "&", "and"), 60, static (IAssertion left, IAssertion right) => left.And(right))
                 .BinaryOperator(Token("||", "|", "or"), 60, static (IAssertion left, IAssertion right) => left.Or(right));
 
-        private static StringBasedToken Token(params string[] values) =>
-            StringBasedToken.CaseInsensitive(values);
+        private static StringComparisonToken Token(params string[] values) =>
+            StringComparisonToken.CaseInsensitive(values);
     }
 }

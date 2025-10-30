@@ -5,19 +5,29 @@ namespace DiceRoll.Input.Parsing
     public sealed class OperandDefinition
     {
         public readonly IToken Token;
-        public readonly OperandParsingHandler ParsingHandler;
+        public readonly OperandParser Parser;
         public readonly Type EvaluationType;
 
-        public OperandDefinition(IToken token, OperandParsingHandler parsingHandler, Type evaluationType)
+        public OperandDefinition(IToken token, OperandParser parser, Type evaluationType)
         {
-            ConstructorException.ThrowIfTypeIsNotNode(evaluationType);
+            ArgumentNullException.ThrowIfNull(token);
+            ArgumentNullException.ThrowIfNull(parser);
+            CommonException.ThrowIfTypeIsNotNode(evaluationType);
             
             Token = token;
-            ParsingHandler = parsingHandler;
+            Parser = parser;
             EvaluationType = evaluationType;
         }
 
-        public static OperandDefinition OfType<T>(IToken token, OperandParsingHandler parsingHandler) where T : INode =>
+        public static OperandDefinition OfType<T>(IToken token, OperandParser parsingHandler) where T : INode =>
             new(token, parsingHandler, typeof(T));
+
+        public static OperandDefinition OfType<T>(IToken token, FlatOperandParsingHandler parsingHandler)
+            where T : INode =>
+            OfType<T>(token, OperandParser.FromDelegate(parsingHandler));
+
+        public static OperandDefinition OfType<T>(IToken token, RecursiveOperandParsingHandler parsingHandler)
+            where T : INode =>
+            OfType<T>(token, OperandParser.FromDelegate(parsingHandler));
     }
 }

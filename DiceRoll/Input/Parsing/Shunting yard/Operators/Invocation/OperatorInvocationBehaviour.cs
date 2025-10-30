@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace DiceRoll.Input.Parsing
@@ -36,8 +37,8 @@ namespace DiceRoll.Input.Parsing
 
             public Builder(int leftArity, int rightArity)
             {
-                ConstructorException.ThrowIfBelowZero(leftArity);
-                ConstructorException.ThrowIfBelowZero(rightArity);
+                ArgumentOutOfRangeException.ThrowIfNegative(leftArity);
+                ArgumentOutOfRangeException.ThrowIfNegative(rightArity);
                 
                 _invokers = new List<OperatorInvoker>(2);
                 _leftArity = leftArity;
@@ -49,7 +50,7 @@ namespace DiceRoll.Input.Parsing
                 int arity = _leftArity + _rightArity;
 
                 if (overload.Signature.OperandsNumber != arity)
-                    throw new ConstructorException($"Adding an invoker to invocation behaviour has failed. The invoker must use {arity} operands, but expects {overload.Signature.OperandsNumber} operands instead.");
+                    throw new ArgumentException($"Adding an invoker to invocation behaviour has failed. The invoker must use {arity} operand(-s), but expects {overload.Signature.OperandsNumber} operand(-s) instead.");
                 
                 _invokers.Add(overload);
 
@@ -59,7 +60,7 @@ namespace DiceRoll.Input.Parsing
             public OperatorInvocationBehaviour Build()
             {
                 if (_invokers.Count is 0)
-                    throw new ConstructorException("Constructing an invocation behaviour with not at least one invoker is not valid");
+                    throw new ArgumentException("Constructing an invocation behaviour with not at least one invoker is not valid.");
                 
                 return new OperatorInvocationBehaviour(_invokers, _leftArity, _rightArity);
             }

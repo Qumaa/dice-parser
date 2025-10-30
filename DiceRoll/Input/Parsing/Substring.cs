@@ -15,13 +15,13 @@ namespace DiceRoll.Input.Parsing
 
         public bool IsEmpty => Length is 0;
 
-        public char this[int i] => IndexThis(i);
-        public char this[Index i] => IndexThis(i);
-        public Substring this[Range i] => IndexThis(i);
+        public char this[in int i] => IndexThis(in i);
+        public char this[in Index i] => IndexThis(in i);
+        public Substring this[in Range i] => IndexThis(in i);
 
         public Substring(string source, int start, int length)
         {
-            ArgumentNullException.ThrowIfNull(source);
+            ArgumentException.ThrowIfNullOrEmpty(source);
             ArgumentOutOfRangeException.ThrowIfLessThan(start, 0);
             ArgumentOutOfRangeException.ThrowIfGreaterThan(start + length, source.Length);
             
@@ -31,8 +31,27 @@ namespace DiceRoll.Input.Parsing
         }
 
         public Substring(string source) : this(source, 0, source.Length) { }
+
+        public Substring(in Substring source, int start, int length) : this(
+            source.Source,
+            source.Start + start,
+            length
+            ) { }
+
+        public Substring(string source, in Range range) : this(source, range.GetOffsetAndLength(source.Length)) { }
         
-        public Substring(in Substring source, int start, int length) : this(source.Source, source.Start + start, length) { }
+        private Substring(string source, (int start, int length) tuple) : this(source, tuple.start, tuple.length) { }
+
+        public Substring(in Substring source, in Range range) : this(
+            in source,
+            range.GetOffsetAndLength(source.Length)
+            ) { }
+
+        private Substring(in Substring source, (int start, int length) tuple) : this(
+            in source,
+            tuple.start,
+            tuple.length
+            ) { }
 
         public ReadOnlySpan<char> AsSpan() =>
             Source.AsSpan(Start, Length);
@@ -48,6 +67,7 @@ namespace DiceRoll.Input.Parsing
         public Range AsRange(int start, int length) =>
             MoveStart(start).SetLength(length).AsRange();
 
+        // todo get rid of these
         public int SourceIndexToRelativeIndex(int sourceIndex) =>
             sourceIndex - Start;
         public Range SourceRangeToRelativeRange(in Range sourceRange) =>
@@ -60,6 +80,12 @@ namespace DiceRoll.Input.Parsing
 
         public Substring MoveEnd(int offset) =>
             new(Source, Start, Length - offset);
+        
+        public Substring SetStart(int start) =>
+            MoveStart(start - Start);
+
+        public Substring SetEnd(int end) =>
+            MoveEnd(End - end);
 
         public Substring SetLength(int newLength) =>
             new(Source, Start, newLength);
@@ -112,7 +138,7 @@ namespace DiceRoll.Input.Parsing
         public int IndexOf(ReadOnlySpan<char> value, StringComparison stringComparison) =>
             AsSpan().IndexOf(value, stringComparison);
 
-        private char IndexThis(int i)
+        private char IndexThis(in int i)
         {
             if (i < 0 || i >= Length)
                 throw new IndexOutOfRangeException();
@@ -120,10 +146,10 @@ namespace DiceRoll.Input.Parsing
             return Source[Start + i];
         }
 
-        private char IndexThis(Index i) =>
+        private char IndexThis(in Index i) =>
             IndexThis(i.GetOffset(Length));
 
-        private Substring IndexThis(Range range)
+        private Substring IndexThis(in Range range)
         {
             (int offset, int length) = range.GetOffsetAndLength(Length);
 
@@ -155,5 +181,29 @@ namespace DiceRoll.Input.Parsing
             public bool MoveNext() =>
                 ++_state < _substring.Length;
         }
+    }
+
+    public static class SubstringExtensions
+    {
+        public static bool IsEmptyOrWhiteSpace(this in Substring substring) =>
+            substring.IsEmpty || substring.IsWhiteSpace();
+
+        public static bool IsWhiteSpace(this in Substring substring)
+        {
+            foreach (char c in substring)
+                if (!char.IsWhiteSpace(c))
+                    return false;
+
+            return true;
+        }
+
+        public static Substring Set(this in Substring substring, in Range range) =>
+            substring.EnvelopSource()[in range];
+        
+        public static Substring EnvelopSource(this in Substring substring) =>
+            Substring.All(substring.Source);
+        
+        public static Substring Empty(this in Substring substring) =>
+            Substring.Empty(in substring);
     }
 }

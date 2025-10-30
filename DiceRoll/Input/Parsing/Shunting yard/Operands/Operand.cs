@@ -14,10 +14,5 @@ namespace DiceRoll.Input.Parsing
             Node = node;
             EvaluationType = evaluationType;
         }
-
-        internal Operand(OperandDefinition definition, in Substring substring) : this(
-            definition.ParsingHandler(substring),
-            definition.EvaluationType
-            ) { }
     }
 }

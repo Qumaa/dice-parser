@@ -1,4 +1,6 @@
-﻿namespace DiceRoll.Input.Parsing
+﻿using System;
+
+namespace DiceRoll.Input.Parsing
 {
     public sealed class ShuntingYard
     {
@@ -7,6 +9,9 @@
 
         public ShuntingYard(TokensTable tokensTable, OperandCastingTable castingTable)
         {
+            ArgumentNullException.ThrowIfNull(tokensTable);
+            ArgumentNullException.ThrowIfNull(castingTable);
+            
             ShuntingYardState state = new(tokensTable);
             ShuntingYardOperators operators = new(state, castingTable);
             ShuntingYardOperands operands = new(state);

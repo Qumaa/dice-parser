@@ -2,8 +2,7 @@
 
 namespace DiceRoll.Input.Parsing
 {
-    [StructLayout(LayoutKind.Auto)]
-    internal readonly struct DiceParser
+    internal sealed class DiceParser : FlatOperandParser
     {
         private readonly IToken _delimiter;
         private readonly CompositionDefinition[] _compositionTokens;
@@ -14,7 +13,7 @@ namespace DiceRoll.Input.Parsing
             _compositionTokens = compositionTokens;
         }
 
-        public INumeric Parse(Substring expression)
+        public override INode Parse(in Substring expression)
         {
             Helper helper = StartParsing(expression);
 

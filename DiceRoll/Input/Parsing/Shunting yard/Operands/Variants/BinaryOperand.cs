@@ -6,8 +6,8 @@
 
         private static OperandDefinition BuildDefault() =>
             OperandDefinition.OfType<IAssertion>(
-                StringBasedToken.CaseInsensitive("true", "false"),
-                x => Node.Value.Constant(bool.Parse(x.AsSpan()))
+                StringComparisonToken.CaseInsensitive("true", "false"),
+                OperandParser.FromDelegate(x => Node.Value.Constant(bool.Parse(x.AsSpan())))
                 );
     }
 }

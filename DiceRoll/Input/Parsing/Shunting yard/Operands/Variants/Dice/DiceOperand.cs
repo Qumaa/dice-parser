@@ -2,17 +2,16 @@
 {
     public static class DiceOperand
     {
-        public static readonly OperandDefinition Default = BuildDefault();
+        public static readonly OperandDefinition Default = DefaultBuilder().Build();
 
-        public static DiceOperandBuilder StartBuilding() =>
+        public static DiceOperandBuilder GetBuilder() =>
             new();
 
-        private static OperandDefinition BuildDefault() =>
-            StartBuilding()
-                .Delimiter(StringBasedToken.CaseInsensitive("d"))
+        public static DiceOperandBuilder DefaultBuilder() =>
+            GetBuilder()
+                .Delimiter(StringComparisonToken.CaseInsensitive("d"))
                 .DefaultComposition(in CompositionDefinition.Summation)
                 .Composition(in CompositionDefinition.Highest)
-                .Composition(in CompositionDefinition.Lowest)
-                .Build();
+                .Composition(in CompositionDefinition.Lowest);
     }
 }
