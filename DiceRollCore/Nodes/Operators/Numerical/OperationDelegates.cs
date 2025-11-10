@@ -7,13 +7,13 @@ namespace DiceRoll
     {
         public readonly OperationEvaluationDelegate Evaluation;
         public readonly OperationDistributionDelegate Distribution;
-        public readonly AssertionEvaluationDelegate AssertionEvaluation;
+        public readonly AssertionDistributionDelegate AssertionDistribution;
         
         public OperationDelegates(OperationEvaluationDelegate evaluation, OperationDistributionDelegate distribution,
-            AssertionEvaluationDelegate assertionEvaluation)
+            AssertionDistributionDelegate assertionDistribution)
         {
             Evaluation = evaluation;
-            AssertionEvaluation = assertionEvaluation;
+            AssertionDistribution = assertionDistribution;
             Distribution = distribution;
         }
     }

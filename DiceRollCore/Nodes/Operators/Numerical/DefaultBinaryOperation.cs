@@ -24,25 +24,14 @@
             new AsAssertionWrapper(this);
 
         private LogicalProbabilityDistribution GetLogicalProbabilityDistribution() =>
-            _delegates.AssertionEvaluation(_left.GetProbabilityDistribution(), _right.GetProbabilityDistribution());
+            _delegates.AssertionDistribution(_left.GetProbabilityDistribution(), _right.GetProbabilityDistribution());
 
-        private class AsAssertionWrapper : Assertion
+        private class AsAssertionWrapper : OperationAsAssertion
         {
-            private readonly DefaultBinaryOperation _operation;
-
-            public AsAssertionWrapper(DefaultBinaryOperation operation)
-            {
-                _operation = operation;
-            }
-            
-            public override void NextEvaluation()
-            {
-                _operation.NextEvaluation();
-                CacheEvaluation(_operation.CachedEvaluation.AsBinary());
-            }
+            public AsAssertionWrapper(DefaultBinaryOperation operation) : base(operation) { }
             
             protected override LogicalProbabilityDistribution CreateProbabilityDistribution() =>
-                _operation.GetLogicalProbabilityDistribution();
+                ((DefaultBinaryOperation) _operation).GetLogicalProbabilityDistribution();
         }
     }
 }

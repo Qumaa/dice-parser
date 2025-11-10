@@ -57,7 +57,7 @@ namespace DiceRoll
             private static readonly LogicalProbabilityDistribution _zero = new(Probability.Zero);
             private static readonly LogicalProbabilityDistribution _hundred = new(Probability.Hundred);
 
-            public static AssertionEvaluationDelegate GetDelegate(OperationType operationType) =>
+            public static AssertionDistributionDelegate GetDelegate(OperationType operationType) =>
                 operationType switch
                 {
                     OperationType.Equal => static (left, right) => Equal(left, right),
