@@ -13,18 +13,9 @@ namespace DiceRoll.Input.Parsing
     {
         public static bool Matches(this IToken token, in Substring input) =>
             token.Matches(input, out _);
-        
-        public static bool Matches(this IToken token, string input) =>
-            token.Matches(input, out _);
-        
-        public static bool Matches(this IToken token, string input, out Substring firstMatch) =>
-            token.Matches(Substring.All(input), out firstMatch);
 
         public static MatchesEnumerable EnumerateMatches(this IToken token, in Substring input) =>
             new(token, in input);
-
-        public static MatchesEnumerable EnumerateMatches(this IToken token, string input) =>
-            token.EnumerateMatches(Substring.All(input));
 
         public static bool MatchesStart(this IToken token, in Substring input, out Substring matchSubstring) =>
             token.Matches(in input, out matchSubstring) && matchSubstring.Start == input.Start;
@@ -44,7 +35,7 @@ namespace DiceRoll.Input.Parsing
                 
             if (!enumerator.MoveNext())
             {
-                matchSubstring = Substring.Empty(in input);
+                matchSubstring = input.Empty();
                 return false;
             }
 
@@ -55,7 +46,7 @@ namespace DiceRoll.Input.Parsing
             if (matchSubstring.End == input.End)
                 return true;
             
-            matchSubstring = Substring.Empty(in input);
+            matchSubstring = input.Empty();
             return false;
         }
 
@@ -87,7 +78,7 @@ namespace DiceRoll.Input.Parsing
 
                 public Enumerator(IToken token, in Substring substring)
                 {
-                    _current = Substring.Empty(in substring);
+                    _current = substring.Empty();
                     _end = substring.End;
                     _token = token;
                 }

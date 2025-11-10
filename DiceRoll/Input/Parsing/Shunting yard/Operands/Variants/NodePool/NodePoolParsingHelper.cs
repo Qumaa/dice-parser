@@ -57,7 +57,7 @@ namespace DiceRoll.Input.Parsing
                 if (!Separator.Matches(members.SetStart(closeScope.End), out separator)) // has separator after close scope?
                     goto last;
 
-                untilNextSeparator = members.Set(closeScope.End..separator.Start);
+                untilNextSeparator = members.SetRange(closeScope.End..separator.Start);
             }
 
             member = members.SetEnd(separator.Start);

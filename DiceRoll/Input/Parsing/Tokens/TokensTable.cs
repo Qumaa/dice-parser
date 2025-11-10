@@ -86,7 +86,7 @@ namespace DiceRoll.Input.Parsing
                 if (operandDefinition.Token.Matches(in expression, out knownSubstring))
                     firstKnownTokenStart = Math.Min(firstKnownTokenStart, knownSubstring.Start);
 
-            return expression[..expression.SourceIndexToRelativeIndex(firstKnownTokenStart)];
+            return expression.SetEnd(firstKnownTokenStart);
         }
 
         private static bool MatchesUsageForm(OperatorInvocationBehaviour invocationBehaviour, OperatorUsageForm usageForm) =>

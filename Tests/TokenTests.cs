@@ -3,7 +3,7 @@ namespace Tests
     [TestClass]
     public class TokenTests
     {
-        private readonly Substring _sample = Substring.All("start end all all 123 allall startend");
+        private readonly Substring _sample = "start end all all 123 allall startend";
         
         [TestMethod]
         public void Matches()

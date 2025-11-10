@@ -21,9 +21,6 @@ namespace DiceRoll.Input.Parsing
             ParseTokensIteratively(expression);
         }
 
-        private void ParseTokensIteratively(string expression) =>
-            ParseTokensIteratively(Substring.All(expression));
-
         private void ParseTokensIteratively(in Substring expression)
         {
             Substring notParsed = expression.Trim();

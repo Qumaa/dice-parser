@@ -30,32 +30,32 @@ namespace DiceRoll.Input.Parsing
             if (!_delimiter.Matches(in input, out Substring delimiter))
                 goto matchFailed;
 
-            Range matchRange = input.SourceRangeToRelativeRange(delimiter.AsRange());
+            Range matchRange = delimiter.AsRange();
             
             // y
-            Substring postDelimiter = input[input.SourceIndexToRelativeIndex(delimiter.End)..];
+            Substring postDelimiter = input.SetStart(delimiter.End);
             
             if (!number.MatchesStart(postDelimiter, out Substring diceFaces))
                 goto matchFailed;
 
-            matchRange = matchRange.And(input.SourceRangeToRelativeRange(diceFaces.AsRange()));
+            matchRange = matchRange.And(diceFaces.AsRange());
 
             // x
-            Substring preDelimiter = input[..input.SourceIndexToRelativeIndex(delimiter.Start)];
+            Substring preDelimiter = input.SetEnd(delimiter.Start);
             
             if (number.MatchesEnd(in preDelimiter, out Substring diceNumber))
             {
-                matchRange = matchRange.And(input.SourceRangeToRelativeRange(diceNumber.AsRange()));
+                matchRange = matchRange.And(diceNumber.AsRange());
                 
                 // c
                 postDelimiter = postDelimiter.MoveStart(diceFaces.Length);
             
                 if (_composition.MatchesStart(in postDelimiter, out Substring composition))
-                    matchRange = matchRange.And(input.SourceRangeToRelativeRange(composition.AsRange()));
+                    matchRange = matchRange.And(composition.AsRange());
             }
 
             //
-            matchSubstring = input[matchRange];
+            matchSubstring = input.SetRange(matchRange);
             return true;
             
             matchFailed:

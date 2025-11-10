@@ -56,7 +56,7 @@ namespace DiceRoll.Input.Parsing
                 stringBuilder.Append(error_arrow_neck); 
             }
             
-            stringBuilder.Append(error_arrow_tail, context.UntilSourceEnd); 
+            stringBuilder.Append(error_arrow_tail, context.Source.Length - context.End); 
             stringBuilder.Append(' ');
 
             // the error message

@@ -21,7 +21,7 @@ namespace DiceRoll.Input.Parsing
 
         public bool Matches(in Substring input, out Substring firstMatch)
         {
-            firstMatch = Substring.Empty(in input);
+            firstMatch = input.Empty();
             
             foreach (string value in _values)
             {

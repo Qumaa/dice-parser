@@ -1,23 +1,23 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace DiceRoll.Input.Parsing
 {
     [StructLayout(LayoutKind.Auto)]
-    public readonly struct Substring
+    public readonly struct Substring : IEnumerable<char>
     {
         public readonly string Source;
         public readonly int Start;
         public readonly int Length;
 
         public int End => Start + Length;
-        public int UntilSourceEnd => Source.Length - End;
 
         public bool IsEmpty => Length is 0;
 
         public char this[in int i] => IndexThis(in i);
         public char this[in Index i] => IndexThis(in i);
-        public Substring this[in Range i] => IndexThis(in i);
 
         public Substring(string source, int start, int length)
         {
@@ -38,10 +38,6 @@ namespace DiceRoll.Input.Parsing
             length
             ) { }
 
-        public Substring(string source, in Range range) : this(source, range.GetOffsetAndLength(source.Length)) { }
-        
-        private Substring(string source, (int start, int length) tuple) : this(source, tuple.start, tuple.length) { }
-
         public Substring(in Substring source, in Range range) : this(
             in source,
             range.GetOffsetAndLength(source.Length)
@@ -53,90 +49,11 @@ namespace DiceRoll.Input.Parsing
             tuple.length
             ) { }
 
-        public ReadOnlySpan<char> AsSpan() =>
-            Source.AsSpan(Start, Length);
-        public ReadOnlySpan<char> AsSpan(int start) =>
-            MoveStart(start).AsSpan();
-        public ReadOnlySpan<char> AsSpan(int start, int length) =>
-            MoveStart(start).SetLength(length).AsSpan();
-
-        public Range AsRange() =>
-            new(Start, End);
-        public Range AsRange(int start) =>
-            MoveStart(start).AsRange();
-        public Range AsRange(int start, int length) =>
-            MoveStart(start).SetLength(length).AsRange();
-
-        // todo get rid of these
-        public int SourceIndexToRelativeIndex(int sourceIndex) =>
-            sourceIndex - Start;
-        public Range SourceRangeToRelativeRange(in Range sourceRange) =>
-            SourceIndexToRelativeIndex(sourceRange.Start.GetOffset(Source.Length))
-                ..
-                SourceIndexToRelativeIndex(sourceRange.End.GetOffset(Source.Length));
-
-        public Substring MoveStart(int offset) =>
-            new(Source, Start + offset, Length - offset);
-
-        public Substring MoveEnd(int offset) =>
-            new(Source, Start, Length - offset);
-        
-        public Substring SetStart(int start) =>
-            MoveStart(start - Start);
-
-        public Substring SetEnd(int end) =>
-            MoveEnd(End - end);
-
-        public Substring SetLength(int newLength) =>
-            new(Source, Start, newLength);
-
-        public Substring Trim() =>
-            TrimStart().TrimEnd();
-
-        public Substring TrimStart()
-        {
-            int trim = 0;
-            
-            for (int i = 0; i < Length; i++)
-            {
-                if (!char.IsWhiteSpace(this[i]))
-                    break;
-
-                trim++;
-            }
-
-            return trim >= 0 ? MoveStart(trim) : this;
-        }
-
-        public Substring TrimEnd()
-        {
-            int trim = 0;
-            
-            for (int i = Length - 1; i >= 0; i--)
-            {
-                if (!char.IsWhiteSpace(this[i]))
-                    break;
-
-                trim++;
-            }
-
-            return trim >= 0 ? MoveEnd(trim) : this;
-        }
-
         public override string ToString() =>
             Source.Substring(Start, Length);
 
         public Enumerator GetEnumerator() =>
             new(this);
-
-        public int IndexOf(string value, StringComparison stringComparison) =>
-            IndexOf(value.AsSpan(), stringComparison);
-
-        public int IndexOf(in Substring value, StringComparison stringComparison) =>
-            IndexOf(value.AsSpan(), stringComparison);
-
-        public int IndexOf(ReadOnlySpan<char> value, StringComparison stringComparison) =>
-            AsSpan().IndexOf(value, stringComparison);
 
         private char IndexThis(in int i)
         {
@@ -156,23 +73,26 @@ namespace DiceRoll.Input.Parsing
             return new Substring(in this, offset, length);
         }
 
-        public static Substring Empty(string source) =>
-            new(source, 0, 0);
+        public static implicit operator Substring(string str) =>
+            new(str);
 
-        public static Substring Empty(in Substring source) =>
-            new(in source, 0, 0);
+        IEnumerator<char> IEnumerable<char>.GetEnumerator() =>
+            GetEnumerator();
 
-        public static Substring All(string source) =>
-            new(source);
+        IEnumerator IEnumerable.GetEnumerator() =>
+            GetEnumerator();
 
-        public struct Enumerator
+        [StructLayout(LayoutKind.Auto)]
+        public struct Enumerator : IEnumerator<char>
         {
             private readonly Substring _substring;
             private int _state;
-            
+
             public char Current => _substring[_state];
 
-            public Enumerator(Substring substring)
+            object IEnumerator.Current => Current;
+
+            public Enumerator(in Substring substring)
             {
                 _substring = substring;
                 _state = -1;
@@ -180,15 +100,89 @@ namespace DiceRoll.Input.Parsing
 
             public bool MoveNext() =>
                 ++_state < _substring.Length;
+
+            public void Dispose() { }
+
+            void IEnumerator.Reset() =>
+                throw new NotSupportedException();
         }
     }
 
     public static class SubstringExtensions
     {
-        public static bool IsEmptyOrWhiteSpace(this in Substring substring) =>
+        public static ReadOnlySpan<char> AsSpan(this Substring substring) =>
+            substring.Source.AsSpan(substring.Start, substring.Length);
+
+        public static ReadOnlySpan<char> AsSpan(this Substring substring, int start) =>
+            substring.MoveStart(start).AsSpan();
+        
+        public static ReadOnlySpan<char> AsSpan(this Substring substring, int start, int length) =>
+            substring.MoveStart(start).SetLength(length).AsSpan();
+
+        public static Range AsRange(this Substring substring) =>
+            substring.Start..substring.End;
+        
+        public static Range AsRange(this Substring substring, int start) =>
+            substring.MoveStart(start).AsRange();
+        
+        public static Range AsRange(this Substring substring, int start, int length) =>
+            substring.MoveStart(start).SetLength(length).AsRange();
+        
+        public static Substring MoveStart(this Substring substring, int offset) =>
+            new(substring.Source, substring.Start + offset, substring.Length - offset);
+
+        public static Substring MoveEnd(this Substring substring, int offset) =>
+            new(substring.Source, substring.Start, substring.Length - offset);
+
+        public static Substring SetRange(this Substring substring, in Range range) =>
+            new(substring.Source, in range);
+
+        public static Substring SetStart(this Substring substring, int start) =>
+            substring.MoveStart(start - substring.Start);
+
+        public static Substring SetEnd(this Substring substring, int end) =>
+            substring.MoveEnd(substring.End - end);
+
+        public static Substring SetLength(this Substring substring, int newLength) =>
+            new(substring.Source, substring.Start, newLength);
+
+        public static Substring Trim(this Substring substring) =>
+            substring.TrimStart().TrimEnd();
+
+        public static Substring TrimStart(this Substring substring)
+        {
+            int trim = 0;
+            
+            for (int i = 0; i < substring.Length; i++)
+            {
+                if (!char.IsWhiteSpace(substring[i]))
+                    break;
+
+                trim++;
+            }
+
+            return trim >= 0 ? substring.MoveStart(trim) : substring;
+        }
+
+        public static Substring TrimEnd(this Substring substring)
+        {
+            int trim = 0;
+            
+            for (int i = substring.Length - 1; i >= 0; i--)
+            {
+                if (!char.IsWhiteSpace(substring[i]))
+                    break;
+
+                trim++;
+            }
+
+            return trim >= 0 ? substring.MoveEnd(trim) : substring;
+        }
+
+        public static bool IsEmptyOrWhiteSpace(this Substring substring) =>
             substring.IsEmpty || substring.IsWhiteSpace();
 
-        public static bool IsWhiteSpace(this in Substring substring)
+        public static bool IsWhiteSpace(this Substring substring)
         {
             foreach (char c in substring)
                 if (!char.IsWhiteSpace(c))
@@ -197,13 +191,16 @@ namespace DiceRoll.Input.Parsing
             return true;
         }
 
-        public static Substring Set(this in Substring substring, in Range range) =>
-            substring.EnvelopSource()[in range];
-        
-        public static Substring EnvelopSource(this in Substring substring) =>
-            Substring.All(substring.Source);
-        
-        public static Substring Empty(this in Substring substring) =>
-            Substring.Empty(in substring);
+        public static int IndexOf(this Substring substring, string value, StringComparison stringComparison) =>
+            substring.IndexOf(value.AsSpan(), stringComparison);
+
+        public static int IndexOf(this Substring substring, in Substring value, StringComparison stringComparison) =>
+            substring.IndexOf(value.AsSpan(), stringComparison);
+
+        public static int IndexOf(this Substring substring, ReadOnlySpan<char> value, StringComparison stringComparison) =>
+            substring.AsSpan().IndexOf(value, stringComparison);
+
+        public static Substring Empty(this Substring substring) =>
+            new(in substring, 0, 0);
     }
 }

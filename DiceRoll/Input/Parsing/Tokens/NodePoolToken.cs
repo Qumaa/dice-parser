@@ -21,7 +21,7 @@ namespace DiceRoll.Input.Parsing
             if (!_helper.TryGetMatchingCloseScope(input.SetStart(openScope.End), out Substring closeScope))
                 goto matchFailed;
 
-            Substring members = input.Set(openScope.End..closeScope.Start);
+            Substring members = input.SetRange(openScope.End..closeScope.Start);
 
             bool encounteredAtLeastOneSeparator = false;
             
@@ -44,11 +44,11 @@ namespace DiceRoll.Input.Parsing
             }
 
             matchFailed:
-            firstMatch = Substring.Empty(in input);
+            firstMatch = input.Empty();
             return false;
 
             matchSucceed:
-            firstMatch = input.Set(openScope.Start..closeScope.End);
+            firstMatch = input.SetRange(openScope.Start..closeScope.End);
             return true;
         }
     }
