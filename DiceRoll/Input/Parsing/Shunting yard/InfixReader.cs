@@ -115,7 +115,7 @@ namespace DiceRoll.Input.Parsing
         {
             while (_operators.TryPeek(out Operator lastOperator) &&
                    !lastOperator.IsOpenParenthesis &&
-                   definition.Precedence < lastOperator.Precedence)
+                   definition.Precedence <= lastOperator.Precedence)
                 _operators.InvokeAfterDelayedOperators(_operators.Pop());
 
             Operator @operator = new(definition);
