@@ -71,7 +71,7 @@ namespace DiceRoll.Input.Parsing
                     return DefaultCompositionHandler();
 
                 foreach (CompositionDefinition token in _compositionTokens)
-                    if (token.Token.Matches(compositionToken))
+                    if (token.Token.MatchesAll(compositionToken))
                         return token.CompositionHandler;
 
                 return DefaultCompositionHandler();

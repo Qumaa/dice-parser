@@ -33,7 +33,7 @@ namespace DiceRoll.Input.Parsing
                 if (!firstMatch.IsEmpty && i > firstMatch.Start) // match is encountered later than the current one
                     continue;
                 
-                if (i == firstMatch.Start && value.Length <= firstMatch.Length) // match starts at the same position but is shorter 
+                if (input.Start + i == firstMatch.Start && value.Length <= firstMatch.Length) // match starts at the same position but is shorter 
                     continue;
                 
                 firstMatch = new Substring(in input, i, value.Length);
