@@ -117,9 +117,7 @@ namespace DiceRoll.Input.Parsing
 
             Operator @operator = new(definition);
             
-            OperatorProcessingResult processingResult = _operators.Process(in @operator, in substring);
-
-            _state.Annotate().OperatorProcessing(processingResult);
+            _operators.Process(in @operator, in substring);
         }
 
         private void Operand(OperandDefinition definition, in Substring substring)

@@ -76,12 +76,9 @@ namespace DiceRoll.Input.Parsing
                 return this;
             }
 
-            public Annotator OperatorProcessing(OperatorProcessingResult processingResult)
+            public Annotator OperatorProcessing()
             {
-                _context.PrecedingTokenKind = processingResult is OperatorProcessingResult.Invoked ?
-                    TokenKind.Operand :
-                    TokenKind.Operator;
-                
+                _context.PrecedingTokenKind = TokenKind.Operator;
                 return this;
             }
         

@@ -9,8 +9,11 @@
             _state = state;
         }
 
-        public void Push(in Operand operand, in Substring context) =>
+        public void Push(in Operand operand, in Substring context)
+        {
             _state.Operands.MapAndPush(new LinkedNode(operand.Node, operand.EvaluationType), in context);
+            _state.Annotate().OperandProcessing();
+        }
 
         public bool TryPeek(out Mapped<LinkedNode> mapped) =>
             _state.Operands.TryPeek(out mapped);

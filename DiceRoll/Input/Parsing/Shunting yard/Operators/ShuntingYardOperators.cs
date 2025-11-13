@@ -6,6 +6,10 @@ namespace DiceRoll.Input.Parsing
     {
         private readonly ShuntingYardState _state;
         private readonly OperandCastingTable _castingTable;
+        
+        public OperatorUsageForm CurrentUsageForm => _state.PrecedingTokenKind is TokenKind.Operand ?
+                OperatorUsageForm.Infix :
+                OperatorUsageForm.Prefix;
 
         public ShuntingYardOperators(ShuntingYardState state, OperandCastingTable castingTable)
         {
@@ -13,11 +17,34 @@ namespace DiceRoll.Input.Parsing
             _castingTable = castingTable;
         }
 
-        public void OpenParenthesis(in Substring substring) =>
-            _state.Operators.MapAndPush(in Operator.OpenParenthesis, substring);
-
-        public OperatorProcessingResult Process(in Operator @operator, in Substring substring)
+        public void OpenParenthesis(in Substring substring)
         {
+            _state.Operators.MapAndPush(in Operator.OpenParenthesis, substring);
+            _state.Annotate().ParenthesisOpening();
+        }
+
+        public void CloseParenthesis()
+        {
+            if (_state.ClosingParenthesisWouldImposeImbalance)
+                throw new UnbalancedParenthesisException();
+
+            while (TryPop(out Mapped<Operator> operatorToken))
+            {
+                if (operatorToken.Value.IsOpenParenthesis)
+                    break;
+
+                InvokeOperator(in operatorToken);
+            }
+            
+            _state.Annotate().ParenthesisClosing();
+            
+            TryInvokeDelayedOperators();
+        }
+
+        public void Process(in Operator @operator, in Substring substring)
+        {
+            InvokeHigherPrecedenceOperators(in @operator);
+            
             Mapped<Operator> mapped = _state.Mapper.Map(in @operator, in substring);
 
             OperatorInvocationBehaviour invocationBehaviour = @operator.InvocationBehaviour;
@@ -26,14 +53,17 @@ namespace DiceRoll.Input.Parsing
             {
                 // invoke immediately using existing operands
                 InvokeOperator(in mapped);
-                return OperatorProcessingResult.Invoked;
+                _state.Annotate().OperandProcessing();
+                return;
             }
+            
+            _state.Annotate().OperatorProcessing();
 
             if (invocationBehaviour is { RightArity: 1, LeftArity: > 0 })
             {
                 // resolve using default shunting-yard mechanism
                 _state.Operators.Push(in mapped);
-                return OperatorProcessingResult.Pushed;
+                return;
             }
 
             // delay until more operands are pushed
@@ -41,8 +71,20 @@ namespace DiceRoll.Input.Parsing
                 new DelayedOperator(@operator.InvocationBehaviour, _state.ParenthesisLevel, _state.Operands.Count),
                 in substring
                 );
+        }
 
-            return OperatorProcessingResult.Delayed;
+        private void InvokeHigherPrecedenceOperators(in Operator @operator)
+        {
+            while (TryPeek(out Operator lastOperator))
+            {
+                if (lastOperator.IsOpenParenthesis)
+                    break;
+                
+                if (lastOperator.Precedence > @operator.Precedence)
+                    break;
+                
+                InvokeAfterDelayedOperators(Pop());
+            }
         }
 
         public bool TryPeek(out Operator @operator) =>
