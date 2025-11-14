@@ -39,9 +39,13 @@ namespace DiceRoll.Input.Parsing
             
             foreach (OperandDefinition operandDefinition in _definitions)
             {
-                if (!operandDefinition.Token.MatchesStart(in expression, out substring))
+                if (!operandDefinition.Token.MatchesStart(in expression, out Substring newMatch))
+                {
+                    TokenGroupUtils.UpdateEarliestMatch(ref substring, in newMatch);
                     continue;
+                }
 
+                substring = newMatch;
                 definition = operandDefinition;
                 return true;
             }

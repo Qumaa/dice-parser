@@ -17,7 +17,7 @@ namespace DiceRoll.Input.Parsing
             ArgumentNullException.ThrowIfNull(definitions);
             
             _state = state;
-            _definitions = definitions.ToArray();
+            _definitions = definitions.OrderByDescending(x => x.Precedence).ToArray();
         }
         
         public override bool TryExecute(in Substring substring, out Substring match)
@@ -40,9 +40,13 @@ namespace DiceRoll.Input.Parsing
                 if (!MatchesCurrentUsageForm(operatorDefinition.InvocationBehaviour))
                     continue;
                 
-                if (!operatorDefinition.Token.MatchesStart(in expression, out substring))
+                if (!operatorDefinition.Token.MatchesStart(in expression, out Substring newMatch))
+                {
+                    TokenGroupUtils.UpdateEarliestMatch(ref substring, in newMatch);
                     continue;
+                }
 
+                substring = newMatch;
                 definition = operatorDefinition;
                 return true;
             }

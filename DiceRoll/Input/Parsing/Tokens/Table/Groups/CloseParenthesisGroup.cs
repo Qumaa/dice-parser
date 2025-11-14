@@ -23,8 +23,7 @@ namespace DiceRoll.Input.Parsing
             if (!_closeParenthesis.MatchesStart(in substring, out match))
                 return false;
             
-            if (_state.ClosingParenthesisWouldImposeImbalance)
-                throw new UnbalancedParenthesisException();
+            ThrowIfImbalanced();
 
             while (_state.Operators.TryPop(out Mapped<Operator> operatorToken))
             {
@@ -39,6 +38,12 @@ namespace DiceRoll.Input.Parsing
             _state.InvocationHandler.TryInvokeDelayedOperators();
             
             return true;
+        }
+
+        private void ThrowIfImbalanced()
+        {
+            if (_state.ParenthesisLevel <= 0)
+                throw new UnbalancedParenthesisException();
         }
     }
 }

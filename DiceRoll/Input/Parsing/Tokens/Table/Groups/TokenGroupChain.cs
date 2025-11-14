@@ -17,11 +17,13 @@ namespace DiceRoll.Input.Parsing
             Substring earliestMatch = substring.Empty();
             
             foreach (TokenGroup group in _groups)
-                if (group.TryExecute(in substring, out earliestMatch))
+                if (group.TryExecute(in substring, out Substring newMatch))
                 {
-                    match = earliestMatch;
+                    match = newMatch;
                     return true;
                 }
+                else
+                    TokenGroupUtils.UpdateEarliestMatch(ref earliestMatch, in newMatch);
 
             match = substring.SetEnd(earliestMatch.Start).Trim();
             return false;

@@ -12,8 +12,6 @@ namespace DiceRoll.Input.Parsing
         internal TokenKind PrecedingTokenKind { get; private set; }
         internal OperatorInvocationHandler InvocationHandler { get; }
 
-        internal bool ClosingParenthesisWouldImposeImbalance => ParenthesisLevel is 0;
-
         public ShuntingYardState(OperandCastingTable castingTable)
         {
             Mapper = new InputMapper();
@@ -36,15 +34,6 @@ namespace DiceRoll.Input.Parsing
 
         internal void MapAndThrow<T>(in Mapped<T> context, string message) =>
             MapAndThrow(in context.Range, message);
-
-        internal void MapAndThrow(in Substring context, string message) =>
-            throw new ParsingException(Mapper.MapAndGetSubstringOf(in context), message);
-
-        internal ParsingException MapException(in Range context, Exception innerException) =>
-            new(Mapper.GetSubstringOf(in context), innerException);
-
-        internal ParsingException MapException<T>(in Mapped<T> context, Exception innerException) =>
-            MapException(in context.Range, innerException);
 
         internal ParsingException MapException(in Substring context, Exception innerException) =>
             new(Mapper.MapAndGetSubstringOf(in context), innerException);

@@ -38,7 +38,7 @@ namespace DiceRoll.Input.Parsing
             }
             catch (Exception e)
             {
-                throw _state.MapException(in parsed, e);
+                throw new ParsingException(_state.Mapper.MapAndGetSubstringOf(in parsed), e);
             }
         }
 
