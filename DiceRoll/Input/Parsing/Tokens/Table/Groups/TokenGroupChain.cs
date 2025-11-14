@@ -12,12 +12,12 @@ namespace DiceRoll.Input.Parsing
             _groups = groups.OrderByDescending(x => x.Precedence).ToArray();
         }
 
-        public bool Execute(in Substring substring, out Substring match)
+        public bool TryExecuteAll(in Substring substring, out Substring match)
         {
             Substring earliestMatch = substring.Empty();
             
             foreach (TokenGroup group in _groups)
-                if (group.TryMatchStart(in substring, out earliestMatch))
+                if (group.TryExecute(in substring, out earliestMatch))
                 {
                     match = earliestMatch;
                     return true;

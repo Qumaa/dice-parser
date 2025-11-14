@@ -2,18 +2,19 @@
 
 namespace DiceRoll.Input.Parsing
 {
-    internal sealed class ShuntingYardState
+    public sealed class ShuntingYardState
     {
-        public int ParenthesisLevel { get; private set; }
-        public InputMapper Mapper { get; }
-        public MappedStack<Operator> Operators { get; }
-        public MappedStack<LinkedNode> Operands { get; }
-        public MappedStack<DelayedOperator> DelayedOperators { get; }
-        public TokenKind PrecedingTokenKind { get; private set; }
+        internal int ParenthesisLevel { get; private set; }
+        internal InputMapper Mapper { get; }
+        internal MappedStack<Operator> Operators { get; }
+        internal MappedStack<LinkedNode> Operands { get; }
+        internal MappedStack<DelayedOperator> DelayedOperators { get; }
+        internal TokenKind PrecedingTokenKind { get; private set; }
+        internal OperatorInvocationHandler InvocationHandler { get; }
 
-        public bool ClosingParenthesisWouldImposeImbalance => ParenthesisLevel is 0;
+        internal bool ClosingParenthesisWouldImposeImbalance => ParenthesisLevel is 0;
 
-        public ShuntingYardState()
+        public ShuntingYardState(OperandCastingTable castingTable)
         {
             Mapper = new InputMapper();
             
@@ -21,32 +22,34 @@ namespace DiceRoll.Input.Parsing
             Operands = Mapper.CreateLinkedStack<LinkedNode>();
             DelayedOperators = Mapper.CreateLinkedStack<DelayedOperator>();
 
+            InvocationHandler = new OperatorInvocationHandler(this, castingTable);
+
             PrecedingTokenKind = TokenKind.ExpressionStart;
             ParenthesisLevel = 0;
         }
 
-        public Annotator Annotate() =>
+        internal Annotator Annotate() =>
             new(this);
 
-        public void MapAndThrow(in Range context, string message) =>
+        internal void MapAndThrow(in Range context, string message) =>
             throw new ParsingException(Mapper.GetSubstringOf(in context), message);
 
-        public void MapAndThrow<T>(in Mapped<T> context, string message) =>
+        internal void MapAndThrow<T>(in Mapped<T> context, string message) =>
             MapAndThrow(in context.Range, message);
 
-        public void MapAndThrow(in Substring context, string message) =>
+        internal void MapAndThrow(in Substring context, string message) =>
             throw new ParsingException(Mapper.MapAndGetSubstringOf(in context), message);
 
-        public ParsingException MapException(in Range context, Exception innerException) =>
+        internal ParsingException MapException(in Range context, Exception innerException) =>
             new(Mapper.GetSubstringOf(in context), innerException);
 
-        public ParsingException MapException<T>(in Mapped<T> context, Exception innerException) =>
+        internal ParsingException MapException<T>(in Mapped<T> context, Exception innerException) =>
             MapException(in context.Range, innerException);
 
-        public ParsingException MapException(in Substring context, Exception innerException) =>
+        internal ParsingException MapException(in Substring context, Exception innerException) =>
             new(Mapper.MapAndGetSubstringOf(in context), innerException);
 
-        public readonly ref struct Annotator
+        internal readonly ref struct Annotator
         {
             private readonly ShuntingYardState _context;
             

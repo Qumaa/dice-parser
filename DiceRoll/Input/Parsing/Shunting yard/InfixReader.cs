@@ -44,7 +44,7 @@ namespace DiceRoll.Input.Parsing
 
         private void ParseSubstringStart(in Substring notParsed, out Substring parsed)
         {
-            if (_chain.Execute(in notParsed, out parsed))
+            if (_chain.TryExecuteAll(in notParsed, out parsed))
                 return;
 
             throw new UnknownTokenException(in parsed);

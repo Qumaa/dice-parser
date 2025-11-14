@@ -4,24 +4,40 @@ namespace DiceRoll.Input.Parsing
 {
     internal class CloseParenthesisGroup : TokenGroup
     {
-        private readonly ShuntingYardOperators _operators;
+        public const int DEFAULT_PRECEDENCE = 1000;
+        
+        private readonly ShuntingYardState _state;
         private readonly IToken _closeParenthesis;
 
-        public CloseParenthesisGroup(int precedence, IToken token, ShuntingYardOperators operators) : base(precedence)
+        public CloseParenthesisGroup(int precedence, IToken token, ShuntingYardState state) : base(precedence)
         {
-            ArgumentNullException.ThrowIfNull(operators);
+            ArgumentNullException.ThrowIfNull(state);
             ArgumentNullException.ThrowIfNull(token);
 
-            _operators = operators;
+            _state = state;
             _closeParenthesis = token;
         }
 
-        public override bool TryMatchStart(in Substring substring, out Substring match)
+        public override bool TryExecute(in Substring substring, out Substring match)
         {
             if (!_closeParenthesis.MatchesStart(in substring, out match))
                 return false;
             
-            _operators.CloseParenthesis();
+            if (_state.ClosingParenthesisWouldImposeImbalance)
+                throw new UnbalancedParenthesisException();
+
+            while (_state.Operators.TryPop(out Mapped<Operator> operatorToken))
+            {
+                if (operatorToken.Value.IsOpenParenthesis)
+                    break;
+
+                _state.InvocationHandler.InvokeOperator(in operatorToken);
+            }
+            
+            _state.Annotate().ParenthesisClosing();
+            
+            _state.InvocationHandler.TryInvokeDelayedOperators();
+            
             return true;
         }
     }

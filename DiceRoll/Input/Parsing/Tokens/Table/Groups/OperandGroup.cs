@@ -6,35 +6,37 @@ namespace DiceRoll.Input.Parsing
 {
     internal class OperandGroup : TokenGroup
     {
-        private readonly ShuntingYardOperands _operands;
-        private readonly ShuntingYardOperators _operators;
+        public const int DEFAULT_PRECEDENCE = 500;
+        
+        private readonly ShuntingYardState _state;
         private readonly OperandDefinition[] _definitions;
 
-        public OperandGroup(int precedence, IEnumerable<OperandDefinition> definitions, ShuntingYardOperands operands,
-            ShuntingYardOperators operators) : base(precedence)
+        public OperandGroup(int precedence, IEnumerable<OperandDefinition> definitions, ShuntingYardState state) : base(precedence)
         {
-            ArgumentNullException.ThrowIfNull(operands);
+            ArgumentNullException.ThrowIfNull(state);
             ArgumentNullException.ThrowIfNull(definitions);
 
-            _operands = operands;
-            _operators = operators;
+            _state = state;
             _definitions = definitions.ToArray();
         }
 
-        public override bool TryMatchStart(in Substring substring, out Substring match)
+        public override bool TryExecute(in Substring substring, out Substring match)
         {
             if (!StartsWithOperand(in substring, out OperandDefinition definition, out match))
                 return false;
             
             Operand operand = ParseOperand(definition, in match);
-            _operands.Push(in operand, in match);
-            _operators.TryInvokeDelayedOperators(); // todo remove
+            _state.Operands.MapAndPush(new LinkedNode(operand.Node, operand.EvaluationType), in match);
+            _state.Annotate().OperandProcessing();
+            _state.InvocationHandler.TryInvokeDelayedOperators(); // todo remove
             return true;
         }
 
         private bool StartsWithOperand(in Substring expression, out OperandDefinition definition,
             out Substring substring)
         {
+            substring = expression.Empty();
+            
             foreach (OperandDefinition operandDefinition in _definitions)
             {
                 if (!operandDefinition.Token.MatchesStart(in expression, out substring))
@@ -44,7 +46,6 @@ namespace DiceRoll.Input.Parsing
                 return true;
             }
 
-            substring = default;
             definition = null;
             return false;
         }

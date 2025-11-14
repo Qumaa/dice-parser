@@ -4,24 +4,27 @@ namespace DiceRoll.Input.Parsing
 {
     internal class OpenParenthesisGroup : TokenGroup
     {
-        private readonly ShuntingYardOperators _operators;
+        public const int DEFAULT_PRECEDENCE = 1100;
+        
+        private readonly ShuntingYardState _state;
         private readonly IToken _openParenthesis;
         
-        public OpenParenthesisGroup(int precedence, IToken token, ShuntingYardOperators operators) : base(precedence)
+        public OpenParenthesisGroup(int precedence, IToken token, ShuntingYardState state) : base(precedence)
         {
-            ArgumentNullException.ThrowIfNull(operators);
+            ArgumentNullException.ThrowIfNull(state);
             ArgumentNullException.ThrowIfNull(token);
             
-            _operators = operators;
+            _state = state;
             _openParenthesis = token;
         }
 
-        public override bool TryMatchStart(in Substring substring, out Substring match)
+        public override bool TryExecute(in Substring substring, out Substring match)
         {
             if (!_openParenthesis.MatchesStart(in substring, out match))
                 return false;
 
-            _operators.OpenParenthesis(in match);
+            _state.Operators.MapAndPush(in Operator.OpenParenthesis, match);
+            _state.Annotate().ParenthesisOpening();
             return true;
         }
     }

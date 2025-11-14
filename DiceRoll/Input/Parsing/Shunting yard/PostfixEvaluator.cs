@@ -3,14 +3,10 @@
     internal sealed class PostfixEvaluator
     {
         private readonly ShuntingYardState _state;
-        private readonly ShuntingYardOperators _operators;
-        private readonly ShuntingYardOperands _operands;
-        
-        public PostfixEvaluator(ShuntingYardState state, ShuntingYardOperators operators, ShuntingYardOperands operands)
+
+        public PostfixEvaluator(ShuntingYardState state)
         {
             _state = state;
-            _operators = operators;
-            _operands = operands;
         }
 
         public NodeTree Evaluate()
@@ -25,10 +21,10 @@
         {
             ThrowIfAnyTrailingOperators();
 
-            while(_operators.TryPop(out Mapped<Operator> context))
-                _operators.InvokeOperator(in context);
+            while(_state.Operators.TryPop(out Mapped<Operator> context))
+                _state.InvocationHandler.InvokeOperator(in context);
 
-            Mapped<LinkedNode> result = _operands.Pop();
+            Mapped<LinkedNode> result = _state.Operands.Pop();
             SubstringMapper mapper = _state.Mapper.BuildSubstringMapper();
             
             ThrowIfAnyOperandLeft();
@@ -38,7 +34,7 @@
         
         private void ThrowIfAnyTrailingOperators()
         {
-            if (!_operators.TryPeek(out Mapped<DelayedOperator> delayedOperator))
+            if (!_state.DelayedOperators.TryPeek(out Mapped<DelayedOperator> delayedOperator))
                 return;
 
             int received = _state.Operands.Count - delayedOperator.Value.CapturedOperands;
@@ -52,7 +48,7 @@
         
         private void ThrowIfAnyOperandLeft()
         {
-            if (_operands.TryPeek(out Mapped<LinkedNode> operandToken))
+            if (_state.Operands.TryPeek(out Mapped<LinkedNode> operandToken))
                 _state.MapAndThrow(in operandToken, "This operand doesn't take part in the expression.");
         }
     }
