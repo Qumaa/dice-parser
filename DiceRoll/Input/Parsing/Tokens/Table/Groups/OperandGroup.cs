@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace DiceRoll.Input.Parsing
 {
-    internal class OperandGroup : TokenGroup
+    public class OperandGroup : TokenGroup
     {
         public const int DEFAULT_PRECEDENCE = 500;
         

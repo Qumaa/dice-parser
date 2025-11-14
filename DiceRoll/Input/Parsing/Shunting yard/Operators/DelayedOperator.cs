@@ -3,7 +3,7 @@
 namespace DiceRoll.Input.Parsing
 {
     [StructLayout(LayoutKind.Auto)]
-    internal readonly struct DelayedOperator
+    public readonly struct DelayedOperator
     {
         public readonly OperatorInvocationBehaviour InvocationBehaviour;
         public readonly int CapturedParenthesisLevel;

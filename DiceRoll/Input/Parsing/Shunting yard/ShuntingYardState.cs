@@ -4,16 +4,18 @@ namespace DiceRoll.Input.Parsing
 {
     public sealed class ShuntingYardState
     {
-        internal int ParenthesisLevel { get; private set; }
-        internal InputMapper Mapper { get; }
-        internal MappedStack<Operator> Operators { get; }
-        internal MappedStack<LinkedNode> Operands { get; }
-        internal MappedStack<DelayedOperator> DelayedOperators { get; }
-        internal TokenKind PrecedingTokenKind { get; private set; }
-        internal OperatorInvocationHandler InvocationHandler { get; }
+        public int ParenthesisLevel { get; private set; }
+        public InputMapper Mapper { get; }
+        public MappedStack<Operator> Operators { get; }
+        public MappedStack<LinkedNode> Operands { get; }
+        public MappedStack<DelayedOperator> DelayedOperators { get; }
+        public TokenKind PrecedingTokenKind { get; private set; }
+        public OperatorInvocationHandler InvocationHandler { get; }
 
         public ShuntingYardState(OperandCastingTable castingTable)
         {
+            ArgumentNullException.ThrowIfNull(castingTable);
+            
             Mapper = new InputMapper();
             
             Operators = Mapper.CreateLinkedStack<Operator>();
@@ -26,19 +28,10 @@ namespace DiceRoll.Input.Parsing
             ParenthesisLevel = 0;
         }
 
-        internal Annotator Annotate() =>
+        public Annotator Annotate() =>
             new(this);
 
-        internal void MapAndThrow(in Range context, string message) =>
-            throw new ParsingException(Mapper.GetSubstringOf(in context), message);
-
-        internal void MapAndThrow<T>(in Mapped<T> context, string message) =>
-            MapAndThrow(in context.Range, message);
-
-        internal ParsingException MapException(in Substring context, Exception innerException) =>
-            new(Mapper.MapAndGetSubstringOf(in context), innerException);
-
-        internal readonly ref struct Annotator
+        public readonly ref struct Annotator
         {
             private readonly ShuntingYardState _context;
             

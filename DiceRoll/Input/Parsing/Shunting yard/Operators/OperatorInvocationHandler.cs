@@ -3,7 +3,7 @@
 namespace DiceRoll.Input.Parsing
 {
     // todo inline the operator invocation struct into this class
-    internal sealed class OperatorInvocationHandler
+    public sealed class OperatorInvocationHandler
     {
         private readonly ShuntingYardState _state;
         private readonly OperandCastingTable _castingTable;

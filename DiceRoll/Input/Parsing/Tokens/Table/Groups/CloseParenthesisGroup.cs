@@ -2,7 +2,7 @@
 
 namespace DiceRoll.Input.Parsing
 {
-    internal class CloseParenthesisGroup : TokenGroup
+    public class CloseParenthesisGroup : TokenGroup
     {
         public const int DEFAULT_PRECEDENCE = 1000;
         

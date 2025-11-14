@@ -4,8 +4,19 @@
     {
         public static void UpdateEarliestMatch(ref Substring current, in Substring nextMatch)
         {
-            if (current.IsEmpty || (!nextMatch.IsEmpty && nextMatch.Start < current.Start))
+            if (nextMatch.IsEmpty)
+                return;
+            
+            if (current.IsEmpty)
+            {
                 current = nextMatch;
+                return;
+            }
+
+            if (nextMatch.Start >= current.Start)
+                return;
+
+            current = nextMatch;
         }
     }
 }

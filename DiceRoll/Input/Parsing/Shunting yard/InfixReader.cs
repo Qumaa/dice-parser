@@ -6,34 +6,37 @@ namespace DiceRoll.Input.Parsing
     {
         private readonly ShuntingYardState _state;
         private readonly TokenGroupChain _chain;
-        
+
         public InfixReader(ShuntingYardState state, TokenGroupChain chain)
         {
             _state = state;
             _chain = chain;
         }
         
-        public void Read(string expression)
+        public void Read(string expression, ExternalTokenSolver solver)
         {
+            ArgumentException.ThrowIfNullOrEmpty(expression);
+            ArgumentNullException.ThrowIfNull(solver);
+            
             _state.Mapper.Append(expression);
-            ParseTokensIteratively(expression);
+            ParseTokensIteratively(expression, solver);
         }
 
-        private void ParseTokensIteratively(in Substring expression)
+        private void ParseTokensIteratively(in Substring expression, ExternalTokenSolver solver)
         {
             Substring notParsed = expression.Trim();
             
-            do notParsed = ParseSubstringStartOrThrow(in notParsed); 
+            do notParsed = ParseSubstringStartOrThrow(in notParsed, solver); 
             while (!notParsed.IsEmpty);
         }
         
-        private Substring ParseSubstringStartOrThrow(in Substring notParsed)
+        private Substring ParseSubstringStartOrThrow(in Substring notParsed, ExternalTokenSolver solver)
         {
             Substring parsed = notParsed;
 
             try
             {
-                ParseSubstringStart(in notParsed, out parsed);
+                ParseSubstringStart(in notParsed, solver, out parsed);
                 return notParsed.MoveStart(parsed.Length).TrimStart();
             }
             catch (Exception e)
@@ -42,9 +45,12 @@ namespace DiceRoll.Input.Parsing
             }
         }
 
-        private void ParseSubstringStart(in Substring notParsed, out Substring parsed)
+        private void ParseSubstringStart(in Substring notParsed, ExternalTokenSolver solver, out Substring parsed)
         {
             if (_chain.TryExecuteAll(in notParsed, out parsed))
+                return;
+
+            if (solver.TrySolve(in parsed, _state))
                 return;
 
             throw new UnknownTokenException(in parsed);
@@ -74,5 +80,11 @@ namespace DiceRoll.Input.Parsing
         //         return _infixReader._operands.Pop().Value.Node;
         //     }
         // }
+    }
+
+    internal static class InfixReaderExtensions
+    {
+        public static void Read(this InfixReader reader, string expression) =>
+            reader.Read(expression, ExternalTokenSolver.Inert);
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace DiceRoll.Input.Parsing
@@ -9,6 +10,8 @@ namespace DiceRoll.Input.Parsing
 
         public TokenGroupChain(IEnumerable<TokenGroup> groups)
         {
+            ArgumentNullException.ThrowIfNull(groups);
+            
             _groups = groups.OrderByDescending(x => x.Precedence).ToArray();
         }
 
@@ -25,7 +28,7 @@ namespace DiceRoll.Input.Parsing
                 else
                     TokenGroupUtils.UpdateEarliestMatch(ref earliestMatch, in newMatch);
 
-            match = substring.SetEnd(earliestMatch.Start).Trim();
+            match = earliestMatch.IsEmpty ? substring : substring.SetEnd(earliestMatch.Start).TrimEnd();
             return false;
         }
     }

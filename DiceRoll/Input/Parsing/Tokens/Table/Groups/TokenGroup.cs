@@ -1,7 +1,7 @@
 ﻿namespace DiceRoll.Input.Parsing
 {
-    // todo default inheritors are internal
-    // todo inline all inheritors delegated calls
+    // todo make inheritors logic accessible otherwise (mostly to ease custom implementations of external token solver)
+    // e.g. make api to process an operand, an operator, open/close parenthesis etc.
     public abstract class TokenGroup
     {
         public readonly int Precedence;

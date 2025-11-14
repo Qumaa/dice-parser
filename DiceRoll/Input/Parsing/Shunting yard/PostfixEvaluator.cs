@@ -1,4 +1,6 @@
-﻿namespace DiceRoll.Input.Parsing
+﻿using System;
+
+namespace DiceRoll.Input.Parsing
 {
     internal sealed class PostfixEvaluator
     {
@@ -43,13 +45,18 @@
             string message =
                 $"This operator didn't receive enough right-side operands. Expected {expected}, but received {received}.";
             
-            _state.MapAndThrow(in delayedOperator, message);
+            MapAndThrow(in delayedOperator.Range, message);
         }
         
         private void ThrowIfAnyOperandLeft()
         {
             if (_state.Operands.TryPeek(out Mapped<LinkedNode> operandToken))
-                _state.MapAndThrow(in operandToken, "This operand doesn't take part in the expression.");
+                MapAndThrow(in operandToken.Range, "This operand doesn't take part in the expression.");
+        }
+
+        private void MapAndThrow(in Range exceptionCause, string message)
+        {
+            throw new ParsingException(_state.Mapper.GetSubstringOf(in exceptionCause), message);
         }
     }
 }

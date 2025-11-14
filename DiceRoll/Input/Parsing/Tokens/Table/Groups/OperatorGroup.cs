@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace DiceRoll.Input.Parsing
 {
-    internal class OperatorGroup : TokenGroup
+    public class OperatorGroup : TokenGroup
     {
         public const int DEFAULT_PRECEDENCE = 0;
         
@@ -25,7 +25,7 @@ namespace DiceRoll.Input.Parsing
             if (!StartsWithOperator(in substring, out OperatorDefinition definition, out match))
                 return false;
 
-            Process(definition, in substring);
+            Process(definition, in match);
             
             return true;
         }
@@ -37,14 +37,14 @@ namespace DiceRoll.Input.Parsing
             
             foreach (OperatorDefinition operatorDefinition in _definitions)
             {
-                if (!MatchesCurrentUsageForm(operatorDefinition.InvocationBehaviour))
-                    continue;
-                
                 if (!operatorDefinition.Token.MatchesStart(in expression, out Substring newMatch))
                 {
                     TokenGroupUtils.UpdateEarliestMatch(ref substring, in newMatch);
                     continue;
                 }
+                
+                if (!MatchesCurrentUsageForm(operatorDefinition.InvocationBehaviour))
+                    continue;
 
                 substring = newMatch;
                 definition = operatorDefinition;
@@ -68,7 +68,7 @@ namespace DiceRoll.Input.Parsing
         {
             Operator @operator = new(definition);
             
-            InvokeHigherPrecedenceOperators(in @operator);
+            InvokeHigherOrEqualPrecedenceOperators(in @operator);
             
             Mapped<Operator> mapped = _state.Mapper.Map(in @operator, in substring);
 
@@ -98,14 +98,14 @@ namespace DiceRoll.Input.Parsing
                 );
         }
         
-        private void InvokeHigherPrecedenceOperators(in Operator @operator)
+        private void InvokeHigherOrEqualPrecedenceOperators(in Operator @operator)
         {
             while (_state.Operators.TryPeek(out Operator lastOperator))
             {
                 if (lastOperator.IsOpenParenthesis)
                     break;
                 
-                if (lastOperator.Precedence > @operator.Precedence)
+                if (lastOperator.Precedence < @operator.Precedence)
                     break;
                 
                 _state.InvocationHandler.InvokeAfterDelayedOperators(_state.Operators.Pop());

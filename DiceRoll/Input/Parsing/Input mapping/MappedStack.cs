@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace DiceRoll.Input.Parsing
 {
-    internal sealed class MappedStack<T>
+    public sealed class MappedStack<T>
     {
         private readonly Stack<Mapped<T>> _stack;
         private readonly InputMapper _inputMapper;
