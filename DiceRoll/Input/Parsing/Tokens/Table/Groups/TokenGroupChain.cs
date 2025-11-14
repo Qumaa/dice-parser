@@ -12,13 +12,18 @@ namespace DiceRoll.Input.Parsing
             _groups = groups.OrderByDescending(x => x.Precedence).ToArray();
         }
 
-        public bool TryMatchAny(in Substring substring, out Substring firstMatch)
+        public bool Execute(in Substring substring, out Substring match)
         {
+            Substring earliestMatch = substring.Empty();
+            
             foreach (TokenGroup group in _groups)
-                if (group.TryMatch(in substring, out firstMatch))
+                if (group.TryMatchStart(in substring, out earliestMatch))
+                {
+                    match = earliestMatch;
                     return true;
+                }
 
-            firstMatch = substring.Empty();
+            match = substring.SetEnd(earliestMatch.Start).Trim();
             return false;
         }
     }

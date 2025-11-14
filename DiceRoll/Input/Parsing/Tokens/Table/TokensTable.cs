@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace DiceRoll.Input.Parsing
 {
@@ -7,90 +6,24 @@ namespace DiceRoll.Input.Parsing
     {
         public static readonly TokensTable Default = BuildDefault().Build();
 
-        private readonly IToken _openParenthesis;
+        public readonly IToken OpenParenthesis;
 
-        private readonly IToken _closeParenthesis;
+        public readonly IToken CloseParenthesis;
 
-        private readonly OperatorDefinition[] _operators;
+        public readonly OperatorDefinition[] Operators;
 
-        private readonly OperandDefinition[] _operands;
+        public readonly OperandDefinition[] Operands;
 
         internal TokensTable(IToken openParenthesis, IToken closeParenthesis, IEnumerable<OperatorDefinition> operators,
             IEnumerable<OperandDefinition> operands)
         {
-            _openParenthesis = openParenthesis;
-            _closeParenthesis = closeParenthesis;
+            OpenParenthesis = openParenthesis;
+            CloseParenthesis = closeParenthesis;
 
 
-            _operators = Syntax.ToArray(operators);
-            _operands = Syntax.ToArray(operands);
+            Operators = Syntax.ToArray(operators);
+            Operands = Syntax.ToArray(operands);
         }
-
-        public bool StartsWithOpenParenthesis(in Substring expression, out Substring substring) =>
-            _openParenthesis.MatchesStart(in expression, out substring);
-
-        public bool StartsWithCloseParenthesis(in Substring expression, out Substring substring) =>
-            _closeParenthesis.MatchesStart(in expression, out substring);
-
-        public bool StartsWithOperator(in Substring expression, OperatorUsageForm usageForm,
-            out OperatorDefinition definition, out Substring substring)
-        {
-            foreach (OperatorDefinition operatorDefinition in _operators)
-            {
-                if (!(MatchesUsageForm(operatorDefinition.InvocationBehaviour, usageForm) &&
-                      operatorDefinition.Token.MatchesStart(in expression, out substring)))
-                    continue;
-
-                definition = operatorDefinition;
-                return true;
-            }
-
-            substring = default;
-            definition = null;
-            return false;
-        }
-
-        public bool StartsWithOperand(in Substring expression, out OperandDefinition definition,
-            out Substring substring)
-        {
-            foreach (OperandDefinition operandDefinition in _operands)
-            {
-                if (!operandDefinition.Token.MatchesStart(in expression, out substring))
-                    continue;
-
-                definition = operandDefinition;
-                return true;
-            }
-
-            substring = default;
-            definition = null;
-            return false;
-        }
-
-        public Substring UntilFirstKnownToken(in Substring expression, OperatorUsageForm currentOperatorUsageForm)
-        {
-            int firstKnownTokenStart = expression.End;
-            
-            if (_openParenthesis.Matches(in expression, out Substring knownSubstring))
-                firstKnownTokenStart = Math.Min(firstKnownTokenStart, knownSubstring.Start);
-                
-            if (_closeParenthesis.Matches(in expression, out knownSubstring))
-                firstKnownTokenStart = Math.Min(firstKnownTokenStart, knownSubstring.Start);
-
-            foreach (OperatorDefinition operatorDefinition in _operators)
-                if (MatchesUsageForm(operatorDefinition.InvocationBehaviour, currentOperatorUsageForm) &&
-                    operatorDefinition.Token.Matches(in expression, out knownSubstring))
-                    firstKnownTokenStart = Math.Min(firstKnownTokenStart, knownSubstring.Start);
-                
-            foreach (OperandDefinition operandDefinition in _operands)
-                if (operandDefinition.Token.Matches(in expression, out knownSubstring))
-                    firstKnownTokenStart = Math.Min(firstKnownTokenStart, knownSubstring.Start);
-
-            return expression.SetEnd(firstKnownTokenStart);
-        }
-
-        private static bool MatchesUsageForm(OperatorInvocationBehaviour invocationBehaviour, OperatorUsageForm usageForm) =>
-            invocationBehaviour is { LeftArity: 0, RightArity: > 0 } == usageForm is OperatorUsageForm.Prefix;
 
         public static TokensTableBuilder BuildDefault() =>
             new TokensTableBuilder(Token("("), Token(")"))

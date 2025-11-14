@@ -7,25 +7,28 @@ namespace DiceRoll.Input.Parsing
     internal class OperandGroup : TokenGroup
     {
         private readonly ShuntingYardOperands _operands;
+        private readonly ShuntingYardOperators _operators;
         private readonly OperandDefinition[] _definitions;
 
-        public OperandGroup(int precedence, IEnumerable<OperandDefinition> definitions, ShuntingYardOperands operands) : base(precedence)
+        public OperandGroup(int precedence, IEnumerable<OperandDefinition> definitions, ShuntingYardOperands operands,
+            ShuntingYardOperators operators) : base(precedence)
         {
             ArgumentNullException.ThrowIfNull(operands);
             ArgumentNullException.ThrowIfNull(definitions);
 
             _operands = operands;
+            _operators = operators;
             _definitions = definitions.ToArray();
         }
 
-        public override bool TryMatch(in Substring substring, out Substring match)
+        public override bool TryMatchStart(in Substring substring, out Substring match)
         {
             if (!StartsWithOperand(in substring, out OperandDefinition definition, out match))
                 return false;
             
             Operand operand = ParseOperand(definition, in match);
             _operands.Push(in operand, in match);
-            // _operators.TryInvokeDelayedOperators(); todo remove
+            _operators.TryInvokeDelayedOperators(); // todo remove
             return true;
         }
 

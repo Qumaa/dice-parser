@@ -4,7 +4,6 @@ namespace DiceRoll.Input.Parsing
 {
     internal sealed class ShuntingYardState
     {
-        public TokensTable Tokens { get; }
         public int ParenthesisLevel { get; private set; }
         public InputMapper Mapper { get; }
         public MappedStack<Operator> Operators { get; }
@@ -14,10 +13,8 @@ namespace DiceRoll.Input.Parsing
 
         public bool ClosingParenthesisWouldImposeImbalance => ParenthesisLevel is 0;
 
-        public ShuntingYardState(TokensTable tokensTable)
+        public ShuntingYardState()
         {
-            Tokens = tokensTable;
-            
             Mapper = new InputMapper();
             
             Operators = Mapper.CreateLinkedStack<Operator>();

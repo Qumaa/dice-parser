@@ -16,7 +16,7 @@ namespace DiceRoll.Input.Parsing
             _openParenthesis = token;
         }
 
-        public override bool TryMatch(in Substring substring, out Substring match)
+        public override bool TryMatchStart(in Substring substring, out Substring match)
         {
             if (!_openParenthesis.MatchesStart(in substring, out match))
                 return false;

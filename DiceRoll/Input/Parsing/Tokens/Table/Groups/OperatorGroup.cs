@@ -18,7 +18,7 @@ namespace DiceRoll.Input.Parsing
             _definitions = definitions.ToArray();
         }
         
-        public override bool TryMatch(in Substring substring, out Substring match)
+        public override bool TryMatchStart(in Substring substring, out Substring match)
         {
             if (!StartsWithOperator(in substring, out OperatorDefinition definition, out match))
                 return false;
