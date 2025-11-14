@@ -10,14 +10,14 @@
             public static INumeric Subtract(INumeric left, INumeric right) =>
                 new Combination(left, right, CombinationType.Subtract);
 
-            public static INumeric Multiply(INumeric left, INumeric right) =>
-                new Combination(left, right, CombinationType.Multiply);
+            public static INumeric Multiply(INumeric left, INumeric multiplier) =>
+                new Combination(left, multiplier, CombinationType.Multiply);
 
-            public static INumeric DivideRoundDown(INumeric left, INumeric right) =>
-                new Combination(left, right, CombinationType.DivideRoundDownwards);
+            public static INumeric DivideRoundDown(INumeric dividend, INumeric divisor) =>
+                new Combination(dividend, divisor, CombinationType.DivideRoundDownwards);
 
-            public static INumeric DivideRoundUp(INumeric left, INumeric right) =>
-                new Combination(left, right, CombinationType.DivideRoundUpwards);
+            public static INumeric DivideRoundUp(INumeric dividend, INumeric divisor) =>
+                new Combination(dividend, divisor, CombinationType.DivideRoundUpwards);
 
             public static INumeric SelectHighest(INumeric left, INumeric right) =>
                 new Selection(left, right, SelectionType.Highest);

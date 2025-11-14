@@ -32,6 +32,9 @@ namespace DiceRoll
         public static bool operator false(Binary self) =>
             !self.Value;
 
+        public static implicit operator Binary(bool value) =>
+            new(value);
+
         public override string ToString() =>
             Value.ToString();
 

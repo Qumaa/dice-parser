@@ -11,18 +11,18 @@ namespace DiceRoll
         private const double _CONSTRUCTOR_TOLERANCE = -8.326672684688674E-16d;
         public readonly double Value;
         
-        public static Probability Hundred => new(1d);
+        public static Probability Hundred => 1d;
 
-        public static Probability Zero => new(0d);
+        public static Probability Zero => 0d;
 
         public Probability(double probability) 
         {
-            if (probability < 0)
+            if (probability < 0d)
             {
                 if (probability < _CONSTRUCTOR_TOLERANCE)
                     throw new NegativeProbabilityException(probability);
 
-                Value = 0;
+                Value = 0d;
                 return;
             }
             
@@ -30,10 +30,10 @@ namespace DiceRoll
         }
 
         public Probability Inversed() =>
-            new(1d - Value);
+            1d - Value;
         
         public Probability Normalized() =>
-            new(double.Min(Value, 1d));
+            double.Min(Value, 1d);
 
         private static bool Approximates(double left, double right)
         {
@@ -103,33 +103,17 @@ namespace DiceRoll
 
         public static Probability operator +(Probability left, Probability right) =>
             new(left.Value + right.Value);
-        public static Probability operator +(double left, Probability right) =>
-            new(left + right.Value);
-        public static Probability operator +(Probability left, double right) =>
-            new(left.Value + right);
         
         public static Probability operator -(Probability self) =>
             new(-self.Value);
         public static Probability operator -(Probability left, Probability right) =>
             new(left.Value - right.Value);
-        public static Probability operator -(double left, Probability right) =>
-            new(left - right.Value);
-        public static Probability operator -(Probability left, double right) =>
-            new(left.Value - right);
 
         public static Probability operator *(Probability left, Probability right) =>
             new(left.Value * right.Value);
-        public static Probability operator *(double left, Probability right) =>
-            new(left * right.Value);
-        public static Probability operator *(Probability left, double right) =>
-            new(left.Value * right);
         
         public static Probability operator /(Probability left, Probability right) =>
             new(left.Value / right.Value);
-        public static Probability operator /(double left, Probability right) =>
-            new(left / right.Value);
-        public static Probability operator /(Probability left, double right) =>
-            new(left.Value / right);
 
         public static bool operator >(Probability left, Probability right) =>
             left.Value > right.Value;
@@ -143,6 +127,12 @@ namespace DiceRoll
             left.Equals(right);
         public static bool operator !=(Probability left, Probability right) =>
             !(left == right);
+
+        public static implicit operator double(Probability probability) =>
+            probability.Value;
+
+        public static implicit operator Probability(double value) =>
+            new(value);
 
     #endregion
     }
