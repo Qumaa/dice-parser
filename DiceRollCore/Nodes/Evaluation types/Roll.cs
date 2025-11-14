@@ -13,11 +13,5 @@ namespace DiceRoll
             Outcome = outcome;
             Probability = probability;
         }
-
-        public Roll(int outcome, double probability) : 
-            this(new Outcome(outcome), new Probability(probability)) 
-        { }
-
-        public Roll(int outcome, Probability probability) : this(new Outcome(outcome), probability) { }
     }
 }

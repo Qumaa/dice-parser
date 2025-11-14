@@ -14,7 +14,7 @@
         {
             operandsAccess.Sequential().Get(out INumeric times).Get(out INumeric node);
             
-            return _handler(node, times.Evaluate().Value);
+            return _handler(node, times.Evaluate());
         }
     }
 }

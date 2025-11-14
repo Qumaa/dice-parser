@@ -4,7 +4,7 @@
     {
         public NumericConstant(int value) 
         {
-            CacheEvaluation(new Outcome(value));
+            CacheEvaluation(value);
         }
 
         public override void NextEvaluation() { }

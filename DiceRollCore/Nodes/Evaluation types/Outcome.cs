@@ -77,10 +77,6 @@ namespace DiceRoll
             new(self.Value + 1);
         public static Outcome operator +(Outcome left, Outcome right) =>
             new(left.Value + right.Value);
-        public static Outcome operator +(int left, Outcome right) =>
-            new(left + right.Value);
-        public static Outcome operator +(Outcome left, int right) =>
-            new(left.Value + right);
 
         public static Outcome operator -(Outcome self) =>
             new(-self.Value);
@@ -88,71 +84,43 @@ namespace DiceRoll
             new(self.Value - 1);
         public static Outcome operator -(Outcome left, Outcome right) =>
             new(left.Value - right.Value);
-        public static Outcome operator -(int left, Outcome right) =>
-            new(left - right.Value);
-        public static Outcome operator -(Outcome left, int right) =>
-            new(left.Value - right);
 
         public static Outcome operator *(Outcome left, Outcome right) =>
             new(left.Value * right.Value);
-        public static Outcome operator *(int left, Outcome right) =>
-            new(left * right.Value);
-        public static Outcome operator *(Outcome left, int right) =>
-            new(left.Value * right);
         
         public static Outcome operator /(Outcome left, Outcome right) =>
             new(left.Value / right.Value);
-        public static Outcome operator /(int left, Outcome right) =>
-            new(left / right.Value);
-        public static Outcome operator /(Outcome left, int right) =>
-            new(left.Value / right);
         
         public static Outcome operator %(Outcome left, Outcome right) =>
             new(left.Value % right.Value);
-        public static Outcome operator %(int left, Outcome right) =>
-            new(left % right.Value);
-        public static Outcome operator %(Outcome left, int right) =>
-            new(left.Value % right);
 
         public static bool operator >(Outcome left, Outcome right) =>
             left.Value > right.Value;
-        public static bool operator >(Outcome left, int right) =>
-            left.Value > right;
         public static bool operator >=(Outcome left, Outcome right) =>
             left.Value >= right.Value;
-        public static bool operator >=(Outcome left, int right) =>
-            left.Value >= right;
         public static bool operator <(Outcome left, Outcome right) =>
             left.Value < right.Value;
-        public static bool operator <(Outcome left, int right) =>
-            left.Value < right;
         public static bool operator <=(Outcome left, Outcome right) =>
             left.Value <= right.Value;
-        public static bool operator <=(Outcome left, int right) =>
-            left.Value <= right;
         public static bool operator ==(Outcome left, Outcome right) =>
             left.Value == right.Value;
-        public static bool operator ==(Outcome left, int right) =>
-            left.Value == right;
         public static bool operator !=(Outcome left, Outcome right) =>
             left.Value != right.Value;
-        public static bool operator !=(Outcome left, int right) =>
-            left.Value != right;
         
         public static Outcome operator &(Outcome left, Outcome right) =>
             new(left.Value & right.Value);
-        public static Outcome operator &(Outcome left, int right) =>
-            new(left.Value & right);
         
         public static Outcome operator |(Outcome left, Outcome right) =>
             new(left.Value | right.Value);
-        public static Outcome operator |(Outcome left, int right) =>
-            new(left.Value | right);
         
         public static Outcome operator ^(Outcome left, Outcome right) =>
             new(left.Value ^ right.Value);
-        public static Outcome operator ^(Outcome left, int right) =>
-            new(left.Value ^ right);
+
+        public static implicit operator Outcome(int value) =>
+            new(value);
+
+        public static implicit operator int(Outcome outcome) =>
+            outcome.Value;
 
     #endregion
     }

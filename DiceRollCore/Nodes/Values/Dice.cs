@@ -17,13 +17,13 @@ namespace DiceRoll
         }
 
         public override void NextEvaluation() =>
-            CacheEvaluation(new Outcome(_random.Next(0, Faces) + 1));
+            CacheEvaluation(_random.Next(0, Faces) + 1);
         
         protected override RollProbabilityDistribution CreateProbabilityDistribution()
         {
             Roll[] rolls = new Roll[Faces];
             
-            Probability eachOutcomeProbability = new(1d / Faces);
+            Probability eachOutcomeProbability = 1d / Faces;
 
             for (int i = 0; i < rolls.Length; i++)
                 rolls[i] = new Roll(i + 1, eachOutcomeProbability);
