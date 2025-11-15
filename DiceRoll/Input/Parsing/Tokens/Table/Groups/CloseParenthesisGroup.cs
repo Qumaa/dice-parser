@@ -25,19 +25,22 @@ namespace DiceRoll.Input.Parsing
             
             ThrowIfImbalanced();
 
-            while (_state.Operators.TryPop(out Mapped<Operator> operatorToken))
-            {
-                if (operatorToken.Value.IsOpenParenthesis)
-                    break;
-
-                _state.InvocationHandler.InvokeOperator(in operatorToken);
-            }
+            InvokeOperatorsUntilOpenParenthesis();
             
             _state.Annotate().ParenthesisClosing();
             
-            _state.InvocationHandler.TryInvokeDelayedOperators();
-            
             return true;
+        }
+
+        private void InvokeOperatorsUntilOpenParenthesis()
+        {
+            while (_state.Operators.TryPop(out Mapped<Operator> @operator))
+            {
+                if (@operator.Value.IsOpenParenthesis)
+                    break;
+
+                _state.InvocationHandler.InvokeOperator(in @operator);
+            }
         }
 
         private void ThrowIfImbalanced()

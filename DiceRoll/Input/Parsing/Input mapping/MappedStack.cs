@@ -17,14 +17,14 @@ namespace DiceRoll.Input.Parsing
 
         public int Count => _stack.Count;
 
-        public void MapAndPush(in T value, in Substring context) =>
-            Push(_inputMapper.Map(in value, in context));
+        public void MapAndPush(in T value, in Substring substring) =>
+            Push(_inputMapper.Map(in value, in substring));
         
         public void Push(in T value, in Range range) =>
             Push(new Mapped<T>(in value, range));
 
-        public void Push(in Mapped<T> context) =>
-            _stack.Push(context);
+        public void Push(in Mapped<T> value) =>
+            _stack.Push(value);
             
         public Mapped<T> Pop() =>
             _stack.Pop();
@@ -37,33 +37,33 @@ namespace DiceRoll.Input.Parsing
         public T PeekValue() =>
             Peek().Value;
 
-        public bool TryPeek(out Mapped<T> context) =>
-            _stack.TryPeek(out context);
+        public bool TryPeek(out Mapped<T> result) =>
+            _stack.TryPeek(out result);
 
-        public bool TryPeek(out T value)
+        public bool TryPeek(out T result)
         {
             if (TryPeek(out Mapped<T> context))
             {
-                value = context.Value;
+                result = context.Value;
                 return true;
             }
 
-            value = default;
+            result = default;
             return false;
         }
 
-        public bool TryPop(out Mapped<T> context) =>
-            _stack.TryPop(out context);
+        public bool TryPop(out Mapped<T> result) =>
+            _stack.TryPop(out result);
 
-        public bool TryPop(out T value)
+        public bool TryPop(out T result)
         {
             if (TryPop(out Mapped<T> context))
             {
-                value = context.Value;
+                result = context.Value;
                 return true;
             }
 
-            value = default;
+            result = default;
             return false;
         }
     }

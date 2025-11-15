@@ -28,7 +28,6 @@ namespace DiceRoll.Input.Parsing
             Operand operand = ParseOperand(definition, in match);
             _state.Operands.MapAndPush(new LinkedNode(operand.Node, operand.EvaluationType), in match);
             _state.Annotate().OperandProcessing();
-            _state.InvocationHandler.TryInvokeDelayedOperators(); // todo remove
             return true;
         }
 

@@ -25,7 +25,7 @@ namespace DiceRoll.Input.Parsing
             if (!StartsWithOperator(in substring, out OperatorDefinition definition, out match))
                 return false;
 
-            Process(definition, in match);
+            HandleOperator(definition, in match);
             
             return true;
         }
@@ -64,15 +64,13 @@ namespace DiceRoll.Input.Parsing
                 OperatorUsageForm.Infix :
                 OperatorUsageForm.Prefix;
 
-        private void Process(OperatorDefinition definition, in Substring substring)
+        private void HandleOperator(OperatorDefinition definition, in Substring substring)
         {
-            Operator @operator = new(definition);
-            
-            InvokeHigherOrEqualPrecedenceOperators(in @operator);
-            
-            Mapped<Operator> mapped = _state.Mapper.Map(in @operator, in substring);
+            InvokeHigherOrEqualPrecedenceOperators(definition);
 
-            OperatorInvocationBehaviour invocationBehaviour = @operator.InvocationBehaviour;
+            Mapped<Operator> mapped = MapOperator(definition, in substring);
+
+            OperatorInvocationBehaviour invocationBehaviour = definition.InvocationBehaviour;
 
             if (invocationBehaviour.RightArity is 0)
             {
@@ -82,33 +80,35 @@ namespace DiceRoll.Input.Parsing
                 return;
             }
             
+            // resolve using default shunting-yard mechanism
+            _state.Operators.Push(in mapped);
             _state.Annotate().OperatorProcessing();
-
-            if (invocationBehaviour is { RightArity: 1, LeftArity: > 0 })
-            {
-                // resolve using default shunting-yard mechanism
-                _state.Operators.Push(in mapped);
-                return;
-            }
-
-            // delay until more operands are pushed
-            _state.DelayedOperators.MapAndPush(
-                new DelayedOperator(@operator.InvocationBehaviour, _state.ParenthesisLevel, _state.Operands.Count),
-                in substring
-                );
         }
-        
-        private void InvokeHigherOrEqualPrecedenceOperators(in Operator @operator)
+
+        private Mapped<Operator> MapOperator(OperatorDefinition definition, in Substring substring)
+        {
+            Operator @operator = new(
+                definition.InvocationBehaviour,
+                definition.Precedence,
+                _state.ParenthesisLevel,
+                _state.Operands.Count
+                );
+
+            Mapped<Operator> mapped = _state.Mapper.Map(in @operator, in substring);
+            return mapped;
+        }
+
+        private void InvokeHigherOrEqualPrecedenceOperators(OperatorDefinition definition)
         {
             while (_state.Operators.TryPeek(out Operator lastOperator))
             {
                 if (lastOperator.IsOpenParenthesis)
                     break;
                 
-                if (lastOperator.Precedence < @operator.Precedence)
+                if (lastOperator.Precedence < definition.Precedence)
                     break;
-                
-                _state.InvocationHandler.InvokeAfterDelayedOperators(_state.Operators.Pop());
+
+                _state.InvocationHandler.InvokeOperator(_state.Operators.Pop());
             }
         }
     }
