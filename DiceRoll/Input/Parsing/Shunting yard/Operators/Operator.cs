@@ -9,16 +9,13 @@ namespace DiceRoll.Input.Parsing
         
         public readonly OperatorInvocationBehaviour InvocationBehaviour;
         public readonly int Precedence;
-        public readonly int ParenthesisLevel;
         public readonly int OperandsPosition;
         
         internal bool IsOpenParenthesis => InvocationBehaviour is null;
             
-        public Operator(OperatorInvocationBehaviour invocationBehaviour, int precedence, int parenthesisLevel,
-            int operandsPosition)
+        public Operator(OperatorInvocationBehaviour invocationBehaviour, int precedence, int operandsPosition)
         {
             InvocationBehaviour = invocationBehaviour;
-            ParenthesisLevel = parenthesisLevel;
             OperandsPosition = operandsPosition;
             Precedence = precedence;
         }

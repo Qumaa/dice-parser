@@ -87,15 +87,9 @@ namespace DiceRoll.Input.Parsing
 
         private Mapped<Operator> MapOperator(OperatorDefinition definition, in Substring substring)
         {
-            Operator @operator = new(
-                definition.InvocationBehaviour,
-                definition.Precedence,
-                _state.ParenthesisLevel,
-                _state.Operands.Count
-                );
+            Operator @operator = new(definition.InvocationBehaviour, definition.Precedence, _state.Operands.Count);
 
-            Mapped<Operator> mapped = _state.Mapper.Map(in @operator, in substring);
-            return mapped;
+            return _state.Mapper.Map(in @operator, in substring);
         }
 
         private void InvokeHigherOrEqualPrecedenceOperators(OperatorDefinition definition)
