@@ -2,5 +2,7 @@
 
 namespace DiceRoll
 {
-    public interface INodePool : INode, IEnumerable<INode> { }
+    public interface INodePool<out T> : INode, IEnumerable<T> where T : INode { }
+    
+    public interface INodePool : INodePool<INode> { }
 }
