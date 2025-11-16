@@ -7,23 +7,26 @@ namespace DiceRoll.Input.Parsing
         private readonly InfixReader _infixReader;
         private readonly PostfixEvaluator _postfixEvaluator;
 
-        public ShuntingYard(TokensTable tokensTable, OperandCastingTable castingTable)
+        public ShuntingYard(ShuntingYardState state, TokenGroupChain chain)
         {
-            ArgumentNullException.ThrowIfNull(tokensTable);
-            ArgumentNullException.ThrowIfNull(castingTable);
+            ArgumentNullException.ThrowIfNull(state);
+            ArgumentNullException.ThrowIfNull(chain);
             
-            ShuntingYardState state = new(tokensTable);
-            ShuntingYardOperators operators = new(state, castingTable);
-            ShuntingYardOperands operands = new(state);
-            
-            _infixReader = new InfixReader(state, operators, operands);
-            _postfixEvaluator = new PostfixEvaluator(state, operators, operands);
+            _infixReader = new InfixReader(state, chain);
+            _postfixEvaluator = new PostfixEvaluator(state);
         }
 
-        public void Append(string expression) =>
-            _infixReader.Read(expression);
+        public void Append(string expression, ExternalTokenSolver solver) =>
+            _infixReader.Read(expression, solver);
 
+        // todo exception formatting support (it is only done during reading)
         public NodeTree Parse() =>
             _postfixEvaluator.Evaluate();
+    }
+
+    public static class ShuntingYardExtensions
+    {
+        public static void Append(this ShuntingYard yard, string expression) =>
+            yard.Append(expression, ExternalTokenSolver.Inert);
     }
 }

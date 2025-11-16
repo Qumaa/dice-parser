@@ -59,7 +59,7 @@ namespace DiceRoll.Input.Parsing
             }
         }
 
-        public static OperatorInvocationException BadArity(int arity, int operandsCount) =>
+        public static OperatorInvocationException NotEnoughOperands(int arity, int operandsCount) =>
             new($"This operator expected {arity} operand(-s), but received {operandsCount}.");
     }
 }

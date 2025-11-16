@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace DiceRoll.Input.Parsing
 {
-    internal sealed class InputMapper
+    public sealed class InputMapper
     {
         private readonly List<string> _accumulatedInput = new();
         private int _inputLength;
@@ -26,20 +26,25 @@ namespace DiceRoll.Input.Parsing
             
         public Range Map(int start, int length)
         {
-            int s = _previousLength + start;
-            int e = s + length;
+            int rangeStart = _previousLength + start;
+            int rangeEnd = rangeStart + length;
             
-            return new Range(new Index(s), new Index(e));
+            return rangeStart..rangeEnd;
         }
 
         public void Append(string input)
         {
-            if (_accumulatedInput.Count > 0 && !char.IsWhiteSpace(_accumulatedInput[^1][^1]))
-                _accumulatedInput.Add(" ");
+            AddSpaceIfNeeded();
                 
             _accumulatedInput.Add(input);
             _previousLength = _inputLength;
             _inputLength += input.Length + 1;
+        }
+
+        private void AddSpaceIfNeeded()
+        {
+            if (_accumulatedInput.Count > 0 && !char.IsWhiteSpace(_accumulatedInput[^1][^1]))
+                _accumulatedInput.Add(" ");
         }
 
         public void Clear()
@@ -52,19 +57,24 @@ namespace DiceRoll.Input.Parsing
         public MappedStack<T> CreateLinkedStack<T>() =>
             new(this);
 
-        public SubstringMapper BuildSubstringMapper()
+        public SubstringMapper BuildSubstringMapper() =>
+            new(BuildSourceString());
+
+        private string BuildSourceString()
         {
             if (_inputLength is 0)
-                return new SubstringMapper(string.Empty);
+                return string.Empty;
             
             char[] chars = new char[_inputLength - 1];
 
             int i = 0;
             foreach (string piece in _accumulatedInput)
-            foreach (char c in piece)
-                chars[i++] = c;
-            
-            return new SubstringMapper(new string(chars));
+            {
+                piece.CopyTo(0, chars, i, piece.Length);
+                i += piece.Length;
+            }
+
+            return new string(chars);
         }
     }
 

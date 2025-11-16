@@ -18,13 +18,28 @@ namespace DiceRoll.Input.Parsing
         public OperandsAccess Get<T>(int operandIndex, out T operand) where T : INode
         {
             INode node = _operands[operandIndex].Value.Node;
+            OperandCaster caster = _casters[operandIndex];
 
-            if ((_casters[operandIndex] is null && OperandCaster.Default<INode, T>().TryCast(node, out operand)) ||
-                (_casters[operandIndex].CastsTo(out OperandCaster<T> caster) && caster.TryCast(node, out operand)))
+            if (TryCast(node, caster, out operand))
                 return this;
 
             throw OperatorInvocationException.InvalidOperandCast(operandIndex, _operatorSignature, typeof(T));
         }
+
+        private static bool TryCast<T>(INode node, OperandCaster caster, out T operand) where T : INode
+        {
+            if (caster is null)
+                return TryDefaultCast(node, out operand);
+
+            if (caster.CastsTo(out OperandCaster<T> typedCaster))
+                return typedCaster.TryCast(node, out operand);
+
+            operand = default;
+            return false;
+        }
+
+        private static bool TryDefaultCast<T>(INode node, out T operand) where T : INode =>
+            OperandCaster.Default<INode, T>().TryCast(node, out operand);
     }
 
     public static class OperandsAccessExtensions

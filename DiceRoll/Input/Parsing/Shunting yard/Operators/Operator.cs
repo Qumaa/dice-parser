@@ -7,17 +7,17 @@ namespace DiceRoll.Input.Parsing
     {
         internal static readonly Operator OpenParenthesis = new();
         
-        public readonly int Precedence;
         public readonly OperatorInvocationBehaviour InvocationBehaviour;
-
+        public readonly int Precedence;
+        public readonly int OperandsPosition;
+        
         internal bool IsOpenParenthesis => InvocationBehaviour is null;
-
-        public Operator(int precedence, OperatorInvocationBehaviour invocationBehaviour)
+            
+        public Operator(OperatorInvocationBehaviour invocationBehaviour, int precedence, int operandsPosition)
         {
-            Precedence = precedence;
             InvocationBehaviour = invocationBehaviour;
+            OperandsPosition = operandsPosition;
+            Precedence = precedence;
         }
-
-        public Operator(OperatorDefinition definition) : this(definition.Precedence, definition.InvocationBehaviour) { }
     }
 }

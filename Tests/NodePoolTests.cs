@@ -126,15 +126,16 @@
 
         private sealed class Parser
         {
-            private readonly ShuntingYard _shuntingYard = new(
-                TokensTable.Default,
-                OperandCastingTable.Default
-                );
+            // private readonly ShuntingYard _shuntingYard = new(
+            //     TokensTable.Default,
+            //     OperandCastingTable.Default
+            //     );
             
             public INode Parse(in Substring operandSubstring)
             {
-                _shuntingYard.Append(operandSubstring.ToString());
-                return _shuntingYard.Parse().Root.Value.Node;
+                // _shuntingYard.Append(operandSubstring.ToString());
+                // return _shuntingYard.Parse().Root.Value.Node;
+                return null;
             }
         }
     }

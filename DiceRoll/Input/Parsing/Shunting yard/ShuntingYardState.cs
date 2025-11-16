@@ -2,27 +2,25 @@
 
 namespace DiceRoll.Input.Parsing
 {
-    internal sealed class ShuntingYardState
+    public sealed class ShuntingYardState
     {
-        public TokensTable Tokens { get; }
         public int ParenthesisLevel { get; private set; }
         public InputMapper Mapper { get; }
-        public MappedStack<Operator> Operators { get; }
         public MappedStack<LinkedNode> Operands { get; }
-        public MappedStack<DelayedOperator> DelayedOperators { get; }
+        public MappedStack<Operator> Operators { get; }
         public TokenKind PrecedingTokenKind { get; private set; }
+        public OperatorInvocationHandler InvocationHandler { get; }
 
-        public bool ClosingParenthesisWouldImposeImbalance => ParenthesisLevel is 0;
-
-        public ShuntingYardState(TokensTable tokensTable)
+        public ShuntingYardState(OperandCastingTable castingTable)
         {
-            Tokens = tokensTable;
+            ArgumentNullException.ThrowIfNull(castingTable);
             
             Mapper = new InputMapper();
             
-            Operators = Mapper.CreateLinkedStack<Operator>();
             Operands = Mapper.CreateLinkedStack<LinkedNode>();
-            DelayedOperators = Mapper.CreateLinkedStack<DelayedOperator>();
+            Operators = Mapper.CreateLinkedStack<Operator>();
+
+            InvocationHandler = new OperatorInvocationHandler(this, castingTable);
 
             PrecedingTokenKind = TokenKind.ExpressionStart;
             ParenthesisLevel = 0;
@@ -30,24 +28,6 @@ namespace DiceRoll.Input.Parsing
 
         public Annotator Annotate() =>
             new(this);
-
-        public void MapAndThrow(in Range context, string message) =>
-            throw new ParsingException(Mapper.GetSubstringOf(in context), message);
-
-        public void MapAndThrow<T>(in Mapped<T> context, string message) =>
-            MapAndThrow(in context.Range, message);
-
-        public void MapAndThrow(in Substring context, string message) =>
-            throw new ParsingException(Mapper.MapAndGetSubstringOf(in context), message);
-
-        public ParsingException MapException(in Range context, Exception innerException) =>
-            new(Mapper.GetSubstringOf(in context), innerException);
-
-        public ParsingException MapException<T>(in Mapped<T> context, Exception innerException) =>
-            MapException(in context.Range, innerException);
-
-        public ParsingException MapException(in Substring context, Exception innerException) =>
-            new(Mapper.MapAndGetSubstringOf(in context), innerException);
 
         public readonly ref struct Annotator
         {
@@ -61,7 +41,7 @@ namespace DiceRoll.Input.Parsing
             public Annotator ParenthesisOpening()
             {
                 _context.ParenthesisLevel++;
-                return NewExpressionStart();
+                return ExpressionStart();
             }
 
             public Annotator ParenthesisClosing()
@@ -70,18 +50,15 @@ namespace DiceRoll.Input.Parsing
                 return OperandProcessing();
             }
 
-            public Annotator NewExpressionStart()
+            public Annotator ExpressionStart()
             {
                 _context.PrecedingTokenKind = TokenKind.ExpressionStart;
                 return this;
             }
 
-            public Annotator OperatorProcessing(OperatorProcessingResult processingResult)
+            public Annotator OperatorProcessing()
             {
-                _context.PrecedingTokenKind = processingResult is OperatorProcessingResult.Invoked ?
-                    TokenKind.Operand :
-                    TokenKind.Operator;
-                
+                _context.PrecedingTokenKind = TokenKind.Operator;
                 return this;
             }
         
