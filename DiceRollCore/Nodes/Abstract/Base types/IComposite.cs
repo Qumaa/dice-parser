@@ -1,9 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace DiceRoll
+﻿namespace DiceRoll
 {
-    public interface IComposite : INumeric
-    {
-        IEnumerable<INumeric> SourceNodes { get; }
-    }
+    public interface IComposite : INumeric, INodePool<INumeric> { }
 }

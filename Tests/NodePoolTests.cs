@@ -54,7 +54,7 @@
                 return;
             }
             
-            if (composite.SourceNodes.ToArray() is not [ Dice { Faces: 4 }, Dice {Faces: 4 } ])
+            if (composite.ToArray() is not [ Dice { Faces: 4 }, Dice {Faces: 4 } ])
                 Assert.Fail();
             
             if (dice is not { Faces: 6 })

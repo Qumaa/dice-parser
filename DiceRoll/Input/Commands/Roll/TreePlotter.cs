@@ -93,7 +93,7 @@ namespace DiceRoll
             Mapped<LinkedNode>[] parents, string indent)
         {
             // todo: only simple composite (repeated node) are handled now
-            using IEnumerator<INumeric> enumerator = composite.SourceNodes.GetEnumerator();
+            using IEnumerator<INumeric> enumerator = composite.GetEnumerator();
             bool isLast = !enumerator.MoveNext();
             
             if (isLast)
@@ -202,7 +202,7 @@ namespace DiceRoll
                 }
                 
                 private static string CompositionString(IComposite composite, string operatorString) =>
-                    $"[{string.Join(',', composite.SourceNodes.Select(x => x.CachedEvaluation.ToString()))}] {operatorString}";
+                    $"[{string.Join(',', composite.Select(x => x.CachedEvaluation.ToString()))}] {operatorString}";
                 
                 private static string GenericSpacedString(SubstringMapper mapper, in Mapped<LinkedNode> operatorNode)
                 {

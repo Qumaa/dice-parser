@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,8 +9,7 @@ namespace DiceRoll
     {
         private readonly Composer _composer;
         private readonly INumeric _compositeNumeric;
-
-        public IEnumerable<INumeric> SourceNodes { get; }
+        private readonly IEnumerable<INumeric> _sourceNodes;
 
         // WARNING: source MUST NOT create new nodes during enumeration, but always point to the same nodes
         public Composite(Composer composer, IEnumerable<INumeric> source)
@@ -18,8 +18,8 @@ namespace DiceRoll
             ArgumentNullException.ThrowIfNull(composer);
 
             _composer = composer;
-            SourceNodes = source;
-            _compositeNumeric = composer.Compose(SourceNodes);
+            _sourceNodes = source;
+            _compositeNumeric = composer.Compose(_sourceNodes);
         }
 
         public Composite(Composer composer, INumeric numeric, int repetitionTimes)
@@ -35,14 +35,14 @@ namespace DiceRoll
                 sourceNodes[i] = numeric.CloneTyped();
 
             _composer = composer;
-            SourceNodes = sourceNodes;
+            _sourceNodes = sourceNodes;
             _compositeNumeric = composer.Compose(sourceNodes);
         }
 
         private Composite(Composite cloneFrom)
         {
-            SourceNodes = cloneFrom.SourceNodes.Select(x => x.CloneTyped()).ToArray();
-            _compositeNumeric = cloneFrom._composer.Compose(SourceNodes);
+            _sourceNodes = cloneFrom._sourceNodes.Select(x => x.CloneTyped()).ToArray();
+            _compositeNumeric = cloneFrom._composer.Compose(_sourceNodes);
         }
 
         public override void NextEvaluation()
@@ -57,5 +57,11 @@ namespace DiceRoll
 
         protected override RollProbabilityDistribution CreateProbabilityDistribution() =>
             _compositeNumeric.GetProbabilityDistribution();
+
+        public IEnumerator<INumeric> GetEnumerator() =>
+            _sourceNodes.GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() =>
+            ((IEnumerable) _sourceNodes).GetEnumerator();
     }
 }
