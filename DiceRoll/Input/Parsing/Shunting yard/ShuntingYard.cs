@@ -19,6 +19,7 @@ namespace DiceRoll.Input.Parsing
         public void Append(string expression, ExternalTokenSolver solver) =>
             _infixReader.Read(expression, solver);
 
+        // todo exception formatting support (it is only done during reading)
         public NodeTree Parse() =>
             _postfixEvaluator.Evaluate();
     }
