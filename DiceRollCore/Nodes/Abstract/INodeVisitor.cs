@@ -6,7 +6,7 @@
         void ForAssertion(IAssertion assertion);
         void ForOperation(IOperation operation);
         // todo:
-        // void ForNodePool(INodePool pool);
+        void ForNodePool<T>(INodePool<T> pool) where T : INode;
         // void ForOther(INode other);
     }
 }

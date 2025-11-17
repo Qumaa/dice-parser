@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.Linq;
 using DiceRoll.Input.Parsing;
 
 namespace DiceRoll
@@ -45,38 +46,44 @@ namespace DiceRoll
 
             INode node = nodeTree.Root.Value.Node;
             
-            Visitor visitor = new(context.Console, strings.FailedToPass);
+            Visitor visitor = new(strings.FailedToPass);
             
             for (int i = 0; i < times; i++)
             {
                 node.NextEvaluation();
-                node.Visit(visitor);
+                context.Console.WriteLine(visitor.VisitForString(node));
             }
         }
         
         private sealed class Visitor : INodeVisitor
         {
-            private readonly IConsole _console;
             private readonly string _failedToPass;
+            private string _visitResult;
 
-            public Visitor(IConsole console, string failedToPass)
+            public Visitor(string failedToPass)
             {
-                _console = console;
                 _failedToPass = failedToPass;
             }
 
             public void ForNumeric(INumeric numeric) =>
-                _console.WriteLine(numeric.CachedEvaluation.ToString());
+                _visitResult = numeric.CachedEvaluation.ToString();
 
             public void ForOperation(IOperation operation) =>
-                _console.WriteLine(
-                    operation.CachedEvaluation.Exists(out Outcome outcome) ?
-                        outcome.ToString() :
-                        _failedToPass
-                    );
+                _visitResult = operation.CachedEvaluation.Exists(out Outcome outcome) ?
+                    outcome.ToString() :
+                    _failedToPass;
+
+            public void ForNodePool<T>(INodePool<T> pool) where T : INode =>
+                _visitResult = $"[{string.Join(", ", pool.Select(x => VisitForString(x)))}]";
 
             public void ForAssertion(IAssertion assertion) =>
-                _console.WriteLine(assertion.CachedEvaluation.ToString());
+                _visitResult = assertion.CachedEvaluation.ToString();
+
+            public string VisitForString(INode node)
+            {
+                node.Visit(this);
+                return _visitResult;
+            }
         }
     }
 }

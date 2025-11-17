@@ -20,7 +20,7 @@ namespace DiceRoll
             new NodePool(_nodes.Select(x => x.CloneTyped()));
 
         public void Visit<T>(T visitor) where T : INodeVisitor =>
-            throw new System.NotImplementedException();
+            visitor.ForNodePool(this);
 
         public void NextEvaluation()
         {

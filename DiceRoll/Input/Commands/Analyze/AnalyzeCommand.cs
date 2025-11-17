@@ -97,6 +97,16 @@ namespace DiceRoll
                 _console.WriteLine(succeeding);
             }
 
+            // todo better support
+            public void ForNodePool<T>(INodePool<T> pool) where T : INode
+            {
+                foreach (T node in pool)
+                {
+                    node.Visit(this);
+                    _console.WriteLine();
+                }
+            }
+
             public void ForAssertion(IAssertion assertion)
             {
                 LogicalProbabilityDistribution distribution = assertion.GetProbabilityDistribution();
