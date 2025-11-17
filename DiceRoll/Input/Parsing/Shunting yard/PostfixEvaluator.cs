@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace DiceRoll.Input.Parsing
+﻿namespace DiceRoll.Input.Parsing
 {
     internal sealed class PostfixEvaluator
     {
@@ -26,21 +24,18 @@ namespace DiceRoll.Input.Parsing
             while(_state.Operators.TryPop(out Mapped<Operator> @operator))
                 _state.InvocationHandler.InvokeOperator(in @operator);
 
-            Mapped<LinkedNode> result = _state.Operands.Pop();
+            Mapped<LinkedNode> result = GetResult();
             SubstringMapper mapper = _state.Mapper.BuildSubstringMapper();
-            
-            ThrowIfAnyOperandLeft(mapper);
 
             return new NodeTree(mapper, result);
         }
-        
-        private void ThrowIfAnyOperandLeft(SubstringMapper mapper)
+
+        private Mapped<LinkedNode> GetResult()
         {
-            if (_state.Operands.TryPeek(out Mapped<LinkedNode> operandToken))
-                throw new ParsingException(
-                    mapper.GetSubstring(in operandToken.Range),
-                    "This operand doesn't take part in the expression."
-                    );
+            if (_state.Operands.Count is 1)
+                return _state.Operands.Pop();
+
+            return NodePoolUtils.GroupNodes(_state.Operands.PopAll());
         }
     }
 }

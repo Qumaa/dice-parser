@@ -23,9 +23,12 @@ namespace DiceRoll.Input.Parsing
             if (!_openParenthesis.MatchesStart(in substring, out match))
                 return false;
 
-            _state.Operators.MapAndPush(in Operator.OpenParenthesis, match);
+            _state.Operators.MapAndPush(GetOperator(), match);
             _state.Annotate().ParenthesisOpening();
             return true;
         }
+
+        private Operator GetOperator() =>
+            new(null, 0, _state.Operands.Count);
     }
 }

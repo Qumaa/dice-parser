@@ -29,20 +29,42 @@ namespace DiceRoll.Input.Parsing
         public Mapped<T> Pop() =>
             _stack.Pop();
 
-        public T PopValue() =>
-            Pop().Value;
-
         public Mapped<T> Peek() =>
             _stack.Peek();
-        public T PeekValue() =>
-            Peek().Value;
 
         public bool TryPeek(out Mapped<T> result) =>
             _stack.TryPeek(out result);
 
-        public bool TryPeek(out T result)
+        public bool TryPop(out Mapped<T> result) =>
+            _stack.TryPop(out result);
+    }
+
+    public static class MappedStackExtensions
+    {
+        public static Mapped<T>[] PopAll<T>(this MappedStack<T> stack) =>
+            stack.PopMany(stack.Count);
+
+        public static Mapped<T>[] PopMany<T>(this MappedStack<T> stack, int count)
         {
-            if (TryPeek(out Mapped<T> context))
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(count, stack.Count);
+            
+            Mapped<T>[] popped = new Mapped<T>[count];
+
+            for (int i = count - 1; i >= 0; i--)
+                popped[i] = stack.Pop();
+
+            return popped;
+        }
+        
+        public static T PopValue<T>(this MappedStack<T> stack) =>
+            stack.Pop().Value;
+        
+        public static T PeekValue<T>(this MappedStack<T> stack) =>
+            stack.Peek().Value;
+        
+        public static bool TryPeek<T>(this MappedStack<T> stack, out T result)
+        {
+            if (stack.TryPeek(out Mapped<T> context))
             {
                 result = context.Value;
                 return true;
@@ -51,13 +73,10 @@ namespace DiceRoll.Input.Parsing
             result = default;
             return false;
         }
-
-        public bool TryPop(out Mapped<T> result) =>
-            _stack.TryPop(out result);
-
-        public bool TryPop(out T result)
+        
+        public static bool TryPop<T>(this MappedStack<T> stack, out T result)
         {
-            if (TryPop(out Mapped<T> context))
+            if (stack.TryPop(out Mapped<T> context))
             {
                 result = context.Value;
                 return true;
