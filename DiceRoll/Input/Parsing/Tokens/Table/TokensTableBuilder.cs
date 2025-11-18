@@ -131,11 +131,11 @@ namespace DiceRoll.Input.Parsing
                 OperatorInvocationBehaviour.WithoutOverloads(OperatorInvoker.Composition(handler), 2, 0)
                 );
 
-        public static TokensTableBuilder Operand<T>(this TokensTableBuilder builder, FlatOperandParsingHandler parsingHandler,
+        public static TokensTableBuilder Operand<T>(this TokensTableBuilder builder, OperandParsingHandler parsingHandler,
             IToken token) where T : INode =>
             builder.Operand(OperandDefinition.OfType<T>(token, parsingHandler));
 
-        public static TokensTableBuilder Operand<T>(this TokensTableBuilder builder, FlatOperandParsingHandler parsingHandler,
+        public static TokensTableBuilder Operand<T>(this TokensTableBuilder builder, OperandParsingHandler parsingHandler,
             IEnumerable<IToken> tokens) where T : INode =>
             builder.Operand<T>(parsingHandler, tokens.ToCompositeToken());
 

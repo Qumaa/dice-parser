@@ -11,7 +11,9 @@ namespace DiceRoll.Input.Parsing
         private readonly ShuntingYardState _state;
         private readonly OperandDefinition[] _definitions;
 
-        public OperandGroup(int precedence, IEnumerable<OperandDefinition> definitions, ShuntingYardState state) : base(precedence)
+        public OperandGroup(int precedence, IEnumerable<OperandDefinition> definitions, ShuntingYardState state) : base(
+            precedence
+            )
         {
             ArgumentNullException.ThrowIfNull(state);
             ArgumentNullException.ThrowIfNull(definitions);
@@ -55,10 +57,10 @@ namespace DiceRoll.Input.Parsing
         
         private static Operand ParseOperand(OperandDefinition definition, in Substring substring)
         {
-            // todo remove
-            INode parsedNode = ((FlatOperandParser) definition.Parser).Parse(in substring);
+            INode parsedNode = definition.Parser.Parse(in substring);
+            Type evaluationType = definition.EvaluationType;
 
-            return new Operand(parsedNode, definition.EvaluationType);
+            return new Operand(parsedNode, evaluationType);
         }
     }
 }

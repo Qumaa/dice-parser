@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace DiceRoll.Input.Parsing
 {
-    internal sealed class DiceParser : FlatOperandParser
+    internal sealed class DiceParser : OperandParser
     {
         private readonly IToken _delimiter;
         private readonly CompositionDefinition[] _compositionTokens;

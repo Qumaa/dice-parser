@@ -22,11 +22,7 @@ namespace DiceRoll.Input.Parsing
         public static OperandDefinition OfType<T>(IToken token, OperandParser parsingHandler) where T : INode =>
             new(token, parsingHandler, typeof(T));
 
-        public static OperandDefinition OfType<T>(IToken token, FlatOperandParsingHandler parsingHandler)
-            where T : INode =>
-            OfType<T>(token, OperandParser.FromDelegate(parsingHandler));
-
-        public static OperandDefinition OfType<T>(IToken token, RecursiveOperandParsingHandler parsingHandler)
+        public static OperandDefinition OfType<T>(IToken token, OperandParsingHandler parsingHandler)
             where T : INode =>
             OfType<T>(token, OperandParser.FromDelegate(parsingHandler));
     }

@@ -1,16 +1,27 @@
-﻿namespace DiceRoll.Input.Parsing
+﻿using System;
+
+namespace DiceRoll.Input.Parsing
 {
     public abstract class OperandParser
     {
-        // note: this constructor is important, as it effectively prevents deriving this class outside the assembly
-        // only flat and recursive variants are ever expected to be used and derived
-        // do not remove
-        protected private OperandParser() { }
+        public abstract INode Parse(in Substring operandSubstring);
         
-        public static FlatOperandParser FromDelegate(FlatOperandParsingHandler handler) =>
-            FlatOperandParser.FromDelegate(handler);
-        
-        public static RecursiveOperandParser FromDelegate(RecursiveOperandParsingHandler handler) =>
-            RecursiveOperandParser.FromDelegate(handler);
+        public static OperandParser FromDelegate(OperandParsingHandler handler) =>
+            new DelegateImplementation(handler);
+
+        private sealed class DelegateImplementation : OperandParser
+        {
+            private readonly OperandParsingHandler _handler;
+
+            public DelegateImplementation(OperandParsingHandler handler)
+            {
+                ArgumentNullException.ThrowIfNull(handler);
+                
+                _handler = handler;
+            }
+
+            public override INode Parse(in Substring operandSubstring) =>
+                _handler(operandSubstring);
+        }
     }
 }
