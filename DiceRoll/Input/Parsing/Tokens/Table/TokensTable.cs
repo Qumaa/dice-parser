@@ -31,7 +31,6 @@ namespace DiceRoll.Input.Parsing
                 .Operand(in DiceOperand.Default)
                 .Operand(in NumericOperand.Default)
                 .Operand(in BinaryOperand.Default)
-                .Operand(in NodePoolOperand.Default)
                 
                 .PrefixUnaryOperator(Token("!", "not"), 120, static (IAssertion node) => node.Not())
                 .PrefixUnaryOperator(Token("-"), 120, static (INumeric node) => node.Negate())
