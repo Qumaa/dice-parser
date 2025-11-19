@@ -5,7 +5,7 @@
         private readonly CompositionHandler _handler;
 
         public CompositionInvoker(CompositionHandler handler) : 
-            base(Signature.Arguments<INumeric, INumeric>().Returns<INumeric>())
+            base(Signature.Arguments<INumeric, INumeric>().Returns<INumeric>(), 2, 0)
         {
             _handler = handler;
         }

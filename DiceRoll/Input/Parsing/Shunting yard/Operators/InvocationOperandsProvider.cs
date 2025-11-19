@@ -11,24 +11,23 @@ namespace DiceRoll.Input.Parsing
             _state = state;
         }
 
-        public Mapped<LinkedNode>[] PopExcessiveOperandsIfAny(in Operator @operator)
+        public Mapped<LinkedNode>[] LiftExcessiveOperandsIfAny(int operatorPosition, int rightArity)
         {
-            OperatorInvocationBehaviour behaviour = @operator.InvocationBehaviour;
             int operands = _state.Operands.Count;
-            int rightOperands = operands - @operator.OperandsPosition;
+            int rightOperands = operands - operatorPosition;
 
-            if (rightOperands == behaviour.RightArity)
+            if (rightOperands == rightArity)
                 return Array.Empty<Mapped<LinkedNode>>();
 
-            int excessiveOperands = rightOperands - behaviour.RightArity;
+            int excessiveOperands = rightOperands - rightArity;
             return PopOperandsDirect(excessiveOperands);
         }
         
-        public Mapped<LinkedNode>[] PopOperandsFor(in Operator @operator)
+        public Mapped<LinkedNode>[] PopOperands(int arity)
         {
-            ThrowIfCannotPop(@operator.InvocationBehaviour);
+            ThrowIfCannotPop(arity);
             
-            return PopOperandsDirect(@operator.InvocationBehaviour.Arity);
+            return PopOperandsDirect(arity);
         }
 
         public void RestoreExcessiveOperands(Mapped<LinkedNode>[] excessiveOperands)
@@ -47,11 +46,11 @@ namespace DiceRoll.Input.Parsing
             return operands;
         }
 
-        private void ThrowIfCannotPop(OperatorInvocationBehaviour behaviour)
+        private void ThrowIfCannotPop(int arity)
         {
             int operands = _state.Operands.Count;
-            if (operands < behaviour.Arity)
-                throw OperatorInvocationException.NotEnoughOperands(behaviour.Arity, operands);
+            if (operands < arity)
+                throw OperatorInvocationException.NotEnoughOperands(arity, operands);
         }
     } 
 }

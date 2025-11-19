@@ -55,9 +55,19 @@ namespace DiceRoll.Input.Parsing
             return false;
         }
         
-        private bool MatchesCurrentUsageForm(OperatorInvocationBehaviour invocationBehaviour) =>
-            invocationBehaviour is { LeftArity: 0, RightArity: > 0 } ==
-            GetCurrentUsageForm() is OperatorUsageForm.Prefix;
+        private bool MatchesCurrentUsageForm(OperatorInvocationBehaviour invocationBehaviour)
+        {
+            foreach (OperatorInvoker invoker in invocationBehaviour.Invokers)
+            {
+                if (MatchesUsageForm(invoker))
+                    return true;
+            }
+
+            return false;
+        }
+        
+        private bool MatchesUsageForm(OperatorInvoker invoker) =>
+            invoker is { LeftArity: 0, RightArity: > 0 } == GetCurrentUsageForm() is OperatorUsageForm.Prefix;
 
         private OperatorUsageForm GetCurrentUsageForm() =>
             _state.PrecedingTokenKind is TokenKind.Operand ?
@@ -66,23 +76,35 @@ namespace DiceRoll.Input.Parsing
 
         private void HandleOperator(OperatorDefinition definition, in Substring substring)
         {
-            InvokeHigherOrEqualPrecedenceOperators(definition);
+            InvokeHigherOrEqualPrecedenceOperators(definition.Precedence);
 
             Mapped<Operator> mapped = MapOperator(definition, in substring);
-
-            OperatorInvocationBehaviour invocationBehaviour = definition.InvocationBehaviour;
-
-            if (invocationBehaviour.RightArity is 0)
-            {
-                // invoke immediately using existing operands
-                _state.InvocationHandler.InvokeOperator(in mapped);
-                _state.Annotate().OperandProcessing();
-                return;
-            }
+            
+            // if (invoker.RightArity is 0)
+            // {
+            //     // invoke immediately using existing operands
+            //     _state.InvocationHandler.InvokeOperator(in mapped);
+            //     _state.Annotate().OperandProcessing();
+            //     return;
+            // }
             
             // resolve using default shunting-yard mechanism
             _state.Operators.Push(in mapped);
             _state.Annotate().OperatorProcessing();
+        }
+
+        private void InvokeHigherOrEqualPrecedenceOperators(int precedence)
+        {
+            while (_state.Operators.TryPeek(out Operator lastOperator))
+            {
+                if (lastOperator.IsOpenParenthesis)
+                    break;
+                
+                if (lastOperator.Precedence < precedence)
+                    break;
+
+                _state.InvocationHandler.InvokeOperator(_state.Operators.Pop());
+            }
         }
 
         private Mapped<Operator> MapOperator(OperatorDefinition definition, in Substring substring)
@@ -90,20 +112,6 @@ namespace DiceRoll.Input.Parsing
             Operator @operator = new(definition.InvocationBehaviour, definition.Precedence, _state.Operands.Count);
 
             return _state.Mapper.Map(in @operator, in substring);
-        }
-
-        private void InvokeHigherOrEqualPrecedenceOperators(OperatorDefinition definition)
-        {
-            while (_state.Operators.TryPeek(out Operator lastOperator))
-            {
-                if (lastOperator.IsOpenParenthesis)
-                    break;
-                
-                if (lastOperator.Precedence < definition.Precedence)
-                    break;
-
-                _state.InvocationHandler.InvokeOperator(_state.Operators.Pop());
-            }
         }
     }
 }

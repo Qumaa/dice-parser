@@ -5,40 +5,25 @@ namespace DiceRoll.Input.Parsing
     public sealed class OperandsAccess
     {
         private readonly Mapped<LinkedNode>[] _operands;
-        private readonly OperandCaster[] _casters;
         private readonly Signature _operatorSignature;
 
-        internal OperandsAccess(Mapped<LinkedNode>[] operands, OperandCaster[] casters, Signature operatorSignature)
+        internal OperandsAccess(Mapped<LinkedNode>[] operands, Signature operatorSignature)
         {
             _operands = operands;
-            _casters = casters;
             _operatorSignature = operatorSignature;
         }
 
         public OperandsAccess Get<T>(int operandIndex, out T operand) where T : INode
         {
             INode node = _operands[operandIndex].Value.Node;
-            OperandCaster caster = _casters[operandIndex];
 
-            if (TryCast(node, caster, out operand))
+            if (TryCast(node, out operand))
                 return this;
 
             throw OperatorInvocationException.InvalidOperandCast(operandIndex, _operatorSignature, typeof(T));
         }
 
-        private static bool TryCast<T>(INode node, OperandCaster caster, out T operand) where T : INode
-        {
-            if (caster is null)
-                return TryDefaultCast(node, out operand);
-
-            if (caster.CastsTo(out OperandCaster<T> typedCaster))
-                return typedCaster.TryCast(node, out operand);
-
-            operand = default;
-            return false;
-        }
-
-        private static bool TryDefaultCast<T>(INode node, out T operand) where T : INode =>
+        private static bool TryCast<T>(INode node, out T operand) where T : INode =>
             OperandCaster.Default<INode, T>().TryCast(node, out operand);
     }
 

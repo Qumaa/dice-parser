@@ -19,40 +19,35 @@ namespace DiceRoll.Input.Parsing
         }
 
         public static OperatorInvocationException NoMatchingSignature(OperatorInvocationBehaviour invocationBehaviour,
-            Mapped<LinkedNode>[] captureOperands, in Substring operatorSubstring)
+            in Substring operatorSubstring)
         {
             string operatorString = operatorSubstring.ToString();
-            string receivedSignature = _SignatureToString(
-                captureOperands.Select(x => x.Value.EvaluationType.Name).ToArray(),
-                invocationBehaviour.LeftArity,
-                operatorString
-                );
 
             string expectedSignatures = string.Join(
                 ',',
                 invocationBehaviour.Invokers
                     .Select(invoker => _SignatureToString(
                             invoker.Signature.EnumerateOperandTypes().Select(type => type.Name).ToArray(),
-                            invocationBehaviour.LeftArity,
+                            invoker.LeftArity,
                             operatorString
                             )
                         )
                 );
             
             string message =
-                $"None of this operator's defined signatures could handle {receivedSignature} arguments. Candidates are {expectedSignatures}.";
+                $"None of this operator's defined signatures could handle passed arguments. Candidates are {expectedSignatures}.";
             
             return new OperatorInvocationException(message);
             
-            static string _SignatureToString(string[] argumentTypeNames, int leftArity, string operatorString)
+            static string _SignatureToString(string[] argumentTypeNames, int operatorPosition, string operatorString)
             {
                 string leftArguments = string.Join(
                     ',',
-                    argumentTypeNames.Take(leftArity)
+                    argumentTypeNames.Take(operatorPosition)
                     );
                 string rightArguments = string.Join(
                     ',',
-                    argumentTypeNames.Skip(leftArity)
+                    argumentTypeNames.Skip(operatorPosition)
                     );
 
                 return $"<{leftArguments} {operatorString} {rightArguments}>";

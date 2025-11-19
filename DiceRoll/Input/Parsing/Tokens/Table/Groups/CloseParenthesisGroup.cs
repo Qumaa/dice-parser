@@ -51,7 +51,7 @@ namespace DiceRoll.Input.Parsing
 
         private void GroupIntoPoolIfNeeded(in Mapped<Operator> openParenthesis, in Substring closeParenthesis)
         {
-            int produced = _state.Operands.Count - openParenthesis.Value.OperandsPosition;
+            int produced = _state.Operands.Count - openParenthesis.Value.Position;
                 
             if (produced is 1)
                 return;

@@ -11,23 +11,9 @@ namespace DiceRoll.Input.Parsing
             _castingTable = castingTable;
         }
 
-        public bool TryGetInvocationInfo(Mapped<LinkedNode>[] operands, in Mapped<Operator> @operator,
-            out InvocationInfo info)
+        public bool TryGetInvocationInfo(in Mapped<Operator> @operator, out InvocationInfo info)
         {
-            OperatorInvocationBehaviour behaviour = @operator.Value.InvocationBehaviour;
-            OperandCaster[] casters = new OperandCaster[behaviour.Arity];
-            
-            foreach (OperatorInvoker invoker in behaviour.Invokers)
-            {
-                if (!InvokableWith(operands, invoker.Signature, casters))
-                    continue;
-
-                info = new InvocationInfo(invoker, casters);
-                return true;
-            }
-
-            info = default;
-            return false;
+            throw new NotImplementedException();
         }
 
         private bool InvokableWith(Mapped<LinkedNode>[] operands, Signature other, OperandCaster[] casters)

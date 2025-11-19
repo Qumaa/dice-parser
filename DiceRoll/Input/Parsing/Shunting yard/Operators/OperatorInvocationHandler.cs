@@ -20,12 +20,15 @@ namespace DiceRoll.Input.Parsing
 
         public void InvokeOperator(in Mapped<Operator> @operator)
         {
-            Mapped<LinkedNode>[] excessive = _operandsProvider.PopExcessiveOperandsIfAny(in @operator.Value);
+            InvocationInfo info = GetInvocationInfo(in @operator);
             
-            Mapped<LinkedNode>[] operands = _operandsProvider.PopOperandsFor(in @operator.Value);
+            OperatorInvoker invoker = info.Invoker;
 
-            InvocationInfo info = GetInvocationInfo(operands, in @operator);
-
+            Mapped<LinkedNode>[] excessive =
+                _operandsProvider.LiftExcessiveOperandsIfAny(@operator.Value.Position, invoker.RightArity);
+            
+            Mapped<LinkedNode>[] operands = _operandsProvider.PopOperands(invoker.Arity);
+            
             Operand result = Invoke(operands, in info);
             
             PushInvocationResult(in result, in @operator.Range, operands);
@@ -33,14 +36,13 @@ namespace DiceRoll.Input.Parsing
             _operandsProvider.RestoreExcessiveOperands(excessive);
         }
 
-        private InvocationInfo GetInvocationInfo(Mapped<LinkedNode>[] operands, in Mapped<Operator> @operator)
+        private InvocationInfo GetInvocationInfo(in Mapped<Operator> @operator)
         {
-            if (_infoProvider.TryGetInvocationInfo(operands, in @operator, out InvocationInfo info))
+            if (_infoProvider.TryGetInvocationInfo(in @operator, out InvocationInfo info))
                 return info;
             
             throw OperatorInvocationException.NoMatchingSignature(
                 @operator.Value.InvocationBehaviour,
-                operands,
                 _state.Mapper.GetSubstringOf(in @operator)
                 );
         }
@@ -49,7 +51,7 @@ namespace DiceRoll.Input.Parsing
         {
             Signature signature = info.Invoker.Signature;
             
-            OperandsAccess access = new(operands, info.Casters, signature);
+            OperandsAccess access = new(operands, signature);
             
             INode invocationResult = info.Invoker.Invoke(access);
 
