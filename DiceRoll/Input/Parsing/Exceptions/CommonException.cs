@@ -12,7 +12,7 @@ namespace DiceRoll.Input.Parsing
                 throw new ArgumentException($"Params array {paramName} is empty.", paramName);
         }
 
-        public static void ThrowIfTypeIsNotNode(Type type, [CallerArgumentExpression(nameof(type))] string paramName = null)
+        public static void ThrowIfTypeIsNotNodeOrNull(Type type, [CallerArgumentExpression(nameof(type))] string paramName = null)
         {
             ArgumentNullException.ThrowIfNull(type);
             
@@ -26,7 +26,7 @@ namespace DiceRoll.Input.Parsing
             [CallerArgumentExpression(nameof(types))] string paramName = null)
         {
             foreach (Type type in types)
-                ThrowIfTypeIsNotNode(type, paramName);
+                ThrowIfTypeIsNotNodeOrNull(type, paramName);
         }
     }
 }

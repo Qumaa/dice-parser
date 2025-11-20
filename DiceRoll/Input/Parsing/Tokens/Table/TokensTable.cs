@@ -67,7 +67,28 @@ namespace DiceRoll.Input.Parsing
         private static StringComparisonToken Token(params string[] values) =>
             StringComparisonToken.CaseInsensitive(values);
     }
+    
+    public static class TokensTableExtensions
+    {
+        public static TokenGroupChain ToDefaultChain(this TokensTable table, EquationParserState state,
+            int openParenthesisPrecedence = OpenParenthesisGroup.DEFAULT_PRECEDENCE,
+            int closeParenthesisPrecedence = CloseParenthesisGroup.DEFAULT_PRECEDENCE,
+            int operandPrecedence = OperandGroup.DEFAULT_PRECEDENCE,
+            int operatorPrecedence = OperatorGroup.DEFAULT_PRECEDENCE) =>
+            new(
+                new TokenGroup[]
+                {
+                    new OpenParenthesisGroup(openParenthesisPrecedence, table.OpenParenthesis, state),
+                    new CloseParenthesisGroup(closeParenthesisPrecedence, table.CloseParenthesis, state),
+                    new OperandGroup(operandPrecedence, table.Operands, state),
+                    new OperatorGroup(operatorPrecedence, table.Operators, state)
+                }
+                );
+    }
+}
 
+namespace DiceRoll.Input.Parsing.Deprecated
+{
     public static class TokensTableExtensions
     {
         public static TokenGroupChain ToDefaultChain(this TokensTable table, ShuntingYardState state,

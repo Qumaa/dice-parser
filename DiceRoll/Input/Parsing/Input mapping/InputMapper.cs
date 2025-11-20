@@ -8,21 +8,6 @@ namespace DiceRoll.Input.Parsing
         private readonly List<string> _accumulatedInput = new();
         private int _inputLength;
         private int _previousLength;
-
-        public Mapped<T> Map<T>(in T element, in Substring token) =>
-            Map(in element, token.Start, token.Length);
-        
-        public Mapped<T> Map<T>(in T element, string token) =>
-            Map(in element, 0, token.Length);
-            
-        public Mapped<T> Map<T>(in T element, int start, int length) =>
-            new(in element, Map(start, length));
-        
-        public Range Map(in Substring token) =>
-            Map(token.Start, token.Length);
-        
-        public Range Map(string token) =>
-            Map(0, token.Length);
             
         public Range Map(int start, int length)
         {
@@ -54,9 +39,6 @@ namespace DiceRoll.Input.Parsing
             _previousLength = 0;
         }
 
-        public MappedStack<T> CreateLinkedStack<T>() =>
-            new(this);
-
         public SubstringMapper BuildSubstringMapper() =>
             new(BuildSourceString());
 
@@ -80,6 +62,21 @@ namespace DiceRoll.Input.Parsing
 
     internal static class InputMapperExtensions
     {
+        public static Mapped<T> Map<T>(this InputMapper mapper, in T element, in Substring token) =>
+            mapper.Map(in element, token.Start, token.Length);
+        
+        public static Mapped<T> Map<T>(this InputMapper mapper, in T element, string token) =>
+            mapper.Map(in element, 0, token.Length);
+            
+        public static Mapped<T> Map<T>(this InputMapper mapper, in T element, int start, int length) =>
+            new(in element, mapper.Map(start, length));
+        
+        public static Range Map(this InputMapper mapper, in Substring token) =>
+            mapper.Map(token.Start, token.Length);
+        
+        public static Range Map(this InputMapper mapper, string token) =>
+            mapper.Map(0, token.Length);
+        
         public static Substring GetSubstringOf<T>(this InputMapper mapper, in Mapped<T> mapped) =>
             mapper.BuildSubstringMapper().GetSubstringOf(mapped);
         
@@ -88,5 +85,14 @@ namespace DiceRoll.Input.Parsing
 
         public static Substring MapAndGetSubstringOf(this InputMapper mapper, in Substring substring) =>
             mapper.GetSubstringOf(mapper.Map(in substring));
+    }
+}
+
+namespace DiceRoll.Input.Parsing.Deprecated
+{
+    internal static class InputMapperExtensions
+    {
+        public static MappedStack<T> CreateLinkedStack<T>(this InputMapper mapper) =>
+            new(mapper);
     }
 }

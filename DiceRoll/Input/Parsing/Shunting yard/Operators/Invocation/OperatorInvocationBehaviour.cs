@@ -6,6 +6,8 @@ namespace DiceRoll.Input.Parsing
 {
     public sealed class OperatorInvocationBehaviour
     {
+        private const int _DEFAULT_OVERLOADS_HINT = 2;
+        
         public readonly OperatorInvoker[] Invokers;
 
         private OperatorInvocationBehaviour(OperatorInvoker[] invokers)
@@ -13,11 +15,11 @@ namespace DiceRoll.Input.Parsing
             Invokers = invokers;
         }
         
-        public static Builder WithOverloads() =>
-            new();
+        public static Builder WithOverloads(int overloadsHint = _DEFAULT_OVERLOADS_HINT) =>
+            new(overloadsHint);
         
-        public static Builder WithOverloads(OperatorInvoker baseInvoker) =>
-            new Builder().Overload(baseInvoker);
+        public static Builder WithOverloads(OperatorInvoker baseInvoker, int overloadsHint = _DEFAULT_OVERLOADS_HINT) =>
+            WithOverloads().Overload(baseInvoker);
 
         public static OperatorInvocationBehaviour WithoutOverloads(OperatorInvoker invoker) =>
             WithOverloads(invoker).Build();
@@ -27,7 +29,7 @@ namespace DiceRoll.Input.Parsing
         {
             private readonly List<OperatorInvoker> _invokers;
             
-            public Builder(int overloadsHint = 2)
+            public Builder(int overloadsHint)
             {
                 _invokers = new List<OperatorInvoker>(overloadsHint);
             }

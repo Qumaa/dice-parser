@@ -14,7 +14,7 @@ namespace DiceRoll.Input.Parsing
 
         internal LinkedNode(INode node, Type evaluationType, Mapped<LinkedNode>[] parents)
         {
-            CommonException.ThrowIfTypeIsNotNode(evaluationType);
+            CommonException.ThrowIfTypeIsNotNodeOrNull(evaluationType);
             
             Node = node;
             Parents = parents;

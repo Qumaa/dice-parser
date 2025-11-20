@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DiceRoll.Input.Parsing
+namespace DiceRoll.Input.Parsing.Deprecated
 {
     public class CloseParenthesisGroup : TokenGroup
     {

@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace DiceRoll.Input.Parsing
+namespace DiceRoll.Input.Parsing.Deprecated
 {
     [StructLayout(LayoutKind.Auto)]
     public readonly struct Operator

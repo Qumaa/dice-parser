@@ -12,7 +12,7 @@ namespace DiceRoll.Input.Parsing
 
         public Signature(Type returnType, params Type[] operandTypes)
         {
-            CommonException.ThrowIfTypeIsNotNode(returnType);
+            CommonException.ThrowIfTypeIsNotNodeOrNull(returnType);
             CommonException.ThrowIfParamsArrayIsEmpty(operandTypes);
             CommonException.ThrowIfAnyTypeIsNotNode(operandTypes);
             

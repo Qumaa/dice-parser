@@ -4,14 +4,14 @@ namespace DiceRoll.Input.Parsing
 {
     public sealed class ExpressionParser
     {
-        private readonly ShuntingYard _shuntingYard;
+        private readonly EquationParser _parser;
 
         public ExpressionParser(TokensTable tokensTable, OperandCastingTable castingTable)
         {
-            ShuntingYardState state = new(castingTable);
+            EquationParserState state = new(castingTable);
             TokenGroupChain chain = tokensTable.ToDefaultChain(state);
             
-            _shuntingYard = new ShuntingYard(state, chain);
+            _parser = new EquationParser(state, chain);
         }
 
         /*
@@ -33,16 +33,16 @@ namespace DiceRoll.Input.Parsing
          */
         public NodeTree Parse(string expression)
         {
-            _shuntingYard.Append(expression);
-            return _shuntingYard.Parse();
+            _parser.Read(expression);
+            return _parser.Fold(ExternalTokenSolver.Inert);
         }
 
         public NodeTree Parse(IEnumerable<string> expression)
         {
             foreach (string segment in expression)
-                _shuntingYard.Append(segment);
+                _parser.Read(segment);
 
-            return _shuntingYard.Parse();
+            return _parser.Fold(ExternalTokenSolver.Inert);
         }
     }
 }

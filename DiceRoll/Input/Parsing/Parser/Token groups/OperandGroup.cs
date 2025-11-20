@@ -2,16 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DiceRoll.Input.Parsing.Deprecated
+namespace DiceRoll.Input.Parsing
 {
     public class OperandGroup : TokenGroup
     {
         public const int DEFAULT_PRECEDENCE = 500;
         
-        private readonly ShuntingYardState _state;
+        private readonly EquationParserState _state;
         private readonly OperandDefinition[] _definitions;
 
-        public OperandGroup(int precedence, IEnumerable<OperandDefinition> definitions, ShuntingYardState state) : base(
+        public OperandGroup(int precedence, IEnumerable<OperandDefinition> definitions, EquationParserState state) : base(
             precedence
             )
         {
@@ -28,8 +28,7 @@ namespace DiceRoll.Input.Parsing.Deprecated
                 return false;
             
             Operand operand = ParseOperand(definition, in match);
-            _state.Operands.MapAndPush(new LinkedNode(operand.Node, operand.EvaluationType), in match);
-            _state.Annotate().OperandProcessing();
+            _state.Members.Push(operand, in match);
             return true;
         }
 

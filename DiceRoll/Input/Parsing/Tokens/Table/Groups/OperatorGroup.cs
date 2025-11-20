@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DiceRoll.Input.Parsing
+namespace DiceRoll.Input.Parsing.Deprecated
 {
     public class OperatorGroup : TokenGroup
     {

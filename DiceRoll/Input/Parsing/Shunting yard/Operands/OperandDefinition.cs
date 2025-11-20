@@ -12,7 +12,7 @@ namespace DiceRoll.Input.Parsing
         {
             ArgumentNullException.ThrowIfNull(token);
             ArgumentNullException.ThrowIfNull(parser);
-            CommonException.ThrowIfTypeIsNotNode(evaluationType);
+            CommonException.ThrowIfTypeIsNotNodeOrNull(evaluationType);
             
             Token = token;
             Parser = parser;
