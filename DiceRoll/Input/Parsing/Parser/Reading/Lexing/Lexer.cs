@@ -2,17 +2,10 @@
 {
     // todo make inheritors logic accessible otherwise (mostly to ease custom implementations of external token solver)
     // e.g. make api to process an operand, an operator, open/close parenthesis etc.
-    public abstract class TokenGroup
+    public abstract class Lexer
     {
-        public readonly int Precedence;
-        
-        protected TokenGroup(int precedence)
-        {
-            Precedence = precedence;
-        }
-
         /// <summary>
-        /// Executes group-associated logic if the start of <paramref name="substring"/> is matched. 
+        /// Executes lexer-associated logic if the start of <paramref name="substring"/> is matched. 
         /// </summary>
         /// <param name="substring">A substring to scan the start of.</param>
         /// <param name="match">Contains either the earliest match or an empty substring when did not match.</param>

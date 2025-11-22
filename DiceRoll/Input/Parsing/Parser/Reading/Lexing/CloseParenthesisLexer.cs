@@ -2,14 +2,14 @@
 
 namespace DiceRoll.Input.Parsing.Deprecated
 {
-    public class CloseParenthesisGroup : TokenGroup
+    public class CloseParenthesisLexer : Lexer
     {
         public const int DEFAULT_PRECEDENCE = 1000;
         
         private readonly ShuntingYardState _state;
         private readonly IToken _closeParenthesis;
 
-        public CloseParenthesisGroup(int precedence, IToken token, ShuntingYardState state) : base(precedence)
+        public CloseParenthesisLexer(int precedence, IToken token, ShuntingYardState state) : base()
         {
             ArgumentNullException.ThrowIfNull(state);
             ArgumentNullException.ThrowIfNull(token);

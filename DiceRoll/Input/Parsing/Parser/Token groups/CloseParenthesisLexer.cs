@@ -2,14 +2,12 @@
 
 namespace DiceRoll.Input.Parsing
 {
-    public class CloseParenthesisGroup : TokenGroup
+    public class CloseParenthesisLexer : Lexer
     {
-        public const int DEFAULT_PRECEDENCE = 1000;
-        
         private readonly EquationParserState _state;
         private readonly IToken _closeParenthesis;
 
-        public CloseParenthesisGroup(int precedence, IToken token, EquationParserState state) : base(precedence)
+        public CloseParenthesisLexer(IToken token, EquationParserState state)
         {
             ArgumentNullException.ThrowIfNull(state);
             ArgumentNullException.ThrowIfNull(token);
@@ -23,7 +21,7 @@ namespace DiceRoll.Input.Parsing
             if (!_closeParenthesis.MatchesStart(in substring, out match))
                 return false;
             
-            _state.Members.Push(CloseParenthesis.Shared, in match);
+            _state.Lexemes.Push(CloseParenthesis.Shared, in match);
             
             return true;
         }

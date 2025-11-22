@@ -5,9 +5,9 @@ namespace DiceRoll.Input.Parsing
     public sealed class EquationReader
     {
         private readonly EquationParserState _state;
-        private readonly TokenGroupChain _chain;
+        private readonly LexingPipeline _chain;
         
-        public EquationReader(EquationParserState state, TokenGroupChain chain)
+        public EquationReader(EquationParserState state, LexingPipeline chain)
         {
             _state = state;
             _chain = chain;
@@ -61,6 +61,6 @@ namespace DiceRoll.Input.Parsing
         }
 
         private void PushUnresolvedMember(in Substring memberSubstring) =>
-            _state.Members.Push(UnresolvedMember.Shared, in memberSubstring);
+            _state.Lexemes.Push(UnknownLexeme.Shared, in memberSubstring);
     }
 }

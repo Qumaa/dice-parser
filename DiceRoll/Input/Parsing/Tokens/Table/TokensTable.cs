@@ -70,18 +70,14 @@ namespace DiceRoll.Input.Parsing
     
     public static class TokensTableExtensions
     {
-        public static TokenGroupChain ToDefaultChain(this TokensTable table, EquationParserState state,
-            int openParenthesisPrecedence = OpenParenthesisGroup.DEFAULT_PRECEDENCE,
-            int closeParenthesisPrecedence = CloseParenthesisGroup.DEFAULT_PRECEDENCE,
-            int operandPrecedence = OperandGroup.DEFAULT_PRECEDENCE,
-            int operatorPrecedence = OperatorGroup.DEFAULT_PRECEDENCE) =>
+        public static LexingPipeline ToDefaultPipeline(this TokensTable table, EquationParserState state) =>
             new(
-                new TokenGroup[]
+                new Lexer[]
                 {
-                    new OpenParenthesisGroup(openParenthesisPrecedence, table.OpenParenthesis, state),
-                    new CloseParenthesisGroup(closeParenthesisPrecedence, table.CloseParenthesis, state),
-                    new OperandGroup(operandPrecedence, table.Operands, state),
-                    new OperatorGroup(operatorPrecedence, table.Operators, state)
+                    new OpenParenthesisLexer(table.OpenParenthesis, state),
+                    new CloseParenthesisLexer(table.CloseParenthesis, state),
+                    new OperandLexer(table.Operands, state),
+                    new OperatorLexer(table.Operators, state)
                 }
                 );
     }
@@ -91,18 +87,18 @@ namespace DiceRoll.Input.Parsing.Deprecated
 {
     public static class TokensTableExtensions
     {
-        public static TokenGroupChain ToDefaultChain(this TokensTable table, ShuntingYardState state,
-            int openParenthesisPrecedence = OpenParenthesisGroup.DEFAULT_PRECEDENCE,
-            int closeParenthesisPrecedence = CloseParenthesisGroup.DEFAULT_PRECEDENCE,
-            int operandPrecedence = OperandGroup.DEFAULT_PRECEDENCE,
-            int operatorPrecedence = OperatorGroup.DEFAULT_PRECEDENCE) =>
+        public static LexingPipeline ToDefaultPipeline(this TokensTable table, ShuntingYardState state,
+            int openParenthesisPrecedence = OpenParenthesisLexer.DEFAULT_PRECEDENCE,
+            int closeParenthesisPrecedence = CloseParenthesisLexer.DEFAULT_PRECEDENCE,
+            int operandPrecedence = OperandLexer.DEFAULT_PRECEDENCE,
+            int operatorPrecedence = OperatorLexer.DEFAULT_PRECEDENCE) =>
             new(
-                new TokenGroup[]
+                new Lexer[]
                 {
-                    new OpenParenthesisGroup(openParenthesisPrecedence, table.OpenParenthesis, state),
-                    new CloseParenthesisGroup(closeParenthesisPrecedence, table.CloseParenthesis, state),
-                    new OperandGroup(operandPrecedence, table.Operands, state),
-                    new OperatorGroup(operatorPrecedence, table.Operators, state)
+                    new OpenParenthesisLexer(openParenthesisPrecedence, table.OpenParenthesis, state),
+                    new CloseParenthesisLexer(closeParenthesisPrecedence, table.CloseParenthesis, state),
+                    new OperandLexer(operandPrecedence, table.Operands, state),
+                    new OperatorLexer(operatorPrecedence, table.Operators, state)
                 }
                 );
     }

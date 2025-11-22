@@ -8,6 +8,8 @@ namespace DiceRoll.Input.Parsing
         private readonly List<string> _accumulatedInput = new();
         private int _inputLength;
         private int _previousLength;
+
+        public int InputLength => _inputLength;
             
         public Range Map(int start, int length)
         {

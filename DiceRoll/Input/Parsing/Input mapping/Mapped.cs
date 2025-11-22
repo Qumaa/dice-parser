@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace DiceRoll.Input.Parsing
@@ -19,5 +20,25 @@ namespace DiceRoll.Input.Parsing
             Value = value;
             Range = range;
         }
+    }
+
+    public static class MappedExtensions
+    {
+        public static bool TryCastValue<TSource, TResult>(this Mapped<TSource> source, out Mapped<TResult> result)
+            where TSource : class where TResult : TSource
+        {
+            if (source.Value is TResult castedValue)
+            {
+                result = new Mapped<TResult>(castedValue, in source.Range);
+                return true;
+            }
+
+            result = default;
+            return false;
+        }
+
+        public static Mapped<TResult> CastValueOrThrow<TSource, TResult>(this Mapped<TSource> source)
+            where TSource : class where TResult : TSource =>
+            new((TResult) source.Value, in source.Range);
     }
 }

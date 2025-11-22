@@ -4,16 +4,12 @@ using System.Linq;
 
 namespace DiceRoll.Input.Parsing
 {
-    public class OperandGroup : TokenGroup
+    public class OperandLexer : Lexer
     {
-        public const int DEFAULT_PRECEDENCE = 500;
-        
         private readonly EquationParserState _state;
         private readonly OperandDefinition[] _definitions;
 
-        public OperandGroup(int precedence, IEnumerable<OperandDefinition> definitions, EquationParserState state) : base(
-            precedence
-            )
+        public OperandLexer(IEnumerable<OperandDefinition> definitions, EquationParserState state)
         {
             ArgumentNullException.ThrowIfNull(state);
             ArgumentNullException.ThrowIfNull(definitions);
@@ -28,7 +24,7 @@ namespace DiceRoll.Input.Parsing
                 return false;
             
             Operand operand = ParseOperand(definition, in match);
-            _state.Members.Push(operand, in match);
+            _state.Lexemes.Push(operand, in match);
             return true;
         }
 
@@ -41,7 +37,7 @@ namespace DiceRoll.Input.Parsing
             {
                 if (!operandDefinition.Token.MatchesStart(in expression, out Substring newMatch))
                 {
-                    TokenGroupUtils.UpdateEarliestMatch(ref substring, in newMatch);
+                    LexerUtils.UpdateEarliestMatch(ref substring, in newMatch);
                     continue;
                 }
 

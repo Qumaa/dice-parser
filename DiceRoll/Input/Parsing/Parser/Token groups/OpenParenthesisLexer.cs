@@ -1,15 +1,13 @@
 ﻿using System;
 
-namespace DiceRoll.Input.Parsing.Deprecated
+namespace DiceRoll.Input.Parsing
 {
-    public class OpenParenthesisGroup : TokenGroup
+    public class OpenParenthesisLexer : Lexer
     {
-        public const int DEFAULT_PRECEDENCE = 1100;
-        
-        private readonly ShuntingYardState _state;
+        private readonly EquationParserState _state;
         private readonly IToken _openParenthesis;
         
-        public OpenParenthesisGroup(int precedence, IToken token, ShuntingYardState state) : base(precedence)
+        public OpenParenthesisLexer(IToken token, EquationParserState state)
         {
             ArgumentNullException.ThrowIfNull(state);
             ArgumentNullException.ThrowIfNull(token);
@@ -23,12 +21,8 @@ namespace DiceRoll.Input.Parsing.Deprecated
             if (!_openParenthesis.MatchesStart(in substring, out match))
                 return false;
 
-            _state.Operators.MapAndPush(GetOperator(), match);
-            _state.Annotate().ParenthesisOpening();
+            _state.Lexemes.Push(OpenParenthesis.Shared, in match);
             return true;
         }
-
-        private Operator GetOperator() =>
-            new(null, 0, _state.Operands.Count);
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace DiceRoll.Input.Parsing
 {
-    public sealed class Operator : EquationMember
+    public sealed class Operator : Lexeme
     {
         public readonly OperatorDefinition[] Definitions;
         

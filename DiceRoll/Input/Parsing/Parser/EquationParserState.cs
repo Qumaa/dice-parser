@@ -5,7 +5,7 @@ namespace DiceRoll.Input.Parsing
     public sealed class EquationParserState
     {
         public readonly OperandCastingTable CastingTable;
-        public readonly EquationMembers Members;
+        public readonly LexemesList Lexemes;
         public readonly InputMapper Mapper;
 
         public EquationParserState(OperandCastingTable castingTable)
@@ -15,12 +15,12 @@ namespace DiceRoll.Input.Parsing
             CastingTable = castingTable;
             
             Mapper = new InputMapper();
-            Members = new EquationMembers(Mapper);
+            Lexemes = new LexemesList(Mapper);
         }
 
         public void Reset()
         {
-            Members.Clear();
+            Lexemes.Clear();
             Mapper.Clear();
         }
     }

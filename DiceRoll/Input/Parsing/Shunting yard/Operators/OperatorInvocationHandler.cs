@@ -53,9 +53,10 @@ namespace DiceRoll.Input.Parsing.Deprecated
             
             OperandsAccess access = new(operands, signature);
             
-            INode invocationResult = info.Invoker.Invoke(access);
+            // INode invocationResult = info.Invoker.Invoke(access);
 
-            return new Operand(invocationResult, signature.GetReturnType());
+            // return new Operand(invocationResult, signature.GetReturnType());
+            return new Operand(null, signature.GetReturnType());
         }
 
         private void PushInvocationResult(in Operand operand, in Range operatorRange, Mapped<LinkedNode>[] operands)

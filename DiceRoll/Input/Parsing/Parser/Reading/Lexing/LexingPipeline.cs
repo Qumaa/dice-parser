@@ -4,29 +4,29 @@ using System.Linq;
 
 namespace DiceRoll.Input.Parsing
 {
-    public sealed class TokenGroupChain
+    public sealed class LexingPipeline
     {
-        private readonly TokenGroup[] _groups;
+        private readonly Lexer[] _lexers;
 
-        public TokenGroupChain(IEnumerable<TokenGroup> groups)
+        public LexingPipeline(IEnumerable<Lexer> lexers)
         {
-            ArgumentNullException.ThrowIfNull(groups);
+            ArgumentNullException.ThrowIfNull(lexers);
             
-            _groups = groups.OrderByDescending(x => x.Precedence).ToArray();
+            _lexers = lexers.ToArray();
         }
 
         public bool TryExecuteAll(in Substring substring, out Substring match)
         {
             Substring earliestMatch = substring.Empty();
             
-            foreach (TokenGroup group in _groups)
-                if (group.TryExecute(in substring, out Substring newMatch))
+            foreach (Lexer lexer in _lexers)
+                if (lexer.TryExecute(in substring, out Substring newMatch))
                 {
                     match = newMatch;
                     return true;
                 }
                 else
-                    TokenGroupUtils.UpdateEarliestMatch(ref earliestMatch, in newMatch);
+                    LexerUtils.UpdateEarliestMatch(ref earliestMatch, in newMatch);
 
             match = earliestMatch.IsEmpty ? substring : substring.SetEnd(earliestMatch.Start).TrimEnd();
             return false;

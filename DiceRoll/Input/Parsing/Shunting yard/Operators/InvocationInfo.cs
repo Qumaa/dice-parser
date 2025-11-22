@@ -6,6 +6,21 @@ namespace DiceRoll.Input.Parsing
     internal readonly struct InvocationInfo
     {
         public readonly OperatorInvoker Invoker;
+        public readonly Mapped<Operand>[] Operands;
+            
+        public InvocationInfo(OperatorInvoker invoker, Mapped<Operand>[] operands)
+        {
+            Invoker = invoker;
+            Operands = operands;
+        }
+    }
+}
+namespace DiceRoll.Input.Parsing.Deprecated
+{
+    [StructLayout(LayoutKind.Auto)]
+    internal readonly struct InvocationInfo
+    {
+        public readonly OperatorInvoker Invoker;
         public readonly Mapped<LinkedNode>[] CastedOperands;
             
         public InvocationInfo(OperatorInvoker invoker, Mapped<LinkedNode>[] castedOperands)

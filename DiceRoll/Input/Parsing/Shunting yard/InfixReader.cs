@@ -5,9 +5,9 @@ namespace DiceRoll.Input.Parsing.Deprecated
     internal sealed class InfixReader
     {
         private readonly ShuntingYardState _state;
-        private readonly TokenGroupChain _chain;
+        private readonly LexingPipeline _chain;
 
-        public InfixReader(ShuntingYardState state, TokenGroupChain chain)
+        public InfixReader(ShuntingYardState state, LexingPipeline chain)
         {
             _state = state;
             _chain = chain;

@@ -1,6 +1,6 @@
 ﻿namespace DiceRoll.Input.Parsing
 {
-    public static class TokenGroupUtils
+    public static class LexerUtils
     {
         public static void UpdateEarliestMatch(ref Substring current, in Substring nextMatch)
         {

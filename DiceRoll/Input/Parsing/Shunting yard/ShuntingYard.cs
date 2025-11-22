@@ -7,7 +7,7 @@ namespace DiceRoll.Input.Parsing.Deprecated
         private readonly InfixReader _infixReader;
         private readonly PostfixEvaluator _postfixEvaluator;
 
-        public ShuntingYard(ShuntingYardState state, TokenGroupChain chain)
+        public ShuntingYard(ShuntingYardState state, LexingPipeline chain)
         {
             ArgumentNullException.ThrowIfNull(state);
             ArgumentNullException.ThrowIfNull(chain);
