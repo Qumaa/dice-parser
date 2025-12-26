@@ -18,7 +18,7 @@ namespace DiceRoll.Input.Parsing.Deprecated
 
         private bool InvokableWith(Mapped<LinkedNode>[] operands, Signature other, OperandCaster[] casters)
         {
-            ReadOnlySpan<Type> targetTypes = other.GetOperandTypes();
+            ReadOnlySpan<Type> targetTypes = other.OperandTypes;
 
             if (operands.Length != targetTypes.Length)
                 return false;

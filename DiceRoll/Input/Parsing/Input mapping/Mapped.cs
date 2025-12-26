@@ -40,5 +40,8 @@ namespace DiceRoll.Input.Parsing
         public static Mapped<TResult> CastValueOrThrow<TSource, TResult>(this Mapped<TSource> source)
             where TSource : class where TResult : TSource =>
             new((TResult) source.Value, in source.Range);
+
+        public static Mapped<T> WithValue<T>(this Mapped<T> mapped, in T value) =>
+            new(in value, in mapped.Range);
     }
 }

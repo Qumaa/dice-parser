@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace DiceRoll.Input.Parsing
 {
     [StructLayout(LayoutKind.Explicit)]
-    public readonly struct Arity
+    public readonly struct Arity : IComparable<Arity>, IComparable
     {
         [FieldOffset(0)] private readonly ushort _left;
         [FieldOffset(2)] private readonly ushort _right;
@@ -29,6 +29,17 @@ namespace DiceRoll.Input.Parsing
 
         public static implicit operator int(Arity arity) =>
             arity.Total;
+
+        public int CompareTo(Arity other) =>
+            Total.CompareTo(other.Total);
+
+        public int CompareTo(object obj)
+        {
+            if (obj is null)
+                return 1;
+
+            return obj is Arity other ? CompareTo(other) : throw new ArgumentException($"Object must be of type {nameof(Arity)}");
+        }
     }
 
     public static class ArityExtensions

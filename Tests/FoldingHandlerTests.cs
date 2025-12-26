@@ -3,9 +3,8 @@
     [TestClass]
     public class FoldingHandlerTests
     {
-        private static readonly OperatorFoldingHandler _handler = new();
-
-
+        private static readonly OperatorFoldingHandler _handler = new(OperandCastingTable.Default);
+        
         [TestMethod]
         public void SimpleTest()
         {

@@ -5,10 +5,10 @@ namespace DiceRoll.Input.Parsing
 {
     public sealed class Signature
     {
-        private readonly Type[] _operandTypes;
-        private readonly Type _returnType;
+        public readonly Type[] OperandTypes;
+        public readonly Type ReturnType;
 
-        public int OperandsNumber => _operandTypes.Length;
+        public int OperandsNumber => OperandTypes.Length;
 
         public Signature(Type returnType, params Type[] operandTypes)
         {
@@ -16,18 +16,12 @@ namespace DiceRoll.Input.Parsing
             CommonException.ThrowIfParamsArrayIsEmpty(operandTypes);
             CommonException.ThrowIfAnyTypeIsNotNode(operandTypes);
             
-            _returnType = returnType;
-            _operandTypes = operandTypes;
+            ReturnType = returnType;
+            OperandTypes = operandTypes;
         }
 
-        public ReadOnlySpan<Type> GetOperandTypes() =>
-            _operandTypes;
-
         public IEnumerable<Type> EnumerateOperandTypes() =>
-            _operandTypes;
-
-        public Type GetReturnType() =>
-            _returnType;
+            OperandTypes;
 
         public static Builder Arguments<T1>() where T1 : INode =>
             new(typeof(T1));

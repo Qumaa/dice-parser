@@ -6,6 +6,15 @@ namespace DiceRoll.Input.Parsing
 {
     public sealed class OperatorFoldingHandler
     {
+        private readonly OperandCastingTable _castingTable;
+        
+        public OperatorFoldingHandler(OperandCastingTable castingTable)
+        {
+            ArgumentNullException.ThrowIfNull(castingTable);
+            
+            _castingTable = castingTable;
+        }
+
         public Range FoldOperators(LexemesList lexemes, in Range range)
         {
             Indexer indexer = IndexOperators(lexemes, in range);
@@ -14,12 +23,12 @@ namespace DiceRoll.Input.Parsing
             if (indexer.Count is 0)
                 return range;
 
-            (int start, int length) = range.GetOffsetAndLength(lexemes.Count);
+            (int start, int end) = range.GetStartAndEnd(lexemes.Count);
 
             foreach (int precedence in precedences)
-                length -= ExecuteAllOperatorsAtPrecedence(indexer, precedence);
+                end -= ExecuteAllOperatorsAtPrecedence(indexer, precedence);
 
-            return start..(start + length);
+            return start..end;
         }
 
         private int ExecuteAllOperatorsAtPrecedence(Indexer indexer, int precedence)
@@ -34,10 +43,10 @@ namespace DiceRoll.Input.Parsing
 
                 indexer.DelistOperatorAt(i);
                 lexemesReduced += reduced;
-                goto start;
+                goto start; // todo instead of restarting the loop, manually check all nearby operators
             }
 
-            return lexemesReduced; //todo
+            return lexemesReduced;
         }
 
         private bool TryExecuteOperatorWithImmediateContext(Indexer indexer, int i, int precedence, out int lexemesReduced)
@@ -60,13 +69,16 @@ namespace DiceRoll.Input.Parsing
 
             foreach (Overload overload in indexedOperator.SortedOverloads)
             {
-                if (!IsInvokableWithImmediateContext(indexer.Source, indexedOperator.Index, overload.Invoker, out Mapped<Operand>[] operands))
+                if (!overload.ToRange(indexedOperator.Index).FitsIn(indexer.Limit, indexer.Source.Count))
+                    continue;
+                
+                if (!IsInvokableWithImmediateContext(indexer.Source, indexedOperator.Index, overload))
                     continue;
 
                 if (overload.Precedence != precedence)
                     goto fail;
 
-                invocationInfo = new InvocationInfo(overload.Invoker, operands);
+                invocationInfo = new InvocationInfo(overload.Invoker, overload.CopyOperandsBuffer());
                 return true;
             }
 
@@ -75,45 +87,50 @@ namespace DiceRoll.Input.Parsing
             return false;
         }
 
-        private bool IsInvokableWithImmediateContext(LexemesList list, int position, OperatorInvoker invoker,
-            out Mapped<Operand>[] operands)
+        private bool IsInvokableWithImmediateContext(LexemesList list, int position, Overload overload)
         {
-            operands = new Mapped<Operand>[invoker.Arity];
-
-            for (int i = 0; i < invoker.Arity.Left; i++)
-            {
-                int index = position - invoker.Arity.Left + i;
-
-                if (!list.TryGetTyped(index, out Mapped<Operand> operand))
-                    return false;
-
-                Type expectedType = invoker.Signature.GetOperandTypes()[i];
-
-                if (operand.Value.EvaluationType != expectedType)
-                    return false;
-
-                operands[i] = operand;
-            }
+            OperatorInvoker invoker = overload.Invoker;
             
-            for (int i = 0; i < invoker.Arity.Right; i++)
+            int offset = position - invoker.Arity.Left;
+            
+            for (int i = 0; i < invoker.Arity; i++)
             {
-                int index = position + 1 + i;
+                int index = offset + i; // current operand index
 
+                if (index >= position) // skipping operator index
+                    index++;
+                
                 if (!list.TryGetTyped(index, out Mapped<Operand> operand))
                     return false;
+                
+                Type expectedType = invoker.Signature.OperandTypes[i];
 
-                Type expectedType = invoker.Signature.GetOperandTypes()[invoker.Arity.Left + i];
-
-                if (operand.Value.EvaluationType != expectedType)
+                if (!MatchesExpectedType(ref operand, expectedType))
                     return false;
-
-                operands[invoker.Arity.Left + i] = operand;
+                
+                overload.OperandsBuffer[i] = operand;
             }
 
             return true;
         }
 
-        private void InvokeUsingImmediateContext(Indexer indexer, int i, InvocationInfo invocationInfo)
+        private bool MatchesExpectedType(ref Mapped<Operand> operand, Type expectedType)
+        {
+            Type evaluationType = operand.Value.EvaluationType;
+            
+            if (evaluationType.IsAssignableTo(expectedType))
+                return true;
+
+            if (!_castingTable.IsCasterDefined(evaluationType, expectedType, out OperandCaster caster))
+                return false;
+
+            INode castedValue = caster.CastOrThrow(operand.Value.Node);
+            Operand castedOperand = new(castedValue, expectedType, operand.Value.Parents);
+            operand = operand.WithValue(castedOperand);
+            return true;
+        }
+
+        private static void InvokeUsingImmediateContext(Indexer indexer, int i, InvocationInfo invocationInfo)
         {
             OperatorInvoker invoker = invocationInfo.Invoker;
             Mapped<IndexedOperator> @operator = indexer.GetOperator(i);
@@ -136,13 +153,13 @@ namespace DiceRoll.Input.Parsing
             
             INode invocationResult = info.Invoker.Invoke(access);
 
-            return new Operand(invocationResult, signature.GetReturnType(), info.Operands);
+            return new Operand(invocationResult, signature.ReturnType, info.Operands);
         }
 
-        private Indexer IndexOperators(LexemesList lexemes, in Range range) =>
+        private static Indexer IndexOperators(LexemesList lexemes, in Range range) =>
             Indexer.FromLexemesList(lexemes, in range);
 
-        private OperatorPrecedences IndexPrecedences(Indexer indexer)
+        private static OperatorPrecedences IndexPrecedences(Indexer indexer)
         {
             OperatorPrecedences precedences = new();
 
@@ -160,13 +177,15 @@ namespace DiceRoll.Input.Parsing
         private sealed class Indexer
         {
             public readonly LexemesList Source;
+            public readonly Range Limit;
             private readonly List<Mapped<IndexedOperator>> _indexedOperators;
 
             public int Count => _indexedOperators.Count;
 
-            public Indexer(LexemesList source, IEnumerable<Mapped<IndexedOperator>> operators)
+            public Indexer(LexemesList source, in Range limit, IEnumerable<Mapped<IndexedOperator>> operators)
             {
                 Source = source;
+                Limit = limit;
                 _indexedOperators = operators.ToList();
             }
 
@@ -195,7 +214,7 @@ namespace DiceRoll.Input.Parsing
                     operators.Add(mapped);
                 }
 
-                return new Indexer(list, operators);
+                return new Indexer(list, in range, operators);
             }
         }
 
@@ -224,13 +243,28 @@ namespace DiceRoll.Input.Parsing
             public readonly int Precedence;
             public readonly Associativity Associativity;
             public readonly OperatorInvoker Invoker;
+            public readonly Mapped<Operand>[] OperandsBuffer;
             
             public Overload(int precedence, OperatorInvoker invoker, Associativity associativity)
             {
                 Precedence = precedence;
                 Invoker = invoker;
                 Associativity = associativity;
+                
+                OperandsBuffer = new Mapped<Operand>[invoker.Arity];
             }
+
+            public Mapped<Operand>[] CopyOperandsBuffer()
+            {
+                Mapped<Operand>[] copy = new Mapped<Operand>[Invoker.Arity];
+                
+                Array.Copy(OperandsBuffer, copy, Invoker.Arity);
+
+                return copy;
+            }
+
+            public Range ToRange(int position) =>
+                (position - Invoker.Arity.Left)..(position + 1 + Invoker.Arity.Right);
         }
     }
 }

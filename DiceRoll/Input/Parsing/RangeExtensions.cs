@@ -4,25 +4,39 @@ namespace DiceRoll.Input.Parsing
 {
     internal static class RangeExtensions
     {
-        public static Range And(this Range range, in Range other)
+        public static (int start, int end) GetStartAndEnd(this Range range, int length = -1)
         {
-            int start = int.Min(range.Start.Value, other.Start.Value);
-            int end = int.Max(range.End.Value, other.End.Value);
+            int start = range.Start.GetOffset(length);
+            int end = range.End.GetOffset(length);
 
-            return new Range(new Index(start), new Index(end));
+            return (start, end);
+        }
+        
+        public static Range And(this Range range, in Range other, int length = -1)
+        {
+            (int start1, int end1) = range.GetStartAndEnd(length);
+            (int start2, int end2) = other.GetStartAndEnd(length);
+            
+            int start = int.Min(start1, start2);
+            int end = int.Max(end1, end2);
+
+            return start..end;
         }
 
-        public static bool OverlapsWith(this Range range, in Range other, int length = 0)
+        public static bool OverlapsWith(this Range range, in Range other, int length = -1)
         {
-            bool hasLength = length > 0;
-
-            int start1 = hasLength ? range.Start.GetOffset(length) : range.Start.Value;
-            int end1 = hasLength ? range.End.GetOffset(length) : range.End.Value;
-            
-            int start2 = hasLength ? other.Start.GetOffset(length) : other.Start.Value;
-            int end2 = hasLength ? other.End.GetOffset(length) : other.End.Value;
+            (int start1, int end1) = range.GetStartAndEnd(length);
+            (int start2, int end2) = other.GetStartAndEnd(length);
             
             return start1 <= end2 && start2 <= end1;
+        }
+
+        public static bool FitsIn(this Range range, in Range other, int length = -1)
+        {
+            (int start1, int end1) = range.GetStartAndEnd(length);
+            (int start2, int end2) = other.GetStartAndEnd(length);
+
+            return start1 >= start2 && end1 <= end2;
         }
     }
 }

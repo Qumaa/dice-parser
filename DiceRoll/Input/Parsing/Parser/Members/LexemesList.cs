@@ -95,16 +95,31 @@ namespace DiceRoll.Input.Parsing
 
         public static Mapped<Lexeme>[] TakeMany(this LexemesList lexemes, in Range range)
         {
-            int rangeStart = range.Start.GetOffset(lexemes.Count);
-            int rangeEnd = range.End.GetOffset(lexemes.Count);
+            (int start, int end) = range.GetStartAndEnd(lexemes.Count);
 
-            int replacedCount = rangeEnd - rangeStart;
-            Mapped<Lexeme>[] taken = new Mapped<Lexeme>[replacedCount];
+            int takenCount = end - start;
+            Mapped<Lexeme>[] taken = new Mapped<Lexeme>[takenCount];
 
-            for (int i = rangeEnd - 1; i >= rangeStart; i--)
+            for (int i = end - 1; i >= start; i--)
             {
                 Mapped<Lexeme> lexeme = lexemes.Take(i);
-                taken[i - rangeStart] = lexeme;
+                taken[i - start] = lexeme;
+            }
+
+            return taken;
+        }
+
+        public static Mapped<Lexeme>[] GetMany(this LexemesList lexemes, in Range range)
+        {
+            (int start, int end) = range.GetStartAndEnd(lexemes.Count);
+
+            int getCount = end - start;
+            Mapped<Lexeme>[] taken = new Mapped<Lexeme>[getCount];
+
+            for (int i = end - 1; i >= start; i--)
+            {
+                Mapped<Lexeme> lexeme = lexemes.Get(i);
+                taken[i - start] = lexeme;
             }
 
             return taken;
@@ -115,22 +130,5 @@ namespace DiceRoll.Input.Parsing
 
         public static Mapped<T> GetTypedOrThrow<T>(this LexemesList lexemes, int index) where T : Lexeme =>
             lexemes.Get(index).CastValueOrThrow<Lexeme, T>();
-
-        public static Mapped<Lexeme>[] GetMany(this LexemesList lexemes, in Range range)
-        {
-            int rangeStart = range.Start.GetOffset(lexemes.Count);
-            int rangeEnd = range.End.GetOffset(lexemes.Count);
-
-            int replacedCount = rangeEnd - rangeStart;
-            Mapped<Lexeme>[] taken = new Mapped<Lexeme>[replacedCount];
-
-            for (int i = rangeStart; i < rangeEnd; i++)
-            {
-                Mapped<Lexeme> lexeme = lexemes.Get(i);
-                taken[i - rangeStart] = lexeme;
-            }
-
-            return taken;
-        }
     }
 }
