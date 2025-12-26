@@ -28,7 +28,7 @@ namespace DiceRoll.Input.Parsing
                 invocationBehaviour.Invokers
                     .Select(invoker => _SignatureToString(
                             invoker.Signature.EnumerateOperandTypes().Select(type => type.Name).ToArray(),
-                            invoker.LeftArity,
+                            invoker.Arity.Left,
                             operatorString
                             )
                         )

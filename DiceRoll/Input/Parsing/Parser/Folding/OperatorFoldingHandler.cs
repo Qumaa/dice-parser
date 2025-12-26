@@ -29,10 +29,11 @@ namespace DiceRoll.Input.Parsing
             start:
             for (int i = 0; i < indexer.Count; i++)
             {
-                if (!TryExecuteOperatorWithImmediateContext(indexer, i, precedence, out lexemesReduced))
+                if (!TryExecuteOperatorWithImmediateContext(indexer, i, precedence, out int reduced))
                     continue;
 
                 indexer.DelistOperatorAt(i);
+                lexemesReduced += reduced;
                 goto start;
             }
 
@@ -79,9 +80,9 @@ namespace DiceRoll.Input.Parsing
         {
             operands = new Mapped<Operand>[invoker.Arity];
 
-            for (int i = 0; i < invoker.LeftArity; i++)
+            for (int i = 0; i < invoker.Arity.Left; i++)
             {
-                int index = position - invoker.LeftArity + i;
+                int index = position - invoker.Arity.Left + i;
 
                 if (!list.TryGetTyped(index, out Mapped<Operand> operand))
                     return false;
@@ -94,19 +95,19 @@ namespace DiceRoll.Input.Parsing
                 operands[i] = operand;
             }
             
-            for (int i = 0; i < invoker.RightArity; i++)
+            for (int i = 0; i < invoker.Arity.Right; i++)
             {
                 int index = position + 1 + i;
 
                 if (!list.TryGetTyped(index, out Mapped<Operand> operand))
                     return false;
 
-                Type expectedType = invoker.Signature.GetOperandTypes()[invoker.LeftArity + i];
+                Type expectedType = invoker.Signature.GetOperandTypes()[invoker.Arity.Left + i];
 
                 if (operand.Value.EvaluationType != expectedType)
                     return false;
 
-                operands[invoker.LeftArity + i] = operand;
+                operands[invoker.Arity.Left + i] = operand;
             }
 
             return true;
@@ -118,8 +119,8 @@ namespace DiceRoll.Input.Parsing
             Mapped<IndexedOperator> @operator = indexer.GetOperator(i);
             int position = @operator.Value.Index;
 
-            int leftMostPosition = position - invoker.LeftArity;
-            Range usedRange = leftMostPosition..(position + invoker.RightArity + 1);
+            int leftMostPosition = position - invoker.Arity.Left;
+            Range usedRange = leftMostPosition..(position + invoker.Arity.Right + 1);
 
             indexer.Source.TakeMany(in usedRange);
             Operand operand = Invoke(in invocationInfo);

@@ -336,4 +336,16 @@ namespace DiceRoll.Input.Parsing
         public Signature Returns<T>() where T : INode =>
             Returns(typeof(T));
     }
+
+    public static class SignatureExtensions
+    {
+        public static Arity DeriveArity(this Signature signature, int operatorPosition)
+        {
+            ArgumentNullException.ThrowIfNull(signature);
+            ArgumentOutOfRangeException.ThrowIfNegative(operatorPosition);
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(operatorPosition, signature.OperandsNumber);
+            
+            return new Arity(operatorPosition, signature.OperandsNumber - operatorPosition);
+        }
+    }
 }

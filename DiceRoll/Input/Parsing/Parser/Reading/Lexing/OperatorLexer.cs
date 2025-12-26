@@ -67,7 +67,7 @@ namespace DiceRoll.Input.Parsing.Deprecated
         }
         
         private bool MatchesUsageForm(OperatorInvoker invoker) =>
-            invoker is { LeftArity: 0, RightArity: > 0 } == GetCurrentUsageForm() is OperatorUsageForm.Prefix;
+            invoker.Arity.IsPrefix() == GetCurrentUsageForm() is OperatorUsageForm.Prefix;
 
         private OperatorUsageForm GetCurrentUsageForm() =>
             _state.PrecedingTokenKind is TokenKind.Operand ?

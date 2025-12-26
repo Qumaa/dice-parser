@@ -25,7 +25,7 @@ namespace DiceRoll.Input.Parsing.Deprecated
             OperatorInvoker invoker = info.Invoker;
 
             Mapped<LinkedNode>[] excessive =
-                _operandsProvider.LiftExcessiveOperandsIfAny(@operator.Value.Position, invoker.RightArity);
+                _operandsProvider.LiftExcessiveOperandsIfAny(@operator.Value.Position, invoker.Arity.Right);
             
             Mapped<LinkedNode>[] operands = _operandsProvider.PopOperands(invoker.Arity);
             

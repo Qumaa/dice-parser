@@ -6,22 +6,26 @@ namespace DiceRoll.Input.Parsing
     {
         public readonly Signature Signature;
         
-        public readonly int LeftArity;
-        public readonly int RightArity;
-        
-        public int Arity => LeftArity + RightArity;
-        
-        protected OperatorInvoker(Signature signature, int leftArity, int rightArity)
+        public readonly Arity Arity;
+
+        protected OperatorInvoker(Signature signature, Arity arity)
         {
-            ArgumentOutOfRangeException.ThrowIfNegative(leftArity);
-            ArgumentOutOfRangeException.ThrowIfNegative(rightArity);
-            ArgumentOutOfRangeException.ThrowIfZero(leftArity + rightArity);
-            ArgumentOutOfRangeException.ThrowIfNotEqual(signature.OperandsNumber, leftArity + rightArity);
-            
+            ArgumentNullException.ThrowIfNull(signature);
+            ArgumentOutOfRangeException.ThrowIfNotEqual(signature.OperandsNumber, arity.Total);
+
             Signature = signature;
-            LeftArity = leftArity;
-            RightArity = rightArity;
+            Arity = arity;
         }
+
+        protected OperatorInvoker(Signature signature, int leftArity, int rightArity) : this(
+            signature,
+            new Arity(leftArity, rightArity)
+            ) { }
+
+        protected OperatorInvoker(Signature signature, int position) : this(
+            signature,
+            signature.DeriveArity(position)
+            ) { }
 
         public abstract INode Invoke(OperandsAccess operandsAccess);
         
