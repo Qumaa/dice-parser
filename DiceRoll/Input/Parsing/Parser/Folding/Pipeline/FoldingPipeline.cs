@@ -15,10 +15,10 @@ namespace DiceRoll.Input.Parsing
             _folders = folders.ToArray();
         }
 
-        public void ExecuteAll(EquationParserState state, UnknownLexemeSolver solver)
+        public void ExecuteAll(LexemesList lexemes, UnknownLexemeSolver solver)
         {
             foreach (Folder folder in _folders)
-                folder.Execute(state);
+                folder.Execute(lexemes);
         }
     }
 }

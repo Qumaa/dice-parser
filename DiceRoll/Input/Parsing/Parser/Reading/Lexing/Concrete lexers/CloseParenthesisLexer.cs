@@ -4,16 +4,16 @@ namespace DiceRoll.Input.Parsing
 {
     public class CloseParenthesisLexer : Lexer
     {
-        private readonly EquationParserState _state;
+        private readonly LexemesList _lexemes;
         private readonly IToken _closeParenthesis;
 
-        public CloseParenthesisLexer(IToken token, EquationParserState state)
+        public CloseParenthesisLexer(IToken token, LexemesList lexemes)
         {
-            ArgumentNullException.ThrowIfNull(state);
+            ArgumentNullException.ThrowIfNull(lexemes);
             ArgumentNullException.ThrowIfNull(token);
 
-            _state = state;
             _closeParenthesis = token;
+            _lexemes = lexemes;
         }
 
         public override bool TryExecute(in Substring substring, out Substring match)
@@ -21,7 +21,7 @@ namespace DiceRoll.Input.Parsing
             if (!_closeParenthesis.MatchesStart(in substring, out match))
                 return false;
             
-            _state.Lexemes.Push(CloseParenthesis.Shared, in match);
+            _lexemes.Push(CloseParenthesis.Shared, in match);
             
             return true;
         }

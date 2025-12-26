@@ -1,19 +1,12 @@
-﻿using System;
-
-namespace DiceRoll.Input.Parsing
+﻿namespace DiceRoll.Input.Parsing
 {
     public sealed class EquationParserState
     {
-        public readonly OperandCastingTable CastingTable;
         public readonly LexemesList Lexemes;
         public readonly InputMapper Mapper;
 
-        public EquationParserState(OperandCastingTable castingTable)
+        public EquationParserState()
         {
-            ArgumentNullException.ThrowIfNull(castingTable);
-            
-            CastingTable = castingTable;
-            
             Mapper = new InputMapper();
             Lexemes = new LexemesList(Mapper);
         }

@@ -70,14 +70,14 @@ namespace DiceRoll.Input.Parsing
     
     public static class TokensTableExtensions
     {
-        public static LexingPipeline ToDefaultPipeline(this TokensTable table, EquationParserState state) =>
+        public static LexingPipeline ToDefaultPipeline(this TokensTable table, LexemesList output) =>
             new(
                 new Lexer[]
                 {
-                    new OpenParenthesisLexer(table.OpenParenthesis, state),
-                    new CloseParenthesisLexer(table.CloseParenthesis, state),
-                    new OperandLexer(table.Operands, state),
-                    new OperatorLexer(table.Operators, state)
+                    new OpenParenthesisLexer(table.OpenParenthesis, output),
+                    new CloseParenthesisLexer(table.CloseParenthesis, output),
+                    new OperandLexer(table.Operands, output),
+                    new OperatorLexer(table.Operators, output)
                 }
                 );
     }

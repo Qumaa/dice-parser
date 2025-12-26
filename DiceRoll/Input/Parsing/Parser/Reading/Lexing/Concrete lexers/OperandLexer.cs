@@ -6,15 +6,15 @@ namespace DiceRoll.Input.Parsing
 {
     public class OperandLexer : Lexer
     {
-        private readonly EquationParserState _state;
+        private readonly LexemesList _lexemes;
         private readonly OperandDefinition[] _definitions;
 
-        public OperandLexer(IEnumerable<OperandDefinition> definitions, EquationParserState state)
+        public OperandLexer(IEnumerable<OperandDefinition> definitions, LexemesList lexemes)
         {
-            ArgumentNullException.ThrowIfNull(state);
+            ArgumentNullException.ThrowIfNull(lexemes);
             ArgumentNullException.ThrowIfNull(definitions);
 
-            _state = state;
+            _lexemes = lexemes;
             _definitions = definitions.ToArray();
         }
 
@@ -24,7 +24,7 @@ namespace DiceRoll.Input.Parsing
                 return false;
             
             Operand operand = ParseOperand(definition, in match);
-            _state.Lexemes.Push(operand, in match);
+            _lexemes.Push(operand, in match);
             return true;
         }
 

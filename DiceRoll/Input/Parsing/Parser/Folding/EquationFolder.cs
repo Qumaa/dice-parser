@@ -4,36 +4,31 @@ namespace DiceRoll.Input.Parsing
 {
     public sealed class EquationFolder
     {
-        private readonly EquationParserState _state;
+        private readonly LexemesList _lexemes;
         private readonly FoldingPipeline _pipeline;
         
-        public EquationFolder(EquationParserState state, FoldingPipeline pipeline)
+        public EquationFolder(LexemesList lexemes, FoldingPipeline pipeline)
         {
-            _state = state;
+            ArgumentNullException.ThrowIfNull(lexemes);
+            ArgumentNullException.ThrowIfNull(pipeline);
+
+            _lexemes = lexemes;
             _pipeline = pipeline;
         }
 
-        public NodeTree Fold(UnknownLexemeSolver solver)
+        public Mapped<LinkedNode> Fold(UnknownLexemeSolver solver)
         {
-            SubstringMapper mapper = _state.Mapper.BuildSubstringMapper();
-            Mapped<LinkedNode> root = FoldAndCollapse(solver);
-            
-            return new NodeTree(mapper, root);
-        }
-
-        private Mapped<LinkedNode> FoldAndCollapse(UnknownLexemeSolver solver)
-        {
-            _pipeline.ExecuteAll(_state, solver);
+            _pipeline.ExecuteAll(_lexemes, solver);
 
             return GetResultOrThrow();
         }
 
         private Mapped<LinkedNode> GetResultOrThrow()
         {
-            if (_state.Lexemes.Count is not 1)
+            if (_lexemes.Count is not 1)
                 throw new Exception(); // todo
 
-            return _state.Lexemes.GetTypedOrThrow<Operand>(0).ToLinkedNode();
+            return _lexemes.GetTypedOrThrow<Operand>(0).ToLinkedNode();
         }
     }
 }

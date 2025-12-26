@@ -23,30 +23,23 @@ namespace DiceRoll.Input.Parsing
             if (indexer.Count is 0)
                 return range;
 
-            (int start, int end) = range.GetStartAndEnd(lexemes.Count);
-
             foreach (int precedence in precedences)
-                end -= ExecuteAllOperatorsAtPrecedence(indexer, precedence);
+                ExecuteAllOperatorsAtPrecedence(indexer, precedence);
 
-            return start..end;
+            return indexer.Range;
         }
 
-        private int ExecuteAllOperatorsAtPrecedence(Indexer indexer, int precedence)
+        private void ExecuteAllOperatorsAtPrecedence(Indexer indexer, int precedence)
         {
-            int lexemesReduced = 0;
-            
             start:
             for (int i = 0; i < indexer.Count; i++)
             {
                 if (!TryExecuteOperatorWithImmediateContext(indexer, i, precedence, out int reduced))
                     continue;
 
-                indexer.DelistOperatorAt(i);
-                lexemesReduced += reduced;
+                indexer.DelistOperatorAt(i, reduced);
                 goto start; // todo instead of restarting the loop, manually check all nearby operators
             }
-
-            return lexemesReduced;
         }
 
         private bool TryExecuteOperatorWithImmediateContext(Indexer indexer, int i, int precedence, out int lexemesReduced)
@@ -69,7 +62,7 @@ namespace DiceRoll.Input.Parsing
 
             foreach (Overload overload in indexedOperator.SortedOverloads)
             {
-                if (!overload.ToRange(indexedOperator.Index).FitsIn(indexer.Limit, indexer.Source.Count))
+                if (!overload.ToRange(indexedOperator.Index).FitsIn(indexer.Range, indexer.Source.Count))
                     continue;
                 
                 if (!IsInvokableWithImmediateContext(indexer.Source, indexedOperator.Index, overload))
@@ -177,23 +170,39 @@ namespace DiceRoll.Input.Parsing
         private sealed class Indexer
         {
             public readonly LexemesList Source;
-            public readonly Range Limit;
             private readonly List<Mapped<IndexedOperator>> _indexedOperators;
+            private Range _range;
 
             public int Count => _indexedOperators.Count;
 
-            public Indexer(LexemesList source, in Range limit, IEnumerable<Mapped<IndexedOperator>> operators)
+            public Range Range => _range;
+
+            public Indexer(LexemesList source, in Range range, IEnumerable<Mapped<IndexedOperator>> operators)
             {
                 Source = source;
-                Limit = limit;
+                _range = range;
                 _indexedOperators = operators.ToList();
             }
 
             public Mapped<IndexedOperator> GetOperator(int index) =>
                 _indexedOperators[index];
 
-            public void DelistOperatorAt(int index) =>
+            public void DelistOperatorAt(int index, int lexemesReduced)
+            {
                 _indexedOperators.RemoveAt(index);
+                
+                for (int i = index; i < Count; i++)
+                    _indexedOperators[i].Value.InsetIndex(lexemesReduced);
+                
+                ReduceRange(lexemesReduced);
+            }
+
+            private void ReduceRange(int reduced)
+            {
+                (int start, int end) = _range.GetStartAndEnd(Source.Count);
+
+                _range = start..(end - reduced);
+            }
 
             public static Indexer FromLexemesList(LexemesList list, in Range range)
             {
@@ -220,8 +229,9 @@ namespace DiceRoll.Input.Parsing
 
         private sealed class IndexedOperator
         {
-            public readonly int Index;
             public readonly Overload[] SortedOverloads;
+
+            public int Index { get; private set; }
             
             public IndexedOperator(int index, IEnumerable<OperatorDefinition> definitions)
             {
@@ -236,6 +246,9 @@ namespace DiceRoll.Input.Parsing
                     .ThenByDescending(x => x.definition.Precedence)
                     .Select(x => new Overload(x.definition.Precedence, x.invoker, x.definition.Associativity))
                     .ToArray();
+
+            public void InsetIndex(int inset) =>
+                Index -= inset;
         }
 
         private sealed class Overload
@@ -264,7 +277,7 @@ namespace DiceRoll.Input.Parsing
             }
 
             public Range ToRange(int position) =>
-                (position - Invoker.Arity.Left)..(position + 1 + Invoker.Arity.Right);
+                (position - Invoker.Arity.Left)..(position + Invoker.Arity.Right);
         }
     }
 }

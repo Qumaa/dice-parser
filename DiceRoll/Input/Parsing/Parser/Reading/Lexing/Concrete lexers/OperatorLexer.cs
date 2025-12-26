@@ -7,15 +7,15 @@ namespace DiceRoll.Input.Parsing
 {
     public class OperatorLexer : Lexer
     {
-        private readonly EquationParserState _state;
+        private readonly LexemesList _lexemes;
         private readonly OperatorDefinition[] _definitions;
         
-        public OperatorLexer(IEnumerable<OperatorDefinition> definitions, EquationParserState state)
+        public OperatorLexer(IEnumerable<OperatorDefinition> definitions, LexemesList lexemes)
         {
-            ArgumentNullException.ThrowIfNull(state);
+            ArgumentNullException.ThrowIfNull(lexemes);
             ArgumentNullException.ThrowIfNull(definitions);
             
-            _state = state;
+            _lexemes = lexemes;
             _definitions = definitions.OrderByDescending(x => x.Precedence).ToArray();
         }
         
@@ -25,7 +25,7 @@ namespace DiceRoll.Input.Parsing
                 return false;
 
             Operator @operator = new(definitions);
-            _state.Lexemes.Push(@operator, in match);
+            _lexemes.Push(@operator, in match);
             return true;
         }
 

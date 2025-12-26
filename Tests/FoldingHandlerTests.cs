@@ -4,6 +4,18 @@
     public class FoldingHandlerTests
     {
         private static readonly OperatorFoldingHandler _handler = new(OperandCastingTable.Default);
+
+        private static LexemesList Lex(string input)
+        {
+            EquationParserState state = new();
+            EquationReader reader = new(state.Mapper, state.Lexemes, TokensTable.Default.ToDefaultPipeline(state.Lexemes));
+            
+            reader.Read(input);
+
+            return state.Lexemes;
+        }
+
+        // todo proper tests
         
         [TestMethod]
         public void SimpleTest()
@@ -13,14 +25,13 @@
             _handler.FoldOperators(list, Range.All);
         }
 
-        private static LexemesList Lex(string input)
+        [TestMethod]
+        public void LimitedRangeTest()
         {
-            EquationParserState state = new(OperandCastingTable.Default);
-            EquationReader reader = new(state, TokensTable.Default.ToDefaultPipeline(state));
-            
-            reader.Read(input);
+            LexemesList list = Lex("2 - 1 + 1");
+            Range range = 1..;
 
-            return state.Lexemes;
+            _handler.FoldOperators(list, in range);
         }
     }
 }

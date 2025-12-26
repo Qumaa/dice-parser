@@ -8,8 +8,8 @@ namespace DiceRoll.Input.Parsing
 
         public ExpressionParser(TokensTable tokensTable, OperandCastingTable castingTable)
         {
-            EquationParserState state = new(castingTable);
-            LexingPipeline chain = tokensTable.ToDefaultPipeline(state);
+            EquationParserState state = new();
+            LexingPipeline chain = tokensTable.ToDefaultPipeline(state.Lexemes);
             
             // _parser = new EquationParser(state, chain);
         }

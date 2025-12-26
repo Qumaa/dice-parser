@@ -4,15 +4,15 @@ namespace DiceRoll.Input.Parsing
 {
     public class OpenParenthesisLexer : Lexer
     {
-        private readonly EquationParserState _state;
+        private readonly LexemesList _lexemes;
         private readonly IToken _openParenthesis;
         
-        public OpenParenthesisLexer(IToken token, EquationParserState state)
+        public OpenParenthesisLexer(IToken token, LexemesList lexemes)
         {
-            ArgumentNullException.ThrowIfNull(state);
+            ArgumentNullException.ThrowIfNull(lexemes);
             ArgumentNullException.ThrowIfNull(token);
             
-            _state = state;
+            _lexemes = lexemes;
             _openParenthesis = token;
         }
 
@@ -21,7 +21,7 @@ namespace DiceRoll.Input.Parsing
             if (!_openParenthesis.MatchesStart(in substring, out match))
                 return false;
 
-            _state.Lexemes.Push(OpenParenthesis.Shared, in match);
+            _lexemes.Push(OpenParenthesis.Shared, in match);
             return true;
         }
     }
