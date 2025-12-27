@@ -27,6 +27,8 @@ namespace DiceRoll.Input.Parsing
 
         private void InsertSorted(int precedence, Associativity associativity)
         {
+            PrecedenceLevel precedenceLevel = new(precedence, associativity);
+            
             // insert in descending order. Highest first, lowest last
             for (int i = 0; i < _precedences.Count; i++)
             {
@@ -41,10 +43,12 @@ namespace DiceRoll.Input.Parsing
 
                 if (precedence < _precedences[i].Value)
                     continue;
-                
-                _precedences.Insert(i, new PrecedenceLevel(precedence, associativity));
+
+                _precedences.Insert(i, precedenceLevel);
                 return;
             }
+            
+            _precedences.Add(precedenceLevel);
         }
 
         public List<PrecedenceLevel>.Enumerator GetEnumerator() =>

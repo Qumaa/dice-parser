@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace DiceRoll
 {
@@ -10,8 +9,5 @@ namespace DiceRoll
 
         public static T[] Params<T>(params T[] args) =>
             args;
-
-        public static T[] ToArray<T>(IEnumerable<T> enumerable) =>
-            enumerable as T[] ?? enumerable.ToArray();
     }
 }

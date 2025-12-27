@@ -13,7 +13,7 @@ namespace DiceRoll.Input.Parsing
             _patterns = patterns;
         }
 
-        public RegexToken(IEnumerable<Regex> patterns) : this(Syntax.ToArray(patterns)) { }
+        public RegexToken(IEnumerable<Regex> patterns) : this(patterns as Regex[] ?? patterns.ToArray()) { }
 
         public RegexToken(Regex pattern) : this(Syntax.SingleEnumerable(pattern)) { }
 

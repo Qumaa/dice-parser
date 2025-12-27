@@ -44,6 +44,15 @@ namespace DiceRoll.Input.Parsing
                     
                     continue;
                 }
+
+                if (!substring.IsEmpty && newMatch.Start == expression.Start)
+                {
+                    if (newMatch.Length < substring.Length)
+                        continue;
+                    
+                    if (newMatch.Length > substring.Length)
+                        collection.Clear();
+                }
                 
                 collection.Add(definition);
                 substring = newMatch;
@@ -76,6 +85,12 @@ namespace DiceRoll.Input.Parsing
                 }
 
                 _many = new List<OperatorDefinition> { _single, definition };
+            }
+
+            public void Clear()
+            {
+                _many?.Clear();
+                _single = null;
             }
 
             public OperatorDefinition[] ToArray()

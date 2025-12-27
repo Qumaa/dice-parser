@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using DiceRoll.FluentExtensions;
 
 namespace DiceRoll.Input.Parsing
@@ -22,8 +23,8 @@ namespace DiceRoll.Input.Parsing
             CloseParenthesis = closeParenthesis;
 
 
-            Operators = Syntax.ToArray(operators);
-            Operands = Syntax.ToArray(operands);
+            Operators = operators as OperatorDefinition[] ?? operators.ToArray();
+            Operands = operands as OperandDefinition[] ?? operands.ToArray();
         }
 
         public static TokensTableBuilder BuildDefault() =>

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace DiceRoll.Input.Parsing
 {
@@ -6,7 +7,7 @@ namespace DiceRoll.Input.Parsing
     {
         private readonly IToken[] _tokens;
 
-        public CompositeToken(IEnumerable<IToken> tokens) : this(Syntax.ToArray(tokens)) { }
+        public CompositeToken(IEnumerable<IToken> tokens) : this(tokens as IToken[] ?? tokens.ToArray()) { }
         
         public CompositeToken(IToken[] tokens)
         {
@@ -22,7 +23,7 @@ namespace DiceRoll.Input.Parsing
                 if (!token.Matches(in input, out Substring newMatch))
                     continue;
 
-                if (firstMatch.IsEmpty || newMatch.Start < firstMatch.Start)
+                if (TokenUtils.ShouldUpdateMatch(in firstMatch, newMatch.Start, newMatch.Length))
                     firstMatch = newMatch;
             }
 
@@ -33,7 +34,7 @@ namespace DiceRoll.Input.Parsing
     public static class CompositeTokenExtensions
     {
         public static IToken ToCompositeToken(this IEnumerable<IToken> tokens) =>
-            ToCompositeToken(Syntax.ToArray(tokens));
+            ToCompositeToken(tokens as IToken[] ?? tokens.ToArray());
 
         public static IToken ToCompositeToken(this IToken[] tokens) =>
             tokens.Length is 1 ? tokens[0] : new CompositeToken(tokens);

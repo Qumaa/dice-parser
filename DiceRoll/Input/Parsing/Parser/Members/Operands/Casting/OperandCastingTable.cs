@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DiceRoll.Input.Parsing
 {
@@ -11,7 +12,7 @@ namespace DiceRoll.Input.Parsing
 
         public OperandCastingTable(IEnumerable<OperandCaster> casters)
         {
-            _casters = Syntax.ToArray(casters);
+            _casters = casters as OperandCaster[] ?? casters.ToArray();
         }
 
         /*
