@@ -11,7 +11,7 @@ namespace DiceRoll.Input.Parsing
         public readonly Associativity Associativity;
 
         public OperatorDefinition(IToken token, int precedence, OperatorInvocationBehaviour invocationBehaviour,
-            Associativity associativity = Associativity.Left)
+            Associativity associativity)
         {
             Token = token;
             Precedence = precedence;

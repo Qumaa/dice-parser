@@ -74,49 +74,53 @@ namespace DiceRoll.Input.Parsing
         }
 
         public static TokensTableBuilder Operator(this TokensTableBuilder builder, IToken token, int precedence,
-            OperatorInvocationBehaviour invocationBehaviour) =>
-            builder.Operator(new OperatorDefinition(token, precedence, invocationBehaviour));
+            OperatorInvocationBehaviour invocationBehaviour, Associativity associativity) =>
+            builder.Operator(new OperatorDefinition(token, precedence, invocationBehaviour, associativity));
 
-        public static OverloadBuilder OverloadedOperator(this TokensTableBuilder builder, IToken token, int precedence) =>
-            new(builder, token, precedence);
+        public static OverloadBuilder OverloadedOperator(this TokensTableBuilder builder, IToken token, int precedence, Associativity associativity) =>
+            new(builder, token, precedence, associativity);
 
         public static TokensTableBuilder BinaryOperator<TReturn, TLeft, TRight>(this TokensTableBuilder builder,
             IToken token, int precedence,
-            BinaryInvocationHandler<TReturn, TLeft, TRight> handler) 
+            BinaryInvocationHandler<TReturn, TLeft, TRight> handler,
+            Associativity associativity = Associativity.Left) 
             where TReturn : INode where TLeft : INode where TRight : INode =>
             builder.Operator(
                 token,
                 precedence,
-                OperatorInvocationBehaviour.WithoutOverloads(OperatorInvoker.Binary(handler))
+                OperatorInvocationBehaviour.WithoutOverloads(OperatorInvoker.Binary(handler)),
+                associativity
                 );
 
         public static OverloadBuilder OverloadedBinaryOperator(this TokensTableBuilder builder,
-            IToken token, int precedence) =>
-            OverloadedOperator(builder, token, precedence);
+            IToken token, int precedence, Associativity associativity = Associativity.Left) =>
+            OverloadedOperator(builder, token, precedence, associativity);
 
         public static TokensTableBuilder PrefixUnaryOperator<TReturn, T>(this TokensTableBuilder builder, IToken token,
             int precedence, UnaryInvocationHandler<TReturn, T> handler) where TReturn : INode where T : INode =>
             builder.Operator(
                 token,
                 precedence,
-                OperatorInvocationBehaviour.WithoutOverloads(OperatorInvoker.PrefixUnary(handler))
+                OperatorInvocationBehaviour.WithoutOverloads(OperatorInvoker.PrefixUnary(handler)),
+                Associativity.Right
                 );
 
         public static OverloadBuilder OverloadedPrefixUnaryOperator(this TokensTableBuilder builder,
             IToken token, int precedence) =>
-            OverloadedOperator(builder, token, precedence);
+            OverloadedOperator(builder, token, precedence, Associativity.Right);
 
         public static TokensTableBuilder PostfixUnaryOperator<TReturn, T>(this TokensTableBuilder builder, IToken token,
             int precedence, UnaryInvocationHandler<TReturn, T> handler) where TReturn : INode where T : INode =>
             builder.Operator(
                 token,
                 precedence,
-                OperatorInvocationBehaviour.WithoutOverloads(OperatorInvoker.PostfixUnary(handler))
+                OperatorInvocationBehaviour.WithoutOverloads(OperatorInvoker.PostfixUnary(handler)),
+                Associativity.Left
                 );
         
         public static OverloadBuilder OverloadedPostfixUnaryOperator(this TokensTableBuilder builder,
             IToken token, int precedence) =>
-            OverloadedOperator(builder, token, precedence);
+            OverloadedOperator(builder, token, precedence, Associativity.Left);
 
         public static TokensTableBuilder CompositionOperator(this TokensTableBuilder builder, int precedence,
             in CompositionDefinition definition) =>
@@ -127,7 +131,8 @@ namespace DiceRoll.Input.Parsing
             builder.Operator(
                 token,
                 precedence,
-                OperatorInvocationBehaviour.WithoutOverloads(OperatorInvoker.Composition(handler))
+                OperatorInvocationBehaviour.WithoutOverloads(OperatorInvoker.Composition(handler)),
+                Associativity.Left
                 );
 
         public static TokensTableBuilder Operand<T>(this TokensTableBuilder builder, OperandParsingHandler parsingHandler,
@@ -142,15 +147,17 @@ namespace DiceRoll.Input.Parsing
         {
             private readonly IToken _token;
             private readonly int _precedence;
+            private readonly Associativity _associativity;
             private readonly TokensTableBuilder _tableBuilder;
             private readonly OperatorInvocationBehaviour.Builder _behaviourBuilder;
 
-            public OverloadBuilder(TokensTableBuilder tableBuilder, IToken token, int precedence)
+            public OverloadBuilder(TokensTableBuilder tableBuilder, IToken token, int precedence, Associativity associativity)
             {
                 _tableBuilder = tableBuilder;
                 _token = token;
                 _precedence = precedence;
-                
+                _associativity = associativity;
+
                 _behaviourBuilder = OperatorInvocationBehaviour.WithOverloads();
             }
 
@@ -161,7 +168,7 @@ namespace DiceRoll.Input.Parsing
             }
 
             public TokensTableBuilder Finish() =>
-                _tableBuilder.Operator(_token, _precedence, _behaviourBuilder.Build());
+                _tableBuilder.Operator(_token, _precedence, _behaviourBuilder.Build(), _associativity);
         }
     }
 }

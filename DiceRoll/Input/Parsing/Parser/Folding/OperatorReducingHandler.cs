@@ -23,21 +23,28 @@ namespace DiceRoll.Input.Parsing
             if (indexer.Count is 0)
                 return range;
 
-            foreach (int precedence in precedences)
+            foreach (PrecedenceLevel precedence in precedences)
                 ExecuteAllOperatorsAtPrecedence(indexer, precedence);
 
             return indexer.Range;
         }
 
-        private void ExecuteAllOperatorsAtPrecedence(Indexer indexer, int precedence)
+        private void ExecuteAllOperatorsAtPrecedence(Indexer indexer, PrecedenceLevel precedence)
         {
+            // todo instead of restarting the loop, manually check all nearby operators
             start:
-            for (int i = 0; i < indexer.Count; i++)
-                if (TryExecuteOperatorWithImmediateContext(indexer, i, precedence))
-                    goto start; // todo instead of restarting the loop, manually check all nearby operators
+            if (precedence.HasAssociativity(Associativity.Right))
+                for (int i = indexer.Count - 1; i >= 0; i--)
+                    if (TryExecuteOperatorWithImmediateContext(indexer, i, in precedence))
+                        goto start; 
+            
+            if (precedence.HasAssociativity(Associativity.Left))
+                for (int i = 0; i < indexer.Count; i++)
+                    if (TryExecuteOperatorWithImmediateContext(indexer, i, in precedence))
+                        goto start; 
         }
 
-        private bool TryExecuteOperatorWithImmediateContext(Indexer indexer, int i, int precedence)
+        private bool TryExecuteOperatorWithImmediateContext(Indexer indexer, int i, in PrecedenceLevel precedence)
         {
             if (!IsPreferableWithinImmediateContext(indexer, i, precedence, out InvocationInfo invocationInfo))
                 return false;
@@ -46,7 +53,8 @@ namespace DiceRoll.Input.Parsing
             return true;
         }
 
-        private bool IsPreferableWithinImmediateContext(Indexer indexer, int i, int precedence, out InvocationInfo invocationInfo)
+        private bool IsPreferableWithinImmediateContext(Indexer indexer, int i, in PrecedenceLevel precedence,
+            out InvocationInfo invocationInfo)
         {
             IndexedOperator indexedOperator = indexer.GetOperator(i).Value;
 
@@ -58,7 +66,7 @@ namespace DiceRoll.Input.Parsing
                 if (!IsInvokableWithImmediateContext(indexer.Source, indexedOperator.Index, overload))
                     continue;
 
-                if (overload.Precedence != precedence)
+                if (overload.Precedence != precedence.Value || !precedence.HasAssociativity(overload.Associativity))
                     goto fail;
 
                 invocationInfo = new InvocationInfo(overload.Invoker, overload.CopyOperandsBuffer());
@@ -151,7 +159,7 @@ namespace DiceRoll.Input.Parsing
                 IndexedOperator @operator = indexer.GetOperator(i).Value;
 
                 foreach (Overload overload in @operator.SortedOverloads)
-                    precedences.Add(overload.Precedence);
+                    precedences.Add(overload.Precedence, overload.Associativity);
             }
 
             return precedences;
