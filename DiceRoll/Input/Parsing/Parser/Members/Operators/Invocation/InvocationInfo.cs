@@ -15,18 +15,3 @@ namespace DiceRoll.Input.Parsing
         }
     }
 }
-namespace DiceRoll.Input.Parsing.Deprecated
-{
-    [StructLayout(LayoutKind.Auto)]
-    internal readonly struct InvocationInfo
-    {
-        public readonly OperatorInvoker Invoker;
-        public readonly Mapped<LinkedNode>[] CastedOperands;
-            
-        public InvocationInfo(OperatorInvoker invoker, Mapped<LinkedNode>[] castedOperands)
-        {
-            Invoker = invoker;
-            CastedOperands = castedOperands;
-        }
-    }
-}

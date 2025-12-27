@@ -82,24 +82,3 @@ namespace DiceRoll.Input.Parsing
                 );
     }
 }
-
-namespace DiceRoll.Input.Parsing.Deprecated
-{
-    public static class TokensTableExtensions
-    {
-        public static LexingPipeline ToDefaultPipeline(this TokensTable table, ShuntingYardState state,
-            int openParenthesisPrecedence = OpenParenthesisLexer.DEFAULT_PRECEDENCE,
-            int closeParenthesisPrecedence = CloseParenthesisLexer.DEFAULT_PRECEDENCE,
-            int operandPrecedence = OperandLexer.DEFAULT_PRECEDENCE,
-            int operatorPrecedence = OperatorLexer.DEFAULT_PRECEDENCE) =>
-            new(
-                new Lexer[]
-                {
-                    new OpenParenthesisLexer(openParenthesisPrecedence, table.OpenParenthesis, state),
-                    new CloseParenthesisLexer(closeParenthesisPrecedence, table.CloseParenthesis, state),
-                    new OperandLexer(operandPrecedence, table.Operands, state),
-                    new OperatorLexer(operatorPrecedence, table.Operators, state)
-                }
-                );
-    }
-}

@@ -89,12 +89,3 @@ namespace DiceRoll.Input.Parsing
             mapper.GetSubstringOf(mapper.Map(in substring));
     }
 }
-
-namespace DiceRoll.Input.Parsing.Deprecated
-{
-    internal static class InputMapperExtensions
-    {
-        public static MappedStack<T> CreateLinkedStack<T>(this InputMapper mapper) =>
-            new(mapper);
-    }
-}
