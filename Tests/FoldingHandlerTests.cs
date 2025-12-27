@@ -3,7 +3,8 @@
     [TestClass]
     public class FoldingHandlerTests
     {
-        private static readonly OperatorFoldingHandler _handler = new(OperandCastingTable.Default);
+        private static readonly OperatorFoldingHandler _operatorHandler = new(OperandCastingTable.Default);
+        private static readonly NodePoolFoldingHandler _nodePoolHandler = new();
 
         private static LexemesList Lex(string input)
         {
@@ -14,7 +15,7 @@
 
             return state.Lexemes;
         }
-
+        
         // todo proper tests
         
         [TestMethod]
@@ -22,7 +23,7 @@
         {
             LexemesList list = Lex("2 - - 2");
 
-            _handler.FoldOperators(list, Range.All);
+            _operatorHandler.Fold(list, Range.All);
         }
 
         [TestMethod]
@@ -31,7 +32,24 @@
             LexemesList list = Lex("2 - 1 + 1");
             Range range = 1..;
 
-            _handler.FoldOperators(list, in range);
+            _operatorHandler.Fold(list, in range);
+        }
+
+
+        [TestMethod]
+        public void NodePoolSimpleTest()
+        {
+            LexemesList list = Lex("2 1 4");
+
+            _nodePoolHandler.Fold(list, Range.All);
+        }
+        
+        [TestMethod]
+        public void NodePoolLimitedRangeTest()
+        {
+            LexemesList list = Lex("2 1 4");
+
+            _nodePoolHandler.Fold(list, ..^1);
         }
     }
 }

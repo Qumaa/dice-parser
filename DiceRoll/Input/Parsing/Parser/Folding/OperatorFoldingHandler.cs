@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace DiceRoll.Input.Parsing
 {
-    public sealed class OperatorFoldingHandler
+    public sealed class OperatorFoldingHandler : LexemesFoldingHandler
     {
         private readonly OperandCastingTable _castingTable;
         
@@ -15,7 +15,7 @@ namespace DiceRoll.Input.Parsing
             _castingTable = castingTable;
         }
 
-        public Range FoldOperators(LexemesList lexemes, in Range range)
+        public override Range Fold(LexemesList lexemes, in Range range)
         {
             Indexer indexer = IndexOperators(lexemes, in range);
             OperatorPrecedences precedences = IndexPrecedences(indexer);
@@ -132,7 +132,7 @@ namespace DiceRoll.Input.Parsing
             int leftMostPosition = position - invoker.Arity.Left;
             Range usedRange = leftMostPosition..(position + invoker.Arity.Right + 1);
 
-            indexer.Source.TakeMany(in usedRange);
+            indexer.Source.Remove(in usedRange);
             Operand operand = Invoke(in invocationInfo);
 
             indexer.Source.Insert(leftMostPosition, operand, in @operator.Range);

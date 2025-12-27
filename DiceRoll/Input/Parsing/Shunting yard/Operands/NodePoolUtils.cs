@@ -21,5 +21,21 @@ namespace DiceRoll.Input.Parsing
             
             return new Mapped<LinkedNode>(linkedPool, poolRange);
         }
+        
+        public static Mapped<Operand> GroupNodes(IEnumerable<Mapped<Operand>> nodes) =>
+            GroupNodes(nodes.ToArray());
+        
+        public static Mapped<Operand> GroupNodes(Mapped<Operand>[] nodes)
+        {
+            Range poolRange = nodes[0].Range;
+            
+            for (int i = 1; i < nodes.Length; i++)
+                poolRange = poolRange.And(nodes[i].Range);
+
+            NodePool pool = new(nodes.Select(x => x.Value.Node));
+            Operand linkedPool = new(pool, typeof(INode), nodes);
+            
+            return new Mapped<Operand>(linkedPool, poolRange);
+        }
     }
 }
