@@ -6,17 +6,17 @@ namespace DiceRoll.Input.Parsing
     {
         private readonly EquationParserState _state;
         private readonly EquationReader _reader;
-        private readonly EquationFolder _folder;
+        private readonly EquationReducer _reducer;
 
-        public EquationParser(EquationParserState state, LexingPipeline lexingPipeline, FoldingPipeline foldingPipeline)
+        public EquationParser(EquationParserState state, LexingPipeline lexingPipeline, LexemesReducingPipeline reducingPipeline)
         {
             ArgumentNullException.ThrowIfNull(state);
             ArgumentNullException.ThrowIfNull(lexingPipeline);
-            ArgumentNullException.ThrowIfNull(foldingPipeline);
+            ArgumentNullException.ThrowIfNull(reducingPipeline);
 
             _state = state;
             _reader = new EquationReader(state.Mapper, state.Lexemes, lexingPipeline);
-            _folder = new EquationFolder(state.Lexemes, foldingPipeline);
+            _reducer = new EquationReducer(state.Lexemes, reducingPipeline);
         }
 
         public void Read(string equation)
@@ -32,12 +32,15 @@ namespace DiceRoll.Input.Parsing
             }
         }
 
-        public NodeTree Fold(UnknownLexemeSolver solver)
+        public NodeTree Collapse(UnknownLexemeSolver solver)
         {
+            // todo error message formatting. A way to reference a lexeme that has caused an exception
             try
             {
                 SubstringMapper mapper = _state.Mapper.BuildSubstringMapper();
-                Mapped<LinkedNode> root = _folder.Fold(solver);
+                Mapped<LinkedNode> root = _reducer.Reduce(solver);
+                
+                _state.Reset();
             
                 return new NodeTree(mapper, root);
             }

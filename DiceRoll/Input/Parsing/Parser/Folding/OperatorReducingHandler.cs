@@ -4,18 +4,18 @@ using System.Linq;
 
 namespace DiceRoll.Input.Parsing
 {
-    public sealed class OperatorFoldingHandler : LexemesFoldingHandler
+    public sealed class OperatorReducingHandler : LexemesReducingHandler
     {
         private readonly OperandCastingTable _castingTable;
         
-        public OperatorFoldingHandler(OperandCastingTable castingTable)
+        public OperatorReducingHandler(OperandCastingTable castingTable)
         {
             ArgumentNullException.ThrowIfNull(castingTable);
             
             _castingTable = castingTable;
         }
 
-        public override Range Fold(LexemesList lexemes, in Range range)
+        public override Range Reduce(LexemesList lexemes, in Range range)
         {
             Indexer indexer = IndexOperators(lexemes, in range);
             OperatorPrecedences precedences = IndexPrecedences(indexer);
@@ -33,26 +33,16 @@ namespace DiceRoll.Input.Parsing
         {
             start:
             for (int i = 0; i < indexer.Count; i++)
-            {
-                if (!TryExecuteOperatorWithImmediateContext(indexer, i, precedence, out int reduced))
-                    continue;
-
-                indexer.DelistOperatorAt(i, reduced);
-                goto start; // todo instead of restarting the loop, manually check all nearby operators
-            }
+                if (TryExecuteOperatorWithImmediateContext(indexer, i, precedence))
+                    goto start; // todo instead of restarting the loop, manually check all nearby operators
         }
 
-        private bool TryExecuteOperatorWithImmediateContext(Indexer indexer, int i, int precedence, out int lexemesReduced)
+        private bool TryExecuteOperatorWithImmediateContext(Indexer indexer, int i, int precedence)
         {
             if (!IsPreferableWithinImmediateContext(indexer, i, precedence, out InvocationInfo invocationInfo))
-            {
-                lexemesReduced = 0;
                 return false;
-            }
 
             InvokeUsingImmediateContext(indexer, i, invocationInfo);
-
-            lexemesReduced = invocationInfo.Invoker.Arity;
             return true;
         }
 
@@ -62,7 +52,7 @@ namespace DiceRoll.Input.Parsing
 
             foreach (Overload overload in indexedOperator.SortedOverloads)
             {
-                if (!overload.ToRange(indexedOperator.Index).FitsIn(indexer.Range, indexer.Source.Count))
+                if (!overload.Invoker.Arity.ToRange(indexedOperator.Index).FitsIn(indexer.Range, indexer.Source.Count))
                     continue;
                 
                 if (!IsInvokableWithImmediateContext(indexer.Source, indexedOperator.Index, overload))
@@ -129,13 +119,13 @@ namespace DiceRoll.Input.Parsing
             Mapped<IndexedOperator> @operator = indexer.GetOperator(i);
             int position = @operator.Value.Index;
 
-            int leftMostPosition = position - invoker.Arity.Left;
-            Range usedRange = leftMostPosition..(position + invoker.Arity.Right + 1);
+            Range usedRange = invoker.Arity.ToRange(position);
 
-            indexer.Source.Remove(in usedRange);
             Operand operand = Invoke(in invocationInfo);
 
-            indexer.Source.Insert(leftMostPosition, operand, in @operator.Range);
+            indexer.DelistOperatorAt(i, invoker.Arity);
+
+            indexer.Source.Replace(in usedRange, operand, in @operator.Range);
         }
 
         private static Operand Invoke(in InvocationInfo info)
@@ -275,9 +265,6 @@ namespace DiceRoll.Input.Parsing
 
                 return copy;
             }
-
-            public Range ToRange(int position) =>
-                (position - Invoker.Arity.Left)..(position + Invoker.Arity.Right);
         }
     }
 }

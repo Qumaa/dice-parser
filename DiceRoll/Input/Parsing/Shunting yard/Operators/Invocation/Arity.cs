@@ -53,5 +53,7 @@ namespace DiceRoll.Input.Parsing
         public static bool IsPrefix(this Arity arity) =>
             arity is { Left: 0, Right: > 0 };
         
+        public static Range ToRange(this Arity arity, int position) =>
+            (position - arity.Left)..(position + arity.Right);
     }
 }

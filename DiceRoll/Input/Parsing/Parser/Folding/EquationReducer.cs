@@ -2,12 +2,12 @@
 
 namespace DiceRoll.Input.Parsing
 {
-    public sealed class EquationFolder
+    public sealed class EquationReducer
     {
         private readonly LexemesList _lexemes;
-        private readonly FoldingPipeline _pipeline;
+        private readonly LexemesReducingPipeline _pipeline;
         
-        public EquationFolder(LexemesList lexemes, FoldingPipeline pipeline)
+        public EquationReducer(LexemesList lexemes, LexemesReducingPipeline pipeline)
         {
             ArgumentNullException.ThrowIfNull(lexemes);
             ArgumentNullException.ThrowIfNull(pipeline);
@@ -16,7 +16,7 @@ namespace DiceRoll.Input.Parsing
             _pipeline = pipeline;
         }
 
-        public Mapped<LinkedNode> Fold(UnknownLexemeSolver solver)
+        public Mapped<LinkedNode> Reduce(UnknownLexemeSolver solver)
         {
             _pipeline.ExecuteAll(_lexemes, solver);
 

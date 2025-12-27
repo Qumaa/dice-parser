@@ -9,9 +9,10 @@ namespace DiceRoll.Input.Parsing
         public ExpressionParser(TokensTable tokensTable, OperandCastingTable castingTable)
         {
             EquationParserState state = new();
-            LexingPipeline chain = tokensTable.ToDefaultPipeline(state.Lexemes);
+            LexingPipeline lexingPipeline = tokensTable.ToDefaultPipeline(state.Lexemes);
+            LexemesReducingPipeline reducingPipeline = LexemesReducingPipeline.CreateDefault(castingTable);
             
-            // _parser = new EquationParser(state, chain);
+            _parser = new EquationParser(state, lexingPipeline, reducingPipeline);
         }
 
         /*
@@ -34,7 +35,7 @@ namespace DiceRoll.Input.Parsing
         public NodeTree Parse(string expression)
         {
             _parser.Read(expression);
-            return _parser.Fold(UnknownLexemeSolver.Inert);
+            return _parser.Collapse(UnknownLexemeSolver.Inert);
         }
 
         public NodeTree Parse(IEnumerable<string> expression)
@@ -42,7 +43,7 @@ namespace DiceRoll.Input.Parsing
             foreach (string segment in expression)
                 _parser.Read(segment);
 
-            return _parser.Fold(UnknownLexemeSolver.Inert);
+            return _parser.Collapse(UnknownLexemeSolver.Inert);
         }
     }
 }

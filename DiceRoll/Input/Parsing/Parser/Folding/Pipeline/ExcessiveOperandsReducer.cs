@@ -1,0 +1,19 @@
+﻿using System;
+
+namespace DiceRoll.Input.Parsing
+{
+    public sealed class ExcessiveOperandsReducer : LexemesReducer
+    {
+        private readonly NodePoolReducingHandler _handler;
+        
+        public ExcessiveOperandsReducer(NodePoolReducingHandler handler)
+        {
+            ArgumentNullException.ThrowIfNull(handler);
+            
+            _handler = handler;
+        }
+
+        public override void Execute(LexemesList lexemes) =>
+            _handler.Reduce(lexemes, Range.All);
+    }
+}

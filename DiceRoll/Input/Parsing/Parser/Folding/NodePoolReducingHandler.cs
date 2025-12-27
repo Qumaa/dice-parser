@@ -2,13 +2,13 @@
 
 namespace DiceRoll.Input.Parsing
 {
-    public sealed class NodePoolFoldingHandler : LexemesFoldingHandler
+    public sealed class NodePoolReducingHandler : LexemesReducingHandler
     {
-        public override Range Fold(LexemesList lexemes, in Range range)
+        public override Range Reduce(LexemesList lexemes, in Range range)
         {
             (int start, int length) = range.GetOffsetAndLength(lexemes.Count);
 
-            if (length is 1)
+            if (length <= 1)
                 return range;
 
             Mapped<Operand>[] operands = lexemes.GetTypedOrThrow<Operand>(in range);
