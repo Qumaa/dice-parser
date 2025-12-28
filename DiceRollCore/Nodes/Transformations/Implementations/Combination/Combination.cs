@@ -7,29 +7,29 @@ namespace DiceRoll
 {
     public sealed class Combination : BinaryTransformation
     {
-        private readonly CombinationType _combinationType;
+        public readonly CombinationType CombinationType;
 
         public Combination(INumeric left, INumeric right, CombinationType combinationType) : base(left, right)
         {
             if (IsDivision(combinationType))
-                ZeroDivisorException.ThrowIfAnyZero(_right.GetProbabilityDistribution());
+                ZeroDivisorException.ThrowIfAnyZero(Right.GetProbabilityDistribution());
             EnumValueNotDefinedException.ThrowIfValueNotDefined(combinationType);
             
-            _combinationType = combinationType;
+            CombinationType = combinationType;
         }
 
         public override void NextEvaluation()
         {
-            Outcome left = _left.Evaluate();
-            Outcome right = _right.Evaluate();
+            Outcome left = Left.Evaluate();
+            Outcome right = Right.Evaluate();
             
             CacheEvaluation(Combine(left, right));
         }
 
         protected override RollProbabilityDistribution CreateProbabilityDistribution()
         {
-            RollProbabilityDistribution source = _left.GetProbabilityDistribution();
-            RollProbabilityDistribution other = _right.GetProbabilityDistribution();
+            RollProbabilityDistribution source = Left.GetProbabilityDistribution();
+            RollProbabilityDistribution other = Right.GetProbabilityDistribution();
 
             SortedList<Outcome, Probability> probabilities = new(Outcome.RelationalComparer);
             
@@ -49,7 +49,7 @@ namespace DiceRoll
         }
 
         private Outcome Combine(Outcome left, Outcome right) =>
-            _combinationType switch
+            CombinationType switch
             {
                 CombinationType.Add => left + right,
                 CombinationType.Subtract => left - right,

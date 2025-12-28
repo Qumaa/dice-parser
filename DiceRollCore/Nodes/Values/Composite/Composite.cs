@@ -11,6 +11,8 @@ namespace DiceRoll
         private readonly INumeric _compositeNumeric;
         private readonly IEnumerable<INumeric> _sourceNodes;
 
+        public INumeric UnderlyingNode => _compositeNumeric;
+
         // WARNING: source MUST NOT create new nodes during enumeration, but always point to the same nodes
         public Composite(Composer composer, IEnumerable<INumeric> source)
         {

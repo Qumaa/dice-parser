@@ -2,23 +2,23 @@
 
 namespace DiceRoll
 {
-    public sealed class Selection : BinaryTransformation
+    public sealed class DefaultSelection : BinaryTransformation
     {
-        private readonly SelectionType _selectionType;
+        public readonly SelectionType SelectionType;
 
-        public Selection(INumeric left, INumeric right, SelectionType selectionType) : base(left, right)
+        public DefaultSelection(INumeric left, INumeric right, SelectionType selectionType) : base(left, right)
         {
             EnumValueNotDefinedException.ThrowIfValueNotDefined(selectionType);
             
-            _selectionType = selectionType;
+            SelectionType = selectionType;
         }
 
         public override void NextEvaluation()
         {
-            Outcome left = _left.Evaluate();
-            Outcome right = _right.Evaluate();
+            Outcome left = Left.Evaluate();
+            Outcome right = Right.Evaluate();
             
-            Outcome evaluation = _selectionType is SelectionType.Highest ?
+            Outcome evaluation = SelectionType is SelectionType.Highest ?
                 Outcome.Max(left, right) : 
                 Outcome.Min(left, right);
             
@@ -27,8 +27,8 @@ namespace DiceRoll
 
         protected override RollProbabilityDistribution CreateProbabilityDistribution()
         {
-            RollProbabilityDistribution source = _left.GetProbabilityDistribution();
-            RollProbabilityDistribution other = _right.GetProbabilityDistribution();
+            RollProbabilityDistribution source = Left.GetProbabilityDistribution();
+            RollProbabilityDistribution other = Right.GetProbabilityDistribution();
             
             CDFTable sourceTable = new(source);
             CDFTable otherTable = new(other);
@@ -52,7 +52,7 @@ namespace DiceRoll
             new(cdfTable.EqualTo(outcome), GetSecondCDFValue(cdfTable, outcome));
 
         private Probability GetSecondCDFValue(CDFTable cdfTable, Outcome outcome) =>
-            _selectionType is SelectionType.Highest ?
+            SelectionType is SelectionType.Highest ?
                 cdfTable.LessThanOrEqual(outcome) :
                 cdfTable.GreaterThanOrEqual(outcome);
 

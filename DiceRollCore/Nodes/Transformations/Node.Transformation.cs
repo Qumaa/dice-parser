@@ -20,10 +20,10 @@
                 new Combination(dividend, divisor, CombinationType.DivideRoundUpwards);
 
             public static INumeric SelectHighest(INumeric left, INumeric right) =>
-                new Selection(left, right, SelectionType.Highest);
+                new DefaultSelection(left, right, SelectionType.Highest);
 
             public static INumeric SelectLowest(INumeric left, INumeric right) =>
-                new Selection(left, right, SelectionType.Lowest);
+                new DefaultSelection(left, right, SelectionType.Lowest);
 
             public static INumeric Negate(INumeric node) =>
                 new Negation(node);

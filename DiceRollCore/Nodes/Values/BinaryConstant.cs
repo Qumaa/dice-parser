@@ -2,6 +2,8 @@
 {
     public sealed class BinaryConstant : Assertion
     {
+        public bool Value => CachedEvaluation.Value;
+        
         public BinaryConstant(bool value)
         {
             CacheEvaluation(new Binary(value));

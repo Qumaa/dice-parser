@@ -60,7 +60,7 @@ namespace DiceRoll.Input.Parsing
 
             foreach (Overload overload in indexedOperator.SortedOverloads)
             {
-                if (!overload.Invoker.Arity.ToRange(indexedOperator.Index).FitsIn(indexer.Range, indexer.Source.Count))
+                if (!overload.Invoker.Arity.FitsIn(indexedOperator.Index, indexer.Range, indexer.Source.Count))
                     continue;
                 
                 if (!IsInvokableWithImmediateContext(indexer.Source, indexedOperator.Index, overload))

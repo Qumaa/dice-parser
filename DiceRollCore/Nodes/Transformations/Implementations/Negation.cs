@@ -9,11 +9,11 @@ namespace DiceRoll
         public override void NextEvaluation()
         {
             base.NextEvaluation();
-            CacheEvaluation(-_source.CachedEvaluation);
+            CacheEvaluation(-Node.CachedEvaluation);
         }
 
         protected override RollProbabilityDistribution CreateProbabilityDistribution() =>
-            _source.GetProbabilityDistribution()
+            Node.GetProbabilityDistribution()
                 .Select(x => new Roll(-x.Outcome, x.Probability))
                 .ToRollProbabilityDistribution();
     }
