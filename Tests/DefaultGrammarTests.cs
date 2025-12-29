@@ -161,25 +161,33 @@
 
         private abstract class Template
         {
-            public readonly string SampleString;
+            public readonly string[] SampleStrings;
             
             protected Template(string sampleString)
             {
-                SampleString = sampleString;
+                SampleStrings = [sampleString];
             }
 
-            public abstract bool MeetsExpectedPattern(INode node);
+            protected Template(string formatString, params string[] options)
+            {
+                SampleStrings = options.Select(x => string.Format(formatString, x)).ToArray();
+            }
+
+            public bool MeetsExpectedPattern(INode[] nodes) =>
+                nodes.All(MeetsExpectedPattern);
+
+            protected abstract bool MeetsExpectedPattern(INode node);
         }
 
         private static class AssertParsingResultOf<TTemplate> where TTemplate : Template, new()
         {
             private static readonly TTemplate _template;
-            private static readonly INode _sampleParseResult;
+            private static readonly INode[] _sampleParseResult;
 
             static AssertParsingResultOf()
             {
                 _template = GetTemplate<TTemplate>();
-                _sampleParseResult = Parse<INode>(_template.SampleString);
+                _sampleParseResult = _template.SampleStrings.Select(Parse<INode>).ToArray();
             }
             
             public static void FailsToMeetExpectedPatternOf<TOther>() where TOther : Template, new()
@@ -207,7 +215,7 @@
         {
             public SingleNumber() : base("15") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is NumericConstant { Value: 15 };
         }
 
@@ -215,7 +223,7 @@
         {
             public SingleBoolean() : base("true") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is BinaryConstant { Value: true };
         }
 
@@ -223,7 +231,7 @@
         {
             public SingleDie() : base("d8") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is Dice { Faces: 8 };
         }
 
@@ -231,7 +239,7 @@
         {
             public ImplicitCompositionDice() : base("2d6") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is Composite
                 {
                     UnderlyingNode: Combination
@@ -245,7 +253,7 @@
         {
             public ExplicitCompositionDice() : base("2d20highest") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is Composite
                 {
                     UnderlyingNode: DefaultSelection
@@ -261,7 +269,7 @@
         {
             public SimpleNodePool() : base("true 15") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is NodePool pool &&
                 pool.ToArray() is [BinaryConstant { Value: true }, NumericConstant { Value: 15 }];
         }
@@ -270,7 +278,7 @@
         {
             public NestedNodePool() : base("4 ( true 15 )") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is NodePool pool &&
                 pool.ToArray() is [NumericConstant { Value: 4 }, NodePool pool2] &&
                 pool2.ToArray() is [BinaryConstant { Value: true }, NumericConstant { Value: 15 }];
@@ -284,7 +292,7 @@
         {
             public SimpleAddition() : base("d4 + 1") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is Combination
                 {
                     CombinationType: CombinationType.Add,
@@ -297,7 +305,7 @@
         {
             public SimpleSubtraction() : base("d4 - 1") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is Combination
                 {
                     CombinationType: CombinationType.Subtract,
@@ -310,7 +318,7 @@
         {
             public SimpleNegation() : base("- 1") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is Negation { Source: NumericConstant { Value: 1 } };
         }
 
@@ -318,7 +326,7 @@
         {
             public SimpleMultiplication() : base("d4 * 3") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is Combination
                 {
                     CombinationType: CombinationType.Multiply,
@@ -331,7 +339,7 @@
         {
             public SimpleDivideRoundDown() : base("d4 / 3") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is Combination
                 {
                     CombinationType: CombinationType.DivideRoundDownwards,
@@ -344,7 +352,7 @@
         {
             public SimpleDivideRoundUp() : base("d4 // 3") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is Combination
                 {
                     CombinationType: CombinationType.DivideRoundUpwards,
@@ -355,9 +363,9 @@
 
         private sealed class SimpleEqualNumeric : Template
         {
-            public SimpleEqualNumeric() : base("d4 = 3") { }
+            public SimpleEqualNumeric() : base("d4 {0} 3", "=", "==") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is DefaultBinaryOperation
                 {
                     OperationType: OperationType.Equal, Left: Dice { Faces: 4 }, Right: NumericConstant { Value: 3 }
@@ -366,9 +374,9 @@
 
         private sealed class SimpleNotEqualNumeric : Template
         {
-            public SimpleNotEqualNumeric() : base("d4 != 3") { }
+            public SimpleNotEqualNumeric() : base("d4 {0} 3", "!=", "=/=") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is DefaultBinaryOperation
                 {
                     OperationType: OperationType.NotEqual,
@@ -379,9 +387,9 @@
 
         private sealed class SimpleEqualBinary : Template
         {
-            public SimpleEqualBinary() : base("false = true") { }
+            public SimpleEqualBinary() : base("false {0} true", "=", "==") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is DefaultBinaryAssertion
                 {
                     AssertionType: BinaryAssertionType.Equal,
@@ -392,9 +400,9 @@
 
         private sealed class SimpleNotEqualBinary : Template
         {
-            public SimpleNotEqualBinary() : base("false != true") { }
+            public SimpleNotEqualBinary() : base("false {0} true", "!=", "=/=") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is DefaultBinaryAssertion
                 {
                     AssertionType: BinaryAssertionType.NotEqual,
@@ -407,7 +415,7 @@
         {
             public SimpleGreaterThan() : base("d4 > 3") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is DefaultBinaryOperation
                 {
                     OperationType: OperationType.GreaterThan,
@@ -420,7 +428,7 @@
         {
             public SimpleGreaterThanOrEqual() : base("d4 >= 3") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is DefaultBinaryOperation
                 {
                     OperationType: OperationType.GreaterThanOrEqual,
@@ -433,7 +441,7 @@
         {
             public SimpleLessThan() : base("d4 < 3") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is DefaultBinaryOperation
                 {
                     OperationType: OperationType.LessThan,
@@ -446,7 +454,7 @@
         {
             public SimpleLessThanOrEqual() : base("d4 <= 3") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is DefaultBinaryOperation
                 {
                     OperationType: OperationType.LessThanOrEqual,
@@ -457,9 +465,9 @@
         
         private sealed class SimpleAnd : Template
         {
-            public SimpleAnd() : base("false & true") { }
+            public SimpleAnd() : base("false {0} true", "&", "&&", "and") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is DefaultBinaryAssertion
                 {
                     AssertionType: BinaryAssertionType.And,
@@ -470,9 +478,9 @@
 
         private sealed class SimpleOr : Template
         {
-            public SimpleOr() : base("false | true") { }
+            public SimpleOr() : base("false {0} true", "|", "||", "or") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is DefaultBinaryAssertion
                 {
                     AssertionType: BinaryAssertionType.Or,
@@ -483,9 +491,9 @@
         
         private sealed class SimpleNot : Template
         {
-            public SimpleNot() : base("!false") { }
+            public SimpleNot() : base("{0} false", "!", "not") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is NotAssertion
                 {
                     Source: BinaryConstant { Value: false }
@@ -500,7 +508,7 @@
         {
             public PrecedenceOverridenByParenthesis() : base("(1 + 2) * 3") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is Combination
                 {
                     CombinationType: CombinationType.Multiply,
@@ -518,7 +526,7 @@
         {
             public PrecedenceAddOverAdd() : base("1 + 2 + 3") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is Combination
                 {
                     CombinationType: CombinationType.Add,
@@ -536,7 +544,7 @@
         {
             public PrecedenceAddOverSubtract() : base("1 + 2 - 3") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is Combination
                 {
                     CombinationType: CombinationType.Subtract,
@@ -554,7 +562,7 @@
         {
             public PrecedenceAddOverNegation() : base("1 + - 2") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is Combination
                 {
                     CombinationType: CombinationType.Add,
@@ -567,7 +575,7 @@
         {
             public PrecedenceAddOverMultiply() : base("1 + 2 * 3") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is Combination
                 {
                     CombinationType: CombinationType.Add,
@@ -585,7 +593,7 @@
         {
             public PrecedenceAddOverDivideRoundDown() : base("1 + 2 / 3") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is Combination
                 {
                     CombinationType: CombinationType.Add,
@@ -603,7 +611,7 @@
         {
             public PrecedenceAddOverDivideRoundUp() : base("1 + 2 // 3") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is Combination
                 {
                     CombinationType: CombinationType.Add,
@@ -621,7 +629,7 @@
         {
             public PrecedenceAddOverGreaterThan() : base("1 + 2 > 3") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is DefaultBinaryOperation
                 {
                     OperationType: OperationType.GreaterThan,
@@ -639,7 +647,7 @@
         {
             public PrecedenceAddOverLessThan() : base("1 + 2 < 3") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is DefaultBinaryOperation
                 {
                     OperationType: OperationType.LessThan,
@@ -657,7 +665,7 @@
         {
             public PrecedenceAddOverGreaterThanOrEqual() : base("1 + 2 >= 3") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is DefaultBinaryOperation
                 {
                     OperationType: OperationType.GreaterThanOrEqual,
@@ -675,7 +683,7 @@
         {
             public PrecedenceAddOverLessThanOrEqual() : base("1 + 2 <= 3") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is DefaultBinaryOperation
                 {
                     OperationType: OperationType.LessThanOrEqual,
@@ -693,7 +701,7 @@
         {
             public PrecedenceAddOverEqual() : base("1 + 2 = 3") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is DefaultBinaryOperation
                 {
                     OperationType: OperationType.Equal,
@@ -711,7 +719,7 @@
         {
             public PrecedenceAddOverNotEqual() : base("1 + 2 != 3") { }
 
-            public override bool MeetsExpectedPattern(INode node) =>
+            protected override bool MeetsExpectedPattern(INode node) =>
                 node is DefaultBinaryOperation
                 {
                     OperationType: OperationType.NotEqual,
