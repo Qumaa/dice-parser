@@ -4,22 +4,22 @@ namespace DiceRoll
 {
     public abstract class BinaryAssertion : Assertion
     {
-        protected readonly IAssertion _left;
-        protected readonly IAssertion _right;
+        public readonly IAssertion Left;
+        public readonly IAssertion Right;
 
         protected BinaryAssertion(IAssertion left, IAssertion right)
         {
             ArgumentNullException.ThrowIfNull(left);
             ArgumentNullException.ThrowIfNull(right);
             
-            _left = left;
-            _right = right;
+            Left = left;
+            Right = right;
         }
 
         public override void NextEvaluation()
         {
-            _left.NextEvaluation();
-            _right.NextEvaluation();
+            Left.NextEvaluation();
+            Right.NextEvaluation();
         }
     }
 }

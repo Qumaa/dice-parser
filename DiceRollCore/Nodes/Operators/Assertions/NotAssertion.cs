@@ -7,10 +7,10 @@
         public override void NextEvaluation()
         {
             base.NextEvaluation();
-            CacheEvaluation(!_source.CachedEvaluation);
+            CacheEvaluation(!Source.CachedEvaluation);
         }
         
         protected override LogicalProbabilityDistribution CreateProbabilityDistribution() =>
-            new(_source.GetProbabilityDistribution().False);
+            new(Source.GetProbabilityDistribution().False);
     }
 }

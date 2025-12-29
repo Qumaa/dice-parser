@@ -45,7 +45,7 @@ namespace DiceRoll.Input.Parsing
                     continue;
                 }
 
-                if (!substring.IsEmpty && newMatch.Start == expression.Start)
+                if (!substring.IsEmpty && substring.Start == expression.Start)
                 {
                     if (newMatch.Length < substring.Length)
                         continue;

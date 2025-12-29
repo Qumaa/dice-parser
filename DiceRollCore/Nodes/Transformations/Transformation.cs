@@ -4,18 +4,18 @@ namespace DiceRoll
 {
     public abstract class Transformation : Numeric
     {
-        public readonly INumeric Node;
+        public readonly INumeric Source;
         
-        protected Transformation(INumeric node)
+        protected Transformation(INumeric source)
         {
-            ArgumentNullException.ThrowIfNull(node);
+            ArgumentNullException.ThrowIfNull(source);
             
-            Node = node;
+            Source = source;
         }
         
         protected abstract override RollProbabilityDistribution CreateProbabilityDistribution();
 
         public override void NextEvaluation() =>
-            Node.NextEvaluation();
+            Source.NextEvaluation();
     }
 }

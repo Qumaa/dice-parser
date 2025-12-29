@@ -4,22 +4,22 @@ namespace DiceRoll
 {
     public abstract class BinaryOperation : Operation
     {
-        protected readonly INumeric _left;
-        protected readonly INumeric _right;
+        public readonly INumeric Left;
+        public readonly INumeric Right;
 
         protected BinaryOperation(INumeric left, INumeric right)
         {
             ArgumentNullException.ThrowIfNull(left);
             ArgumentNullException.ThrowIfNull(right);
             
-            _left = left;
-            _right = right;
+            Left = left;
+            Right = right;
         }
 
         public override void NextEvaluation()
         {
-            _left.NextEvaluation();
-            _right.NextEvaluation();
+            Left.NextEvaluation();
+            Right.NextEvaluation();
         }
     }
 }
