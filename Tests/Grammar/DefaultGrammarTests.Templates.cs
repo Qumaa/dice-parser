@@ -1,311 +1,6 @@
-﻿namespace Tests
+﻿// ReSharper disable ClassNeverInstantiated.Local
+namespace Tests
 {
-    [TestClass]
-    public partial class DefaultGrammarTests
-    {
-        // todo composition once done
-        // todo range
-        // todo advanced dice (once changed to be an operator)
-        
-        [TestClass]
-        public class OperandTests
-        {
-            [TestMethod]
-            public void IntConstantTest()
-            {
-                AssertParsingResultOf<SingleNumber>.MeetsExpectedPattern();
-
-                AssertParsingResultOf<SingleNumber>.FailsToMeetExpectedPatternOf<SingleBoolean>();
-                AssertParsingResultOf<SingleNumber>.FailsToMeetExpectedPatternOf<SingleDie>();
-                AssertParsingResultOf<SingleNumber>.FailsToMeetExpectedPatternOf<ImplicitCompositionDice>();
-                AssertParsingResultOf<SingleNumber>.FailsToMeetExpectedPatternOf<ExplicitCompositionDice>();
-            }
-
-            [TestMethod]
-            public void BoolConstantTest()
-            {
-                AssertParsingResultOf<SingleBoolean>.MeetsExpectedPattern();
-
-                AssertParsingResultOf<SingleBoolean>.FailsToMeetExpectedPatternOf<SingleNumber>();
-                AssertParsingResultOf<SingleBoolean>.FailsToMeetExpectedPatternOf<SingleDie>();
-                AssertParsingResultOf<SingleBoolean>.FailsToMeetExpectedPatternOf<ImplicitCompositionDice>();
-                AssertParsingResultOf<SingleBoolean>.FailsToMeetExpectedPatternOf<ExplicitCompositionDice>();
-            }
-
-            [TestMethod]
-            public void DiceTest()
-            {
-                AssertParsingResultOf<SingleDie>.MeetsExpectedPattern();
-                AssertParsingResultOf<ExplicitCompositionDice>.MeetsExpectedPattern();
-                AssertParsingResultOf<ImplicitCompositionDice>.MeetsExpectedPattern();
-
-                AssertParsingResultOf<SingleDie>.FailsToMeetExpectedPatternOf<SingleBoolean>();
-                AssertParsingResultOf<ExplicitCompositionDice>.FailsToMeetExpectedPatternOf<SingleBoolean>();
-                AssertParsingResultOf<ImplicitCompositionDice>.FailsToMeetExpectedPatternOf<SingleBoolean>();
-                AssertParsingResultOf<SingleDie>.FailsToMeetExpectedPatternOf<SingleNumber>();
-                AssertParsingResultOf<ExplicitCompositionDice>.FailsToMeetExpectedPatternOf<SingleNumber>();
-                AssertParsingResultOf<ImplicitCompositionDice>.FailsToMeetExpectedPatternOf<SingleNumber>();
-            }
-
-            [TestMethod]
-            public void NodePoolTest()
-            {
-                AssertParsingResultOf<SimpleNodePool>.MeetsExpectedPattern();
-                AssertParsingResultOf<NestedNodePool>.MeetsExpectedPattern();
-            }
-        }
-
-        [TestMethod]
-        public void SimpleTests()
-        {
-            AssertParsingResultOf<SimpleAddition>.MeetsExpectedPattern();
-            
-            AssertParsingResultOf<SimpleSubtraction>.MeetsExpectedPattern();
-            AssertParsingResultOf<SimpleNegation>.MeetsExpectedPattern();
-            
-            AssertParsingResultOf<SimpleMultiplication>.MeetsExpectedPattern();
-            
-            AssertParsingResultOf<SimpleDivideRoundDown>.MeetsExpectedPattern();
-            AssertParsingResultOf<SimpleDivideRoundUp>.MeetsExpectedPattern();
-            
-            AssertParsingResultOf<SimpleEqualNumeric>.MeetsExpectedPattern();
-            AssertParsingResultOf<SimpleNotEqualNumeric>.MeetsExpectedPattern();
-            
-            AssertParsingResultOf<SimpleEqualBinary>.MeetsExpectedPattern();
-            AssertParsingResultOf<SimpleNotEqualBinary>.MeetsExpectedPattern();
-            
-            AssertParsingResultOf<SimpleGreaterThan>.MeetsExpectedPattern();
-            AssertParsingResultOf<SimpleGreaterThanOrEqual>.MeetsExpectedPattern();
-            
-            AssertParsingResultOf<SimpleLessThan>.MeetsExpectedPattern();
-            AssertParsingResultOf<SimpleLessThanOrEqual>.MeetsExpectedPattern();
-            
-            AssertParsingResultOf<SimpleAnd>.MeetsExpectedPattern();
-            AssertParsingResultOf<SimpleOr>.MeetsExpectedPattern();
-            
-            AssertParsingResultOf<SimpleNot>.MeetsExpectedPattern();
-        }
-
-        [TestClass]
-        public class PrecedenceTests
-        {
-            [TestMethod]
-            public void ParenthesisTest() =>
-                AssertParsingResultOf<PrecedenceOverridenByParenthesis>.MeetsExpectedPattern();
-            
-            [TestMethod]
-            public void AddTests()
-            {
-                AssertParsingResultOf<PrecedenceAddOverAdd>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceAddOverSubtract>.MeetsExpectedPattern();
-                AssertParsingResultOf<PrecedenceAddOverNegation>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceAddOverMultiply>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceAddOverDivideRoundDown>.MeetsExpectedPattern();
-                AssertParsingResultOf<PrecedenceAddOverDivideRoundUp>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceAddOverGreaterThan>.MeetsExpectedPattern();
-                AssertParsingResultOf<PrecedenceAddOverGreaterThanOrEqual>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceAddOverLessThan>.MeetsExpectedPattern();
-                AssertParsingResultOf<PrecedenceAddOverLessThanOrEqual>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceAddOverEqual>.MeetsExpectedPattern();
-                AssertParsingResultOf<PrecedenceAddOverNotEqual>.MeetsExpectedPattern();
-            }
-            
-            [TestMethod]
-            public void SubtractTests()
-            {
-                AssertParsingResultOf<PrecedenceSubtractOverAdd>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceSubtractOverSubtract>.MeetsExpectedPattern();
-                AssertParsingResultOf<PrecedenceSubtractOverNegation>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceSubtractOverMultiply>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceSubtractOverDivideRoundDown>.MeetsExpectedPattern();
-                AssertParsingResultOf<PrecedenceSubtractOverDivideRoundUp>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceSubtractOverGreaterThan>.MeetsExpectedPattern();
-                AssertParsingResultOf<PrecedenceSubtractOverGreaterThanOrEqual>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceSubtractOverLessThan>.MeetsExpectedPattern();
-                AssertParsingResultOf<PrecedenceSubtractOverLessThanOrEqual>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceSubtractOverEqual>.MeetsExpectedPattern();
-                AssertParsingResultOf<PrecedenceSubtractOverNotEqual>.MeetsExpectedPattern();
-            }
-
-            [TestMethod]
-            public void MultiplyTests()
-            {
-                AssertParsingResultOf<PrecedenceMultiplyOverAdd>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceMultiplyOverSubtract>.MeetsExpectedPattern();
-                AssertParsingResultOf<PrecedenceMultiplyOverNegation>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceMultiplyOverMultiply>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceMultiplyOverDivideRoundDown>.MeetsExpectedPattern();
-                AssertParsingResultOf<PrecedenceMultiplyOverDivideRoundUp>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceMultiplyOverGreaterThan>.MeetsExpectedPattern();
-                AssertParsingResultOf<PrecedenceMultiplyOverGreaterThanOrEqual>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceMultiplyOverLessThan>.MeetsExpectedPattern();
-                AssertParsingResultOf<PrecedenceMultiplyOverLessThanOrEqual>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceMultiplyOverEqual>.MeetsExpectedPattern();
-                AssertParsingResultOf<PrecedenceMultiplyOverNotEqual>.MeetsExpectedPattern();
-            }
-
-            [TestMethod]
-            public void DivideRoundDownTests()
-            {
-                AssertParsingResultOf<PrecedenceDivideRoundDownOverAdd>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceDivideRoundDownOverSubtract>.MeetsExpectedPattern();
-                AssertParsingResultOf<PrecedenceDivideRoundDownOverNegation>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceDivideRoundDownOverMultiply>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceDivideRoundDownOverDivideRoundDown>.MeetsExpectedPattern();
-                AssertParsingResultOf<PrecedenceDivideRoundDownOverDivideRoundUp>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceDivideRoundDownOverGreaterThan>.MeetsExpectedPattern();
-                AssertParsingResultOf<PrecedenceDivideRoundDownOverGreaterThanOrEqual>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceDivideRoundDownOverLessThan>.MeetsExpectedPattern();
-                AssertParsingResultOf<PrecedenceDivideRoundDownOverLessThanOrEqual>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceDivideRoundDownOverEqual>.MeetsExpectedPattern();
-                AssertParsingResultOf<PrecedenceDivideRoundDownOverNotEqual>.MeetsExpectedPattern();
-            }
-            
-            [TestMethod]
-            public void DivideRoundUpTests()
-            {
-                AssertParsingResultOf<PrecedenceDivideRoundUpOverAdd>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceDivideRoundUpOverSubtract>.MeetsExpectedPattern();
-                AssertParsingResultOf<PrecedenceDivideRoundUpOverNegation>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceDivideRoundUpOverMultiply>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceDivideRoundUpOverDivideRoundDown>.MeetsExpectedPattern();
-                AssertParsingResultOf<PrecedenceDivideRoundUpOverDivideRoundUp>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceDivideRoundUpOverGreaterThan>.MeetsExpectedPattern();
-                AssertParsingResultOf<PrecedenceDivideRoundUpOverGreaterThanOrEqual>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceDivideRoundUpOverLessThan>.MeetsExpectedPattern();
-                AssertParsingResultOf<PrecedenceDivideRoundUpOverLessThanOrEqual>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceDivideRoundUpOverEqual>.MeetsExpectedPattern();
-                AssertParsingResultOf<PrecedenceDivideRoundUpOverNotEqual>.MeetsExpectedPattern();
-            }
-
-            [TestMethod]
-            public void NegateTests()
-            {
-                AssertParsingResultOf<PrecedenceNegateOverAdd>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceNegateOverSubtract>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceNegateOverMultiply>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceNegateOverDivideRoundDown>.MeetsExpectedPattern();
-                AssertParsingResultOf<PrecedenceNegateOverDivideRoundUp>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceNegateOverGreaterThan>.MeetsExpectedPattern();
-                AssertParsingResultOf<PrecedenceNegateOverGreaterThanOrEqual>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceNegateOverLessThan>.MeetsExpectedPattern();
-                AssertParsingResultOf<PrecedenceNegateOverLessThanOrEqual>.MeetsExpectedPattern();
-            
-                AssertParsingResultOf<PrecedenceNegateOverEqual>.MeetsExpectedPattern();
-                AssertParsingResultOf<PrecedenceNegateOverNotEqual>.MeetsExpectedPattern();
-            }
-        }
-    }
-
-    // misc
-    // todo bad syntax assertions e.g. "1 +" throws not enough operands
-    // todo bad type assertions e.g. "true" as numeric throws
-    public partial class DefaultGrammarTests
-    {
-        private static readonly EquationParser _parser = CreateDefaultGrammarParser();
-
-        private static EquationParser CreateDefaultGrammarParser()
-        {
-            EquationParserState state = new();
-            LexingPipeline lexingPipeline = TokensTable.Default.ToDefaultPipeline(state.Lexemes);
-            LexemesReducingPipeline reducingPipeline = LexemesReducingPipeline.CreateDefault(OperandCastingTable.Default);
-            
-            return new EquationParser(state, lexingPipeline, reducingPipeline);
-        }
-        
-        private static T Parse<T>(string input) where T : INode
-        {
-            _parser.Read(input);
-
-            return (T) _parser.Collapse(UnknownLexemeSolver.Inert).Root.Value.Node;
-        }
-
-        private static T GetTemplate<T>() where T : Template, new() =>
-            new();
-
-        private abstract class Template
-        {
-            public readonly string[] SampleStrings;
-            
-            protected Template(string sampleString)
-            {
-                SampleStrings = [sampleString];
-            }
-
-            protected Template(string formatString, params string[] options)
-            {
-                SampleStrings = options.Select(x => string.Format(formatString, x)).ToArray();
-            }
-
-            public bool MeetsExpectedPattern(INode[] nodes) =>
-                nodes.All(MeetsExpectedPattern);
-
-            protected abstract bool MeetsExpectedPattern(INode node);
-        }
-
-        private static class AssertParsingResultOf<TTemplate> where TTemplate : Template, new()
-        {
-            private static readonly TTemplate _template;
-            private static readonly INode[] _sampleParseResult;
-
-            static AssertParsingResultOf()
-            {
-                _template = GetTemplate<TTemplate>();
-                _sampleParseResult = _template.SampleStrings.Select(Parse<INode>).ToArray();
-            }
-            
-            public static void FailsToMeetExpectedPatternOf<TOther>() where TOther : Template, new()
-            {
-                TOther otherTemplate = AssertParsingResultOf<TOther>._template;
-                
-                if (otherTemplate.MeetsExpectedPattern(_sampleParseResult))
-                    Assert.Fail($"Parsing a sample of {typeof(TTemplate).Name} produced a result that also meets the expected pattern of {typeof(TOther).Name}, which it must not.");
-            }
-
-            public static void MeetsExpectedPattern()
-            {
-                if (!_template.MeetsExpectedPattern(_sampleParseResult))
-                    Assert.Fail($"Parsing a sample of {typeof(TTemplate).Name} produced a result that doesn't meet the expected pattern.");
-            }
-        }
-    }
-
-    // templates
     public partial class DefaultGrammarTests
     {
     #region Operands
@@ -621,6 +316,8 @@
                 };
         }
 
+    #region Add
+
         private sealed class PrecedenceAddOverAdd : Template
         {
             public PrecedenceAddOverAdd() : base("1 + 2 + 3") { }
@@ -834,7 +531,11 @@
                     Right: NumericConstant { Value: 3 }
                 };
         }
-        
+
+    #endregion
+
+    #region Subtract
+
         private sealed class PrecedenceSubtractOverAdd : Template
         {
             public PrecedenceSubtractOverAdd() : base("1 - 2 + 3") { }
@@ -1048,7 +749,11 @@
                     Right: NumericConstant { Value: 3 }
                 };
         }
-        
+
+    #endregion
+
+    #region Multiply
+
         private sealed class PrecedenceMultiplyOverAdd : Template
         {
             public PrecedenceMultiplyOverAdd() : base("1 * 2 + 3") { }
@@ -1262,7 +967,11 @@
                     Right: NumericConstant { Value: 3 }
                 };
         }
-        
+
+    #endregion
+
+    #region Divide round down
+
         private sealed class PrecedenceDivideRoundDownOverAdd : Template
         {
             public PrecedenceDivideRoundDownOverAdd() : base("1 / 2 + 3") { }
@@ -1476,7 +1185,11 @@
                     Right: NumericConstant { Value: 3 }
                 };
         }
-        
+
+    #endregion
+
+    #region Divide round up
+
         private sealed class PrecedenceDivideRoundUpOverAdd : Template
         {
             public PrecedenceDivideRoundUpOverAdd() : base("1 // 2 + 3") { }
@@ -1690,7 +1403,11 @@
                     Right: NumericConstant { Value: 3 }
                 };
         }
-        
+
+    #endregion
+
+    #region Negate
+
         private sealed class PrecedenceNegateOverAdd : Template
         {
             public PrecedenceNegateOverAdd() : base("- 1 + 2") { }
@@ -1866,6 +1583,58 @@
                     Right: NumericConstant { Value: 2 }
                 };
         }
+
+    #endregion
+        
+        // todo below
+
+    #region Greater than
+
+        
+
+    #endregion
+        
+    #region Greater than or equal
+
+        
+
+    #endregion
+        
+    #region Less than
+
+        
+
+    #endregion
+        
+    #region Less than or equal
+
+        
+
+    #endregion
+        
+    #region Equal
+
+        
+
+    #endregion
+        
+    #region Not equal
+
+        
+
+    #endregion
+        
+    #region And
+
+        
+
+    #endregion
+        
+    #region Or
+
+        
+
+    #endregion
 
     #endregion
     }
