@@ -55,12 +55,5 @@ namespace DiceRoll.Input.Parsing
         
         public static Range ToRange(this Arity arity, int position) =>
             (position - arity.Left)..(position + arity.Right + 1);
-
-        public static bool FitsIn(this Arity arity, int position, in Range range, int length)
-        {
-            (int start, int end) = range.GetStartAndEnd(length);
-
-            return position - arity.Left >= start && position + arity.Right < end;
-        }
     }
 }

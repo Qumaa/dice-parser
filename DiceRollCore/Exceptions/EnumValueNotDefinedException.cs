@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 
-namespace DiceRoll
+namespace DiceRoll.Exceptions
 {
-    internal static class EnumValueNotDefinedException
+    public static class EnumValueNotDefinedException
     {
         public static void ThrowIfValueNotDefined<TEnum>(
             TEnum value,

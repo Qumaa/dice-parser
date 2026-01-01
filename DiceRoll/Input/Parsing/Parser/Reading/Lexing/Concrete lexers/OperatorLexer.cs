@@ -16,7 +16,7 @@ namespace DiceRoll.Input.Parsing
             ArgumentNullException.ThrowIfNull(definitions);
             
             _lexemes = lexemes;
-            _definitions = definitions.OrderByDescending(x => x.Precedence).ToArray();
+            _definitions = definitions.OrderByDescending(x => x.InvocationBehaviour.Precedence).ToArray();
         }
         
         public override bool TryExecute(in Substring substring, out Substring match)

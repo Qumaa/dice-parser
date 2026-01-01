@@ -60,7 +60,7 @@ namespace DiceRoll.Input.Parsing
 
             foreach (Overload overload in indexedOperator.SortedOverloads)
             {
-                if (!overload.Invoker.Arity.FitsIn(indexedOperator.Index, indexer.Range, indexer.Source.Count))
+                if (!overload.FitsIn(indexedOperator.Index, indexer.Range, indexer.Source.Count))
                     continue;
                 
                 if (!IsInvokableWithImmediateContext(indexer.Source, indexedOperator.Index, overload))
@@ -241,8 +241,13 @@ namespace DiceRoll.Input.Parsing
                 definitions
                     .SelectMany(x => x.InvocationBehaviour.Invokers.Select(y => (definition: x, invoker: y)))
                     .OrderByDescending(x => x.invoker.Arity)
-                    .ThenByDescending(x => x.definition.Precedence)
-                    .Select(x => new Overload(x.definition.Precedence, x.invoker, x.definition.Associativity))
+                    .ThenByDescending(x => x.definition.InvocationBehaviour.Precedence)
+                    .Select(x => new Overload(
+                            x.definition.InvocationBehaviour.Precedence,
+                            x.invoker,
+                            x.definition.InvocationBehaviour.Associativity
+                            )
+                        )
                     .ToArray();
 
             public void InsetIndex(int inset) =>
@@ -272,6 +277,14 @@ namespace DiceRoll.Input.Parsing
                 Array.Copy(OperandsBuffer, copy, Invoker.Arity);
 
                 return copy;
+            }
+            
+            public bool FitsIn(int position, in Range range, int length)
+            {
+                (int start, int end) = range.GetStartAndEnd(length);
+                Arity arity = Invoker.Arity;
+
+                return position - arity.Left >= start && position + arity.Right < end;
             }
         }
     }

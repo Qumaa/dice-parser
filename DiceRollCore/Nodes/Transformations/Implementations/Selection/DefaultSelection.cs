@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using DiceRoll.Exceptions;
 
 namespace DiceRoll
 {

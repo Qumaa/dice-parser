@@ -5,7 +5,6 @@ namespace DiceRoll.Input.Parsing
     public abstract class OperatorInvoker
     {
         public readonly Signature Signature;
-        
         public readonly Arity Arity;
 
         protected OperatorInvoker(Signature signature, Arity arity)

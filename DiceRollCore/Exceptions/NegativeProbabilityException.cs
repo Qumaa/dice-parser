@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace DiceRoll
+namespace DiceRoll.Exceptions
 {
-    internal sealed class NegativeProbabilityException : ArgumentException
+    public sealed class NegativeProbabilityException : ArgumentException
     {
         public NegativeProbabilityException() { }
         public NegativeProbabilityException(double probability) : base(GetErrorMessage(probability)) { }

@@ -1,4 +1,6 @@
-﻿#pragma warning disable CS8524
+﻿using DiceRoll.Exceptions;
+
+#pragma warning disable CS8524
 
 namespace DiceRoll
 {

@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using DiceRoll.Exceptions;
 
 #pragma warning disable CS8524
 

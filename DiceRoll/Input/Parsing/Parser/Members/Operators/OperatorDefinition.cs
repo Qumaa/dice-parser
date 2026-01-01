@@ -6,17 +6,12 @@ namespace DiceRoll.Input.Parsing
     public sealed class OperatorDefinition
     {
         public readonly IToken Token;
-        public readonly int Precedence;
         public readonly OperatorInvocationBehaviour InvocationBehaviour;
-        public readonly Associativity Associativity;
 
-        public OperatorDefinition(IToken token, int precedence, OperatorInvocationBehaviour invocationBehaviour,
-            Associativity associativity)
+        public OperatorDefinition(IToken token, OperatorInvocationBehaviour invocationBehaviour)
         {
             Token = token;
-            Precedence = precedence;
             InvocationBehaviour = invocationBehaviour;
-            Associativity = associativity;
         }
     }
 }
