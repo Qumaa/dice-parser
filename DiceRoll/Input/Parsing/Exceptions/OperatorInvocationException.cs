@@ -13,7 +13,7 @@ namespace DiceRoll.Input.Parsing
             string signature = $"<{string.Join(',', operatorSignature.EnumerateOperandTypes().Select(x => x.Name))}>";
 
             string message = 
-                $"This operator defines a {signature} signature where operand number {operandIndex} type is {operatorSignature.OperandTypes[operandIndex].Name}, but {requestedType} was asked instead. Invocation behaviour is flawed.";
+                $"This operator defines a {signature} signature where operand number {operandIndex + 1} type is {operatorSignature.OperandTypes[operandIndex].Name}, but {requestedType} was asked instead. Invocation behaviour is flawed.";
             
             return new OperatorInvocationException(message);
         }

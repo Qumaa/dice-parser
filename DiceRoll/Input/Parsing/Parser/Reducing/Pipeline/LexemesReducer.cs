@@ -2,6 +2,6 @@
 {
     public abstract class LexemesReducer
     {
-        public abstract void Execute(LexemesList lexemes);
+        public abstract void Execute(LexemesList lexemes, ReducerCursor cursor);
     }
 }

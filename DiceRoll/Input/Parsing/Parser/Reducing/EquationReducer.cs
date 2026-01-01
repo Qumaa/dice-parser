@@ -16,9 +16,9 @@ namespace DiceRoll.Input.Parsing
             _pipeline = pipeline;
         }
 
-        public Mapped<LinkedNode> Reduce(UnknownLexemeSolver solver)
+        public Mapped<LinkedNode> Reduce(ReducerCursor cursor, UnknownLexemeSolver solver)
         {
-            _pipeline.ExecuteAll(_lexemes, solver);
+            _pipeline.ExecuteAll(_lexemes, cursor, solver);
 
             return GetResultOrThrow();
         }
@@ -26,7 +26,7 @@ namespace DiceRoll.Input.Parsing
         private Mapped<LinkedNode> GetResultOrThrow()
         {
             if (_lexemes.Count is not 1)
-                throw new Exception(); // todo
+                throw new Exception("More than 1 result has been produced by parser. Cannot proceed due to non deterministic output.");
 
             return _lexemes.GetTypedOrThrow<Operand>(0).ToLinkedNode();
         }
