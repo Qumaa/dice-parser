@@ -13,7 +13,7 @@ namespace DiceRoll.Input.Parsing
             _handler = handler;
         }
 
-        public override void Execute(LexemesList lexemes, ReducerCursor cursor) =>
+        public override void Execute(LexemesList lexemes, Cursor cursor) =>
             _handler.Reduce(lexemes, Range.All, cursor);
     }
 }

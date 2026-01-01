@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace DiceRoll.Input.Parsing
@@ -18,14 +19,13 @@ namespace DiceRoll.Input.Parsing
             return new OperatorInvocationException(message);
         }
 
-        public static OperatorInvocationException NoMatchingSignature(OperatorInvocationBehaviour invocationBehaviour,
-            in Substring operatorSubstring)
+        public static OperatorInvocationException NoMatchingSignature(IEnumerable<OperatorInvocationBehaviour> invocationBehaviours,
+            string operatorString)
         {
-            string operatorString = operatorSubstring.ToString();
-
             string expectedSignatures = string.Join(
                 ',',
-                invocationBehaviour.Invokers
+                invocationBehaviours
+                    .SelectMany(x => x.Invokers)
                     .Select(invoker => _SignatureToString(
                             invoker.Signature.EnumerateOperandTypes().Select(type => type.Name).ToArray(),
                             invoker.Arity.Left,
@@ -53,8 +53,5 @@ namespace DiceRoll.Input.Parsing
                 return $"<{leftArguments} {operatorString} {rightArguments}>";
             }
         }
-
-        public static OperatorInvocationException NotEnoughOperands(int arity, int operandsCount) =>
-            new($"This operator expected {arity} operand(-s), but received {operandsCount}.");
     }
 }

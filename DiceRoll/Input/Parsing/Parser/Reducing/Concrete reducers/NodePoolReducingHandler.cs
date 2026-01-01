@@ -4,7 +4,7 @@ namespace DiceRoll.Input.Parsing
 {
     public sealed class NodePoolReducingHandler : LexemesReducingHandler
     {
-        public override Range Reduce(LexemesList lexemes, in Range range, ReducerCursor cursor)
+        public override Range Reduce(LexemesList lexemes, in Range range, Cursor cursor)
         {
             (int start, int length) = range.GetOffsetAndLength(lexemes.Count);
 

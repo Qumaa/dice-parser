@@ -15,7 +15,7 @@ namespace DiceRoll.Input.Parsing
             _castingTable = castingTable;
         }
 
-        public override Range Reduce(LexemesList lexemes, in Range range, ReducerCursor cursor)
+        public override Range Reduce(LexemesList lexemes, in Range range, Cursor cursor)
         {
             Indexer indexer = IndexOperators(lexemes, in range);
             OperatorPrecedences precedences = IndexPrecedences(indexer);
@@ -26,10 +26,12 @@ namespace DiceRoll.Input.Parsing
             foreach (PrecedenceLevel precedence in precedences)
                 ExecuteAllOperatorsAtPrecedence(indexer, precedence, cursor);
 
+            ThrowIfAnyOperatorLeft(indexer, cursor);
+
             return indexer.Range;
         }
 
-        private void ExecuteAllOperatorsAtPrecedence(Indexer indexer, PrecedenceLevel precedence, ReducerCursor cursor)
+        private void ExecuteAllOperatorsAtPrecedence(Indexer indexer, PrecedenceLevel precedence, Cursor cursor)
         {
             // todo instead of restarting the loop, manually check all nearby operators
             start:
@@ -44,13 +46,35 @@ namespace DiceRoll.Input.Parsing
                         goto start; 
         }
 
-        private bool TryExecuteOperatorWithImmediateContext(Indexer indexer, int i, in PrecedenceLevel precedence,
-            ReducerCursor cursor)
+        private static void ThrowIfAnyOperatorLeft(Indexer indexer, Cursor cursor)
         {
-            if (!IsPreferableWithinImmediateContext(indexer, i, precedence, out InvocationInfo invocationInfo))
-                return false;
+            if (indexer.Count is 0)
+                return;
+
+            Mapped<IndexedOperator> @operator = indexer.GetOperator(0);
             
+            IEnumerable<OperatorInvocationBehaviour> behaviours =
+                @operator.Value.SortedOverloads.Select(x => x.InvocationBehaviour);
+            
+            cursor.MoveTo(@operator.Range);
+            string operatorString = cursor.GetSubstringOfCurrent().ToString();
+            
+            throw OperatorInvocationException.NoMatchingSignature(behaviours, operatorString);
+        }
+
+        private bool TryExecuteOperatorWithImmediateContext(Indexer indexer, int i, in PrecedenceLevel precedence,
+            Cursor cursor)
+        {
+            cursor.MoveTo(indexer.GetOperator(i).Range);
+            
+            if (!IsPreferableWithinImmediateContext(indexer, i, precedence, out InvocationInfo invocationInfo))
+            {
+                cursor.MoveToPrevious();
+                return false;
+            }
+
             InvokeUsingImmediateContext(indexer, i, invocationInfo, cursor);
+            cursor.MoveToPrevious();
             return true;
         }
 
@@ -123,7 +147,7 @@ namespace DiceRoll.Input.Parsing
         }
 
         private static void InvokeUsingImmediateContext(Indexer indexer, int i, InvocationInfo invocationInfo,
-            ReducerCursor cursor)
+            Cursor cursor)
         {
             OperatorInvoker invoker = invocationInfo.Invoker;
             Mapped<IndexedOperator> @operator = indexer.GetOperator(i);
@@ -249,9 +273,8 @@ namespace DiceRoll.Input.Parsing
                     .OrderByDescending(x => x.invoker.Arity)
                     .ThenByDescending(x => x.definition.InvocationBehaviour.Precedence)
                     .Select(x => new Overload(
-                            x.definition.InvocationBehaviour.Precedence,
-                            x.invoker,
-                            x.definition.InvocationBehaviour.Associativity
+                            x.definition.InvocationBehaviour,
+                            x.invoker
                             )
                         )
                     .ToArray();
@@ -262,16 +285,17 @@ namespace DiceRoll.Input.Parsing
 
         private sealed class Overload
         {
-            public readonly int Precedence;
-            public readonly Associativity Associativity;
+            public readonly OperatorInvocationBehaviour InvocationBehaviour;
             public readonly OperatorInvoker Invoker;
             public readonly Mapped<Operand>[] OperandsBuffer;
             
-            public Overload(int precedence, OperatorInvoker invoker, Associativity associativity)
+            public int Precedence => InvocationBehaviour.Precedence;
+            public Associativity Associativity => InvocationBehaviour.Associativity;
+            
+            public Overload(OperatorInvocationBehaviour invocationBehaviour, OperatorInvoker invoker)
             {
-                Precedence = precedence;
+                InvocationBehaviour = invocationBehaviour;
                 Invoker = invoker;
-                Associativity = associativity;
                 
                 OperandsBuffer = new Mapped<Operand>[invoker.Arity];
             }

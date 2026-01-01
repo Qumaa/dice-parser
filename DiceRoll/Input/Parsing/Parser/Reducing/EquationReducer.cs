@@ -16,7 +16,7 @@ namespace DiceRoll.Input.Parsing
             _pipeline = pipeline;
         }
 
-        public Mapped<LinkedNode> Reduce(ReducerCursor cursor, UnknownLexemeSolver solver)
+        public Mapped<LinkedNode> Reduce(Cursor cursor, UnknownLexemeSolver solver)
         {
             _pipeline.ExecuteAll(_lexemes, cursor, solver);
 

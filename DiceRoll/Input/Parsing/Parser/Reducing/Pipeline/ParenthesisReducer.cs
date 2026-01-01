@@ -16,7 +16,7 @@ namespace DiceRoll.Input.Parsing
             _nodePoolHandler = nodePoolHandler;
         }
 
-        public override void Execute(LexemesList lexemes, ReducerCursor cursor)
+        public override void Execute(LexemesList lexemes, Cursor cursor)
         {
             for (int i = 0; i < lexemes.Count; i++)
             {
@@ -27,7 +27,7 @@ namespace DiceRoll.Input.Parsing
             }
         }
 
-        private void DetermineRangeAndReduce(LexemesList lexemes, int openParenthesisPosition, ReducerCursor cursor,
+        private void DetermineRangeAndReduce(LexemesList lexemes, int openParenthesisPosition, Cursor cursor,
             in Range openParenthesisRange)
         {
             int position = openParenthesisPosition;

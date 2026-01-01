@@ -35,9 +35,8 @@ namespace DiceRoll.Input.Parsing
         public NodeTree Collapse(UnknownLexemeSolver solver)
         {
             SubstringMapper mapper = _state.Mapper.BuildSubstringMapper();
-            ReducerCursor cursor = new();
+            Cursor cursor = new(mapper);
             
-            // todo error message formatting. A way to reference a lexeme that has caused an exception
             try
             {
                 Mapped<LinkedNode> root = _reducer.Reduce(cursor, solver);
