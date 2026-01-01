@@ -2,32 +2,32 @@
 {
     public class OperationAsAssertion : IAssertion
     {
-        protected readonly IOperation _operation;
+        public readonly IOperation Source;
         private LogicalProbabilityDistribution _cachedDistribution;
 
-        public Binary CachedEvaluation => _operation.CachedEvaluation.AsBinary();
+        public Binary CachedEvaluation => Source.CachedEvaluation.AsBinary();
 
         public Probability True => GetProbabilityDistribution().True;
 
-        public OperationAsAssertion(IOperation operation) 
+        public OperationAsAssertion(IOperation source) 
         {
-            _operation = operation;
+            Source = source;
         }
 
         public void Visit<T>(T visitor) where T : INodeVisitor =>
             visitor.ForAssertion(this);
 
         public void NextEvaluation() =>
-            _operation.NextEvaluation();
+            Source.NextEvaluation();
 
         public object Clone() =>
-            new OperationAsAssertion(_operation.CloneTyped());
+            new OperationAsAssertion(Source.CloneTyped());
 
         public LogicalProbabilityDistribution GetProbabilityDistribution() =>
             _cachedDistribution ??= CreateProbabilityDistribution();
         
         protected virtual LogicalProbabilityDistribution CreateProbabilityDistribution() =>
-            _operation.GetProbabilityDistribution().AsLogical();
+            Source.GetProbabilityDistribution().AsLogical();
         
     }
 }

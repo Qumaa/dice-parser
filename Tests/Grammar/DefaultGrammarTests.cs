@@ -1,4 +1,4 @@
-﻿namespace Tests
+﻿namespace Tests.Grammar.Default
 {
     [TestClass]
     public partial class DefaultGrammarTests
@@ -228,6 +228,133 @@
             
                 AssertParsingResultOf<PrecedenceNegateOverEqual>.MeetsExpectedPattern();
                 AssertParsingResultOf<PrecedenceNegateOverNotEqual>.MeetsExpectedPattern();
+            }
+            
+            [TestMethod]
+            public void GreaterThanTests()
+            {
+                AssertParsingResultOf<PrecedenceGreaterThanOverAdd>.MeetsExpectedPattern();
+            
+                AssertParsingResultOf<PrecedenceGreaterThanOverSubtract>.MeetsExpectedPattern();
+                AssertParsingResultOf<PrecedenceGreaterThanOverNegation>.MeetsExpectedPattern();
+            
+                AssertParsingResultOf<PrecedenceGreaterThanOverMultiply>.MeetsExpectedPattern();
+            
+                AssertParsingResultOf<PrecedenceGreaterThanOverDivideRoundDown>.MeetsExpectedPattern();
+                AssertParsingResultOf<PrecedenceGreaterThanOverDivideRoundUp>.MeetsExpectedPattern();
+            
+                AssertParsingResultOf<PrecedenceGreaterThanOverEqual>.MeetsExpectedPattern();
+                AssertParsingResultOf<PrecedenceGreaterThanOverNotEqual>.MeetsExpectedPattern();
+            }
+            
+            [TestMethod]
+            public void GreaterThanOrEqualTests()
+            {
+                AssertParsingResultOf<PrecedenceGreaterThanOrEqualOverAdd>.MeetsExpectedPattern();
+            
+                AssertParsingResultOf<PrecedenceGreaterThanOrEqualOverSubtract>.MeetsExpectedPattern();
+                AssertParsingResultOf<PrecedenceGreaterThanOrEqualOverNegation>.MeetsExpectedPattern();
+            
+                AssertParsingResultOf<PrecedenceGreaterThanOrEqualOverMultiply>.MeetsExpectedPattern();
+            
+                AssertParsingResultOf<PrecedenceGreaterThanOrEqualOverDivideRoundDown>.MeetsExpectedPattern();
+                AssertParsingResultOf<PrecedenceGreaterThanOrEqualOverDivideRoundUp>.MeetsExpectedPattern();
+            
+                AssertParsingResultOf<PrecedenceGreaterThanOrEqualOverEqual>.MeetsExpectedPattern();
+                AssertParsingResultOf<PrecedenceGreaterThanOrEqualOverNotEqual>.MeetsExpectedPattern();
+            }
+            
+            [TestMethod]
+            public void LessThanTests()
+            {
+                AssertParsingResultOf<PrecedenceLessThanOverAdd>.MeetsExpectedPattern();
+            
+                AssertParsingResultOf<PrecedenceLessThanOverSubtract>.MeetsExpectedPattern();
+                AssertParsingResultOf<PrecedenceLessThanOverNegation>.MeetsExpectedPattern();
+            
+                AssertParsingResultOf<PrecedenceLessThanOverMultiply>.MeetsExpectedPattern();
+            
+                AssertParsingResultOf<PrecedenceLessThanOverDivideRoundDown>.MeetsExpectedPattern();
+                AssertParsingResultOf<PrecedenceLessThanOverDivideRoundUp>.MeetsExpectedPattern();
+            
+                AssertParsingResultOf<PrecedenceLessThanOverEqual>.MeetsExpectedPattern();
+                AssertParsingResultOf<PrecedenceLessThanOverNotEqual>.MeetsExpectedPattern();
+            }
+            
+            [TestMethod]
+            public void LessThanOrEqualTests()
+            {
+                AssertParsingResultOf<PrecedenceLessThanOrEqualOverAdd>.MeetsExpectedPattern();
+            
+                AssertParsingResultOf<PrecedenceLessThanOrEqualOverSubtract>.MeetsExpectedPattern();
+                AssertParsingResultOf<PrecedenceLessThanOrEqualOverNegation>.MeetsExpectedPattern();
+            
+                AssertParsingResultOf<PrecedenceLessThanOrEqualOverMultiply>.MeetsExpectedPattern();
+            
+                AssertParsingResultOf<PrecedenceLessThanOrEqualOverDivideRoundDown>.MeetsExpectedPattern();
+                AssertParsingResultOf<PrecedenceLessThanOrEqualOverDivideRoundUp>.MeetsExpectedPattern();
+            
+                AssertParsingResultOf<PrecedenceLessThanOrEqualOverEqual>.MeetsExpectedPattern();
+                AssertParsingResultOf<PrecedenceLessThanOrEqualOverNotEqual>.MeetsExpectedPattern();
+            }
+
+            [TestMethod]
+            public void EqualTests()
+            {
+                AssertParsingResultOf<PrecedenceEqualOverAdd>.MeetsExpectedPattern();
+            
+                AssertParsingResultOf<PrecedenceEqualOverSubtract>.MeetsExpectedPattern();
+                AssertParsingResultOf<PrecedenceEqualOverNegation>.MeetsExpectedPattern();
+            
+                AssertParsingResultOf<PrecedenceEqualOverMultiply>.MeetsExpectedPattern();
+            
+                AssertParsingResultOf<PrecedenceEqualOverDivideRoundDown>.MeetsExpectedPattern();
+                AssertParsingResultOf<PrecedenceEqualOverDivideRoundUp>.MeetsExpectedPattern();
+            
+                AssertParsingResultOf<PrecedenceEqualOverGreaterThan>.MeetsExpectedPattern();
+                AssertParsingResultOf<PrecedenceEqualOverGreaterThanOrEqual>.MeetsExpectedPattern();
+                
+                AssertParsingResultOf<PrecedenceEqualOverLessThan>.MeetsExpectedPattern();
+                AssertParsingResultOf<PrecedenceEqualOverLessThanOrEqual>.MeetsExpectedPattern();
+                
+                AssertParsingResultOf<PrecedenceEqualOverEqual>.MeetsExpectedPattern();
+                AssertParsingResultOf<PrecedenceEqualOverNotEqual>.MeetsExpectedPattern();
+            }
+            
+            [TestMethod]
+            public void AndTests()
+            {
+                AssertParsingResultOf<PrecedenceAndOverGreaterThan>.MeetsExpectedPattern();
+                AssertParsingResultOf<PrecedenceAndOverGreaterThanOrEqual>.MeetsExpectedPattern();
+                
+                AssertParsingResultOf<PrecedenceAndOverLessThan>.MeetsExpectedPattern();
+                AssertParsingResultOf<PrecedenceAndOverLessThanOrEqual>.MeetsExpectedPattern();
+                
+                AssertParsingResultOf<PrecedenceAndOverEqual>.MeetsExpectedPattern();
+                AssertParsingResultOf<PrecedenceAndOverNotEqual>.MeetsExpectedPattern();
+                
+                AssertParsingResultOf<PrecedenceAndOverAnd>.MeetsExpectedPattern();
+                AssertParsingResultOf<PrecedenceAndOverOr>.MeetsExpectedPattern();
+                
+                AssertParsingResultOf<PrecedenceAndOverNot>.MeetsExpectedPattern();
+            }
+            
+            [TestMethod]
+            public void OrTests()
+            {
+                AssertParsingResultOf<PrecedenceOrOverGreaterThan>.MeetsExpectedPattern();
+                AssertParsingResultOf<PrecedenceOrOverGreaterThanOrEqual>.MeetsExpectedPattern();
+                
+                AssertParsingResultOf<PrecedenceOrOverLessThan>.MeetsExpectedPattern();
+                AssertParsingResultOf<PrecedenceOrOverLessThanOrEqual>.MeetsExpectedPattern();
+                
+                AssertParsingResultOf<PrecedenceOrOverEqual>.MeetsExpectedPattern();
+                AssertParsingResultOf<PrecedenceOrOverNotEqual>.MeetsExpectedPattern();
+                
+                AssertParsingResultOf<PrecedenceOrOverAnd>.MeetsExpectedPattern();
+                AssertParsingResultOf<PrecedenceOrOverOr>.MeetsExpectedPattern();
+                
+                AssertParsingResultOf<PrecedenceOrOverNot>.MeetsExpectedPattern();
             }
         }
     }

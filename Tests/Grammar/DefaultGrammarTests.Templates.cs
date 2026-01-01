@@ -1,5 +1,5 @@
 ﻿// ReSharper disable ClassNeverInstantiated.Local
-namespace Tests
+namespace Tests.Grammar.Default
 {
     public partial class DefaultGrammarTests
     {
@@ -1586,53 +1586,1473 @@ namespace Tests
 
     #endregion
         
-        // todo below
+        // todo next 4
+        
+    #region Highest
+
+        
+
+    #endregion
+
+    #region Lowest
+
+        
+
+    #endregion
+
+    #region Summation
+
+        
+
+    #endregion
+
+    #region Range
+
+        
+
+    #endregion
 
     #region Greater than
 
+        private sealed class PrecedenceGreaterThanOverAdd : Template
+        {
+            public PrecedenceGreaterThanOverAdd() : base("1 > 2 + 3") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.GreaterThan,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Combination
+                    {
+                        CombinationType: CombinationType.Add,
+                        Left: NumericConstant { Value: 2 },
+                        Right: NumericConstant { Value: 3 }
+                    }
+                };
+        }
         
+        private sealed class PrecedenceGreaterThanOverSubtract : Template
+        {
+            public PrecedenceGreaterThanOverSubtract() : base("1 > 2 - 3") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.GreaterThan,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Combination
+                    {
+                        CombinationType: CombinationType.Subtract,
+                        Left: NumericConstant { Value: 2 },
+                        Right: NumericConstant { Value: 3 }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceGreaterThanOverNegation : Template
+        {
+            public PrecedenceGreaterThanOverNegation() : base("1 > - 2") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.GreaterThan,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Negation
+                    {
+                        Source: NumericConstant { Value: 2 }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceGreaterThanOverMultiply : Template
+        {
+            public PrecedenceGreaterThanOverMultiply() : base("1 > 2 * 3") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.GreaterThan,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Combination
+                    {
+                        CombinationType: CombinationType.Multiply,
+                        Left: NumericConstant { Value: 2 },
+                        Right: NumericConstant { Value: 3 }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceGreaterThanOverDivideRoundDown : Template
+        {
+            public PrecedenceGreaterThanOverDivideRoundDown() : base("1 > 2 / 3") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.GreaterThan,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Combination
+                    {
+                        CombinationType: CombinationType.DivideRoundDownwards,
+                        Left: NumericConstant { Value: 2 },
+                        Right: NumericConstant { Value: 3 }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceGreaterThanOverDivideRoundUp : Template
+        {
+            public PrecedenceGreaterThanOverDivideRoundUp() : base("1 > 2 // 3") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.GreaterThan,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Combination
+                    {
+                        CombinationType: CombinationType.DivideRoundUpwards,
+                        Left: NumericConstant { Value: 2 },
+                        Right: NumericConstant { Value: 3 }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceGreaterThanOverEqual : Template
+        {
+            public PrecedenceGreaterThanOverEqual() : base("1 > 2 = true") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.Equal,
+                    Left: OperationAsAssertion
+                    {
+                        Source: DefaultBinaryOperation
+                        {
+                            OperationType: OperationType.GreaterThan,
+                            Left: NumericConstant { Value: 1 },
+                            Right: NumericConstant { Value: 2 }
+                        }
+                    },
+                    Right: BinaryConstant { Value: true }
+                };
+        }
+
+        private sealed class PrecedenceGreaterThanOverNotEqual : Template
+        {
+            public PrecedenceGreaterThanOverNotEqual() : base("1 > 2 != true") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.NotEqual,
+                    Left: OperationAsAssertion
+                    {
+                        Source: DefaultBinaryOperation
+                        {
+                            OperationType: OperationType.GreaterThan,
+                            Left: NumericConstant { Value: 1 },
+                            Right: NumericConstant { Value: 2 }
+                        }
+                    },
+                    Right: BinaryConstant { Value: true }
+                };
+        }
 
     #endregion
         
     #region Greater than or equal
 
+        private sealed class PrecedenceGreaterThanOrEqualOverAdd : Template
+        {
+            public PrecedenceGreaterThanOrEqualOverAdd() : base("1 >= 2 + 3") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.GreaterThanOrEqual,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Combination
+                    {
+                        CombinationType: CombinationType.Add,
+                        Left: NumericConstant { Value: 2 },
+                        Right: NumericConstant { Value: 3 }
+                    }
+                };
+        }
         
+        private sealed class PrecedenceGreaterThanOrEqualOverSubtract : Template
+        {
+            public PrecedenceGreaterThanOrEqualOverSubtract() : base("1 >= 2 - 3") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.GreaterThanOrEqual,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Combination
+                    {
+                        CombinationType: CombinationType.Subtract,
+                        Left: NumericConstant { Value: 2 },
+                        Right: NumericConstant { Value: 3 }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceGreaterThanOrEqualOverNegation : Template
+        {
+            public PrecedenceGreaterThanOrEqualOverNegation() : base("1 >= - 2") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.GreaterThanOrEqual,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Negation
+                    {
+                        Source: NumericConstant { Value: 2 }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceGreaterThanOrEqualOverMultiply : Template
+        {
+            public PrecedenceGreaterThanOrEqualOverMultiply() : base("1 >= 2 * 3") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.GreaterThanOrEqual,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Combination
+                    {
+                        CombinationType: CombinationType.Multiply,
+                        Left: NumericConstant { Value: 2 },
+                        Right: NumericConstant { Value: 3 }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceGreaterThanOrEqualOverDivideRoundDown : Template
+        {
+            public PrecedenceGreaterThanOrEqualOverDivideRoundDown() : base("1 >= 2 / 3") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.GreaterThanOrEqual,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Combination
+                    {
+                        CombinationType: CombinationType.DivideRoundDownwards,
+                        Left: NumericConstant { Value: 2 },
+                        Right: NumericConstant { Value: 3 }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceGreaterThanOrEqualOverDivideRoundUp : Template
+        {
+            public PrecedenceGreaterThanOrEqualOverDivideRoundUp() : base("1 >= 2 // 3") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.GreaterThanOrEqual,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Combination
+                    {
+                        CombinationType: CombinationType.DivideRoundUpwards,
+                        Left: NumericConstant { Value: 2 },
+                        Right: NumericConstant { Value: 3 }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceGreaterThanOrEqualOverEqual : Template
+        {
+            public PrecedenceGreaterThanOrEqualOverEqual() : base("1 >= 2 = true") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.Equal,
+                    Left: OperationAsAssertion
+                    {
+                        Source: DefaultBinaryOperation
+                        {
+                            OperationType: OperationType.GreaterThanOrEqual,
+                            Left: NumericConstant { Value: 1 },
+                            Right: NumericConstant { Value: 2 }
+                        }
+                    },
+                    Right: BinaryConstant { Value: true }
+                };
+        }
+
+        private sealed class PrecedenceGreaterThanOrEqualOverNotEqual : Template
+        {
+            public PrecedenceGreaterThanOrEqualOverNotEqual() : base("1 >= 2 != true") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.NotEqual,
+                    Left: OperationAsAssertion
+                    {
+                        Source: DefaultBinaryOperation
+                        {
+                            OperationType: OperationType.GreaterThanOrEqual,
+                            Left: NumericConstant { Value: 1 },
+                            Right: NumericConstant { Value: 2 }
+                        }
+                    },
+                    Right: BinaryConstant { Value: true }
+                };
+        }
 
     #endregion
         
     #region Less than
 
+        private sealed class PrecedenceLessThanOverAdd : Template
+        {
+            public PrecedenceLessThanOverAdd() : base("1 < 2 + 3") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.LessThan,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Combination
+                    {
+                        CombinationType: CombinationType.Add,
+                        Left: NumericConstant { Value: 2 },
+                        Right: NumericConstant { Value: 3 }
+                    }
+                };
+        }
         
+        private sealed class PrecedenceLessThanOverSubtract : Template
+        {
+            public PrecedenceLessThanOverSubtract() : base("1 < 2 - 3") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.LessThan,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Combination
+                    {
+                        CombinationType: CombinationType.Subtract,
+                        Left: NumericConstant { Value: 2 },
+                        Right: NumericConstant { Value: 3 }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceLessThanOverNegation : Template
+        {
+            public PrecedenceLessThanOverNegation() : base("1 < - 2") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.LessThan,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Negation
+                    {
+                        Source: NumericConstant { Value: 2 }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceLessThanOverMultiply : Template
+        {
+            public PrecedenceLessThanOverMultiply() : base("1 < 2 * 3") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.LessThan,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Combination
+                    {
+                        CombinationType: CombinationType.Multiply,
+                        Left: NumericConstant { Value: 2 },
+                        Right: NumericConstant { Value: 3 }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceLessThanOverDivideRoundDown : Template
+        {
+            public PrecedenceLessThanOverDivideRoundDown() : base("1 < 2 / 3") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.LessThan,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Combination
+                    {
+                        CombinationType: CombinationType.DivideRoundDownwards,
+                        Left: NumericConstant { Value: 2 },
+                        Right: NumericConstant { Value: 3 }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceLessThanOverDivideRoundUp : Template
+        {
+            public PrecedenceLessThanOverDivideRoundUp() : base("1 < 2 // 3") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.LessThan,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Combination
+                    {
+                        CombinationType: CombinationType.DivideRoundUpwards,
+                        Left: NumericConstant { Value: 2 },
+                        Right: NumericConstant { Value: 3 }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceLessThanOverEqual : Template
+        {
+            public PrecedenceLessThanOverEqual() : base("1 < 2 = true") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.Equal,
+                    Left: OperationAsAssertion
+                    {
+                        Source: DefaultBinaryOperation
+                        {
+                            OperationType: OperationType.LessThan,
+                            Left: NumericConstant { Value: 1 },
+                            Right: NumericConstant { Value: 2 }
+                        }
+                    },
+                    Right: BinaryConstant { Value: true }
+                };
+        }
+
+        private sealed class PrecedenceLessThanOverNotEqual : Template
+        {
+            public PrecedenceLessThanOverNotEqual() : base("1 < 2 != true") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.NotEqual,
+                    Left: OperationAsAssertion
+                    {
+                        Source: DefaultBinaryOperation
+                        {
+                            OperationType: OperationType.LessThan,
+                            Left: NumericConstant { Value: 1 },
+                            Right: NumericConstant { Value: 2 }
+                        }
+                    },
+                    Right: BinaryConstant { Value: true }
+                };
+        }
 
     #endregion
         
     #region Less than or equal
 
+        private sealed class PrecedenceLessThanOrEqualOverAdd : Template
+        {
+            public PrecedenceLessThanOrEqualOverAdd() : base("1 <= 2 + 3") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.LessThanOrEqual,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Combination
+                    {
+                        CombinationType: CombinationType.Add,
+                        Left: NumericConstant { Value: 2 },
+                        Right: NumericConstant { Value: 3 }
+                    }
+                };
+        }
         
+        private sealed class PrecedenceLessThanOrEqualOverSubtract : Template
+        {
+            public PrecedenceLessThanOrEqualOverSubtract() : base("1 <= 2 - 3") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.LessThanOrEqual,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Combination
+                    {
+                        CombinationType: CombinationType.Subtract,
+                        Left: NumericConstant { Value: 2 },
+                        Right: NumericConstant { Value: 3 }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceLessThanOrEqualOverNegation : Template
+        {
+            public PrecedenceLessThanOrEqualOverNegation() : base("1 <= - 2") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.LessThanOrEqual,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Negation
+                    {
+                        Source: NumericConstant { Value: 2 }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceLessThanOrEqualOverMultiply : Template
+        {
+            public PrecedenceLessThanOrEqualOverMultiply() : base("1 <= 2 * 3") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.LessThanOrEqual,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Combination
+                    {
+                        CombinationType: CombinationType.Multiply,
+                        Left: NumericConstant { Value: 2 },
+                        Right: NumericConstant { Value: 3 }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceLessThanOrEqualOverDivideRoundDown : Template
+        {
+            public PrecedenceLessThanOrEqualOverDivideRoundDown() : base("1 <= 2 / 3") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.LessThanOrEqual,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Combination
+                    {
+                        CombinationType: CombinationType.DivideRoundDownwards,
+                        Left: NumericConstant { Value: 2 },
+                        Right: NumericConstant { Value: 3 }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceLessThanOrEqualOverDivideRoundUp : Template
+        {
+            public PrecedenceLessThanOrEqualOverDivideRoundUp() : base("1 <= 2 // 3") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.LessThanOrEqual,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Combination
+                    {
+                        CombinationType: CombinationType.DivideRoundUpwards,
+                        Left: NumericConstant { Value: 2 },
+                        Right: NumericConstant { Value: 3 }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceLessThanOrEqualOverEqual : Template
+        {
+            public PrecedenceLessThanOrEqualOverEqual() : base("1 <= 2 = true") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.Equal,
+                    Left: OperationAsAssertion
+                    {
+                        Source: DefaultBinaryOperation
+                        {
+                            OperationType: OperationType.LessThanOrEqual,
+                            Left: NumericConstant { Value: 1 },
+                            Right: NumericConstant { Value: 2 }
+                        }
+                    },
+                    Right: BinaryConstant { Value: true }
+                };
+        }
+
+        private sealed class PrecedenceLessThanOrEqualOverNotEqual : Template
+        {
+            public PrecedenceLessThanOrEqualOverNotEqual() : base("1 <= 2 != true") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.NotEqual,
+                    Left: OperationAsAssertion
+                    {
+                        Source: DefaultBinaryOperation
+                        {
+                            OperationType: OperationType.LessThanOrEqual,
+                            Left: NumericConstant { Value: 1 },
+                            Right: NumericConstant { Value: 2 }
+                        }
+                    },
+                    Right: BinaryConstant { Value: true }
+                };
+        }
 
     #endregion
         
     #region Equal
 
+        private sealed class PrecedenceEqualOverAdd : Template
+        {
+            public PrecedenceEqualOverAdd() : base("1 = 2 + 3") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.Equal,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Combination
+                    {
+                        CombinationType: CombinationType.Add,
+                        Left: NumericConstant { Value: 2 },
+                        Right: NumericConstant { Value: 3 }
+                    }
+                };
+        }
         
+        private sealed class PrecedenceEqualOverSubtract : Template
+        {
+            public PrecedenceEqualOverSubtract() : base("1 = 2 - 3") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.Equal,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Combination
+                    {
+                        CombinationType: CombinationType.Subtract,
+                        Left: NumericConstant { Value: 2 },
+                        Right: NumericConstant { Value: 3 }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceEqualOverNegation : Template
+        {
+            public PrecedenceEqualOverNegation() : base("1 = - 2") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.Equal,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Negation
+                    {
+                        Source: NumericConstant { Value: 2 }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceEqualOverMultiply : Template
+        {
+            public PrecedenceEqualOverMultiply() : base("1 = 2 * 3") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.Equal,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Combination
+                    {
+                        CombinationType: CombinationType.Multiply,
+                        Left: NumericConstant { Value: 2 },
+                        Right: NumericConstant { Value: 3 }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceEqualOverDivideRoundDown : Template
+        {
+            public PrecedenceEqualOverDivideRoundDown() : base("1 = 2 / 3") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.Equal,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Combination
+                    {
+                        CombinationType: CombinationType.DivideRoundDownwards,
+                        Left: NumericConstant { Value: 2 },
+                        Right: NumericConstant { Value: 3 }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceEqualOverDivideRoundUp : Template
+        {
+            public PrecedenceEqualOverDivideRoundUp() : base("1 = 2 // 3") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.Equal,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Combination
+                    {
+                        CombinationType: CombinationType.DivideRoundUpwards,
+                        Left: NumericConstant { Value: 2 },
+                        Right: NumericConstant { Value: 3 }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceEqualOverGreaterThan : Template
+        {
+            public PrecedenceEqualOverGreaterThan() : base("true = 1 > 2") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.Equal,
+                    Left: BinaryConstant { Value: true },
+                    Right: OperationAsAssertion
+                    {
+                        Source: DefaultBinaryOperation
+                        {
+                            OperationType: OperationType.GreaterThan,
+                            Left: NumericConstant { Value: 1 },
+                            Right: NumericConstant { Value: 2 }
+                        }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceEqualOverGreaterThanOrEqual : Template
+        {
+            public PrecedenceEqualOverGreaterThanOrEqual() : base("true = 1 >= 2") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.Equal,
+                    Left: BinaryConstant { Value: true },
+                    Right: OperationAsAssertion
+                    {
+                        Source: DefaultBinaryOperation
+                        {
+                            OperationType: OperationType.GreaterThanOrEqual,
+                            Left: NumericConstant { Value: 1 },
+                            Right: NumericConstant { Value: 2 }
+                        }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceEqualOverLessThan : Template
+        {
+            public PrecedenceEqualOverLessThan() : base("true = 1 < 2") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.Equal,
+                    Left: BinaryConstant { Value: true },
+                    Right: OperationAsAssertion
+                    {
+                        Source: DefaultBinaryOperation
+                        {
+                            OperationType: OperationType.LessThan,
+                            Left: NumericConstant { Value: 1 },
+                            Right: NumericConstant { Value: 2 }
+                        }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceEqualOverLessThanOrEqual : Template
+        {
+            public PrecedenceEqualOverLessThanOrEqual() : base("true = 1 <= 2") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.Equal,
+                    Left: BinaryConstant { Value: true },
+                    Right: OperationAsAssertion
+                    {
+                        Source: DefaultBinaryOperation
+                        {
+                            OperationType: OperationType.LessThanOrEqual,
+                            Left: NumericConstant { Value: 1 },
+                            Right: NumericConstant { Value: 2 }
+                        }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceEqualOverEqual : Template
+        {
+            public PrecedenceEqualOverEqual() : base("true = 1 = 2") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.Equal,
+                    Left: BinaryConstant { Value: true },
+                    Right: OperationAsAssertion
+                    {
+                        Source: DefaultBinaryOperation
+                        {
+                            OperationType: OperationType.Equal,
+                            Left: NumericConstant { Value: 1 },
+                            Right: NumericConstant { Value: 2 }
+                        }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceEqualOverNotEqual : Template
+        {
+            public PrecedenceEqualOverNotEqual() : base("true = 1 != 2") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.Equal,
+                    Left: BinaryConstant { Value: true },
+                    Right: OperationAsAssertion
+                    {
+                        Source: DefaultBinaryOperation
+                        {
+                            OperationType: OperationType.NotEqual,
+                            Left: NumericConstant { Value: 1 },
+                            Right: NumericConstant { Value: 2 }
+                        }
+                    }
+                };
+        }
 
     #endregion
         
     #region Not equal
 
+        private sealed class PrecedenceNotEqualOverAdd : Template
+        {
+            public PrecedenceNotEqualOverAdd() : base("1 != 2 + 3") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.NotEqual,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Combination
+                    {
+                        CombinationType: CombinationType.Add,
+                        Left: NumericConstant { Value: 2 },
+                        Right: NumericConstant { Value: 3 }
+                    }
+                };
+        }
         
+        private sealed class PrecedenceNotEqualOverSubtract : Template
+        {
+            public PrecedenceNotEqualOverSubtract() : base("1 != 2 - 3") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.NotEqual,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Combination
+                    {
+                        CombinationType: CombinationType.Subtract,
+                        Left: NumericConstant { Value: 2 },
+                        Right: NumericConstant { Value: 3 }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceNotEqualOverNegation : Template
+        {
+            public PrecedenceNotEqualOverNegation() : base("1 != - 2") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.NotEqual,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Negation
+                    {
+                        Source: NumericConstant { Value: 2 }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceNotEqualOverMultiply : Template
+        {
+            public PrecedenceNotEqualOverMultiply() : base("1 != 2 * 3") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.NotEqual,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Combination
+                    {
+                        CombinationType: CombinationType.Multiply,
+                        Left: NumericConstant { Value: 2 },
+                        Right: NumericConstant { Value: 3 }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceNotEqualOverDivideRoundDown : Template
+        {
+            public PrecedenceNotEqualOverDivideRoundDown() : base("1 != 2 / 3") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.NotEqual,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Combination
+                    {
+                        CombinationType: CombinationType.DivideRoundDownwards,
+                        Left: NumericConstant { Value: 2 },
+                        Right: NumericConstant { Value: 3 }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceNotEqualOverDivideRoundUp : Template
+        {
+            public PrecedenceNotEqualOverDivideRoundUp() : base("1 != 2 // 3") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation
+                {
+                    OperationType: OperationType.NotEqual,
+                    Left: NumericConstant { Value: 1 },
+                    Right: Combination
+                    {
+                        CombinationType: CombinationType.DivideRoundUpwards,
+                        Left: NumericConstant { Value: 2 },
+                        Right: NumericConstant { Value: 3 }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceNotEqualOverGreaterThan : Template
+        {
+            public PrecedenceNotEqualOverGreaterThan() : base("true != 1 > 2") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.NotEqual,
+                    Left: BinaryConstant { Value: true },
+                    Right: OperationAsAssertion
+                    {
+                        Source: DefaultBinaryOperation
+                        {
+                            OperationType: OperationType.GreaterThan,
+                            Left: NumericConstant { Value: 1 },
+                            Right: NumericConstant { Value: 2 }
+                        }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceNotEqualOverGreaterThanOrEqual : Template
+        {
+            public PrecedenceNotEqualOverGreaterThanOrEqual() : base("true != 1 >= 2") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.NotEqual,
+                    Left: BinaryConstant { Value: true },
+                    Right: OperationAsAssertion
+                    {
+                        Source: DefaultBinaryOperation
+                        {
+                            OperationType: OperationType.GreaterThanOrEqual,
+                            Left: NumericConstant { Value: 1 },
+                            Right: NumericConstant { Value: 2 }
+                        }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceNotEqualOverLessThan : Template
+        {
+            public PrecedenceNotEqualOverLessThan() : base("true != 1 < 2") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.NotEqual,
+                    Left: BinaryConstant { Value: true },
+                    Right: OperationAsAssertion
+                    {
+                        Source: DefaultBinaryOperation
+                        {
+                            OperationType: OperationType.LessThan,
+                            Left: NumericConstant { Value: 1 },
+                            Right: NumericConstant { Value: 2 }
+                        }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceNotEqualOverLessThanOrEqual : Template
+        {
+            public PrecedenceNotEqualOverLessThanOrEqual() : base("true != 1 <= 2") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.NotEqual,
+                    Left: BinaryConstant { Value: true },
+                    Right: OperationAsAssertion
+                    {
+                        Source: DefaultBinaryOperation
+                        {
+                            OperationType: OperationType.LessThanOrEqual,
+                            Left: NumericConstant { Value: 1 },
+                            Right: NumericConstant { Value: 2 }
+                        }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceNotEqualOverEqual : Template
+        {
+            public PrecedenceNotEqualOverEqual() : base("true != 1 = 2") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.NotEqual,
+                    Left: BinaryConstant { Value: true },
+                    Right: OperationAsAssertion
+                    {
+                        Source: DefaultBinaryOperation
+                        {
+                            OperationType: OperationType.Equal,
+                            Left: NumericConstant { Value: 1 },
+                            Right: NumericConstant { Value: 2 }
+                        }
+                    }
+                };
+        }
+
+        private sealed class PrecedenceNotEqualOverNotEqual : Template
+        {
+            public PrecedenceNotEqualOverNotEqual() : base("true != 1 != 2") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.NotEqual,
+                    Left: BinaryConstant { Value: true },
+                    Right: OperationAsAssertion
+                    {
+                        Source: DefaultBinaryOperation
+                        {
+                            OperationType: OperationType.NotEqual,
+                            Left: NumericConstant { Value: 1 },
+                            Right: NumericConstant { Value: 2 }
+                        }
+                    }
+                };
+        }
 
     #endregion
         
     #region And
 
+        private sealed class PrecedenceAndOverGreaterThan : Template
+        {
+            public PrecedenceAndOverGreaterThan() : base("true and 1 > 2") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.And,
+                    Left: BinaryConstant { Value: true },
+                    Right: OperationAsAssertion
+                    {
+                        Source: DefaultBinaryOperation
+                        {
+                            OperationType: OperationType.GreaterThan,
+                            Left: NumericConstant { Value: 1 },
+                            Right: NumericConstant { Value: 2 }
+                        }
+                    }
+                };
+        }
         
+        private sealed class PrecedenceAndOverGreaterThanOrEqual : Template
+        {
+            public PrecedenceAndOverGreaterThanOrEqual() : base("true and 1 >= 2") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.And,
+                    Left: BinaryConstant { Value: true },
+                    Right: OperationAsAssertion
+                    {
+                        Source: DefaultBinaryOperation
+                        {
+                            OperationType: OperationType.GreaterThanOrEqual,
+                            Left: NumericConstant { Value: 1 },
+                            Right: NumericConstant { Value: 2 }
+                        }
+                    }
+                };
+        }
+        
+        private sealed class PrecedenceAndOverLessThan : Template
+        {
+            public PrecedenceAndOverLessThan() : base("true and 1 < 2") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.And,
+                    Left: BinaryConstant { Value: true },
+                    Right: OperationAsAssertion
+                    {
+                        Source: DefaultBinaryOperation
+                        {
+                            OperationType: OperationType.LessThan,
+                            Left: NumericConstant { Value: 1 },
+                            Right: NumericConstant { Value: 2 }
+                        }
+                    }
+                };
+        }
+        
+        private sealed class PrecedenceAndOverLessThanOrEqual : Template
+        {
+            public PrecedenceAndOverLessThanOrEqual() : base("true and 1 <= 2") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.And,
+                    Left: BinaryConstant { Value: true },
+                    Right: OperationAsAssertion
+                    {
+                        Source: DefaultBinaryOperation
+                        {
+                            OperationType: OperationType.LessThanOrEqual,
+                            Left: NumericConstant { Value: 1 },
+                            Right: NumericConstant { Value: 2 }
+                        }
+                    }
+                };
+        }
+        
+        private sealed class PrecedenceAndOverEqual : Template
+        {
+            public PrecedenceAndOverEqual() : base("true and 1 = 2") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.And,
+                    Left: BinaryConstant { Value: true },
+                    Right: OperationAsAssertion
+                    {
+                        Source: DefaultBinaryOperation
+                        {
+                            OperationType: OperationType.Equal,
+                            Left: NumericConstant { Value: 1 },
+                            Right: NumericConstant { Value: 2 }
+                        }
+                    }
+                };
+        }
+        
+        private sealed class PrecedenceAndOverNotEqual : Template
+        {
+            public PrecedenceAndOverNotEqual() : base("true and 1 != 2") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.And,
+                    Left: BinaryConstant { Value: true },
+                    Right: OperationAsAssertion
+                    {
+                        Source: DefaultBinaryOperation
+                        {
+                            OperationType: OperationType.NotEqual,
+                            Left: NumericConstant { Value: 1 },
+                            Right: NumericConstant { Value: 2 }
+                        }
+                    }
+                };
+        }
+        
+        private sealed class PrecedenceAndOverAnd : Template
+        {
+            public PrecedenceAndOverAnd() : base("true and false and true") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.And,
+                    Left: DefaultBinaryAssertion
+                    {
+                        AssertionType: BinaryAssertionType.And,
+                        Left: BinaryConstant { Value: true },
+                        Right: BinaryConstant { Value: false }
+                    },
+                    Right: BinaryConstant { Value: true }
+                };
+        }
+        
+        private sealed class PrecedenceAndOverOr : Template
+        {
+            public PrecedenceAndOverOr() : base("true and false or true") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.Or,
+                    Left: DefaultBinaryAssertion
+                    {
+                        AssertionType: BinaryAssertionType.And,
+                        Left: BinaryConstant { Value: true },
+                        Right: BinaryConstant { Value: false }
+                    },
+                    Right: BinaryConstant { Value: true }
+                };
+        }
+        
+        private sealed class PrecedenceAndOverNot : Template
+        {
+            public PrecedenceAndOverNot() : base("true and not true") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.And,
+                    Left: BinaryConstant { Value: true },
+                    Right: NotAssertion
+                    {
+                        Source: BinaryConstant { Value: true }
+                    }
+                };
+        }
 
     #endregion
         
     #region Or
 
+        private sealed class PrecedenceOrOverGreaterThan : Template
+        {
+            public PrecedenceOrOverGreaterThan() : base("true or 1 > 2") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.Or,
+                    Left: BinaryConstant { Value: true },
+                    Right: OperationAsAssertion
+                    {
+                        Source: DefaultBinaryOperation
+                        {
+                            OperationType: OperationType.GreaterThan,
+                            Left: NumericConstant { Value: 1 },
+                            Right: NumericConstant { Value: 2 }
+                        }
+                    }
+                };
+        }
         
+        private sealed class PrecedenceOrOverGreaterThanOrEqual : Template
+        {
+            public PrecedenceOrOverGreaterThanOrEqual() : base("true or 1 >= 2") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.Or,
+                    Left: BinaryConstant { Value: true },
+                    Right: OperationAsAssertion
+                    {
+                        Source: DefaultBinaryOperation
+                        {
+                            OperationType: OperationType.GreaterThanOrEqual,
+                            Left: NumericConstant { Value: 1 },
+                            Right: NumericConstant { Value: 2 }
+                        }
+                    }
+                };
+        }
+        
+        private sealed class PrecedenceOrOverLessThan : Template
+        {
+            public PrecedenceOrOverLessThan() : base("true or 1 < 2") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.Or,
+                    Left: BinaryConstant { Value: true },
+                    Right: OperationAsAssertion
+                    {
+                        Source: DefaultBinaryOperation
+                        {
+                            OperationType: OperationType.LessThan,
+                            Left: NumericConstant { Value: 1 },
+                            Right: NumericConstant { Value: 2 }
+                        }
+                    }
+                };
+        }
+        
+        private sealed class PrecedenceOrOverLessThanOrEqual : Template
+        {
+            public PrecedenceOrOverLessThanOrEqual() : base("true or 1 <= 2") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.Or,
+                    Left: BinaryConstant { Value: true },
+                    Right: OperationAsAssertion
+                    {
+                        Source: DefaultBinaryOperation
+                        {
+                            OperationType: OperationType.LessThanOrEqual,
+                            Left: NumericConstant { Value: 1 },
+                            Right: NumericConstant { Value: 2 }
+                        }
+                    }
+                };
+        }
+        
+        private sealed class PrecedenceOrOverEqual : Template
+        {
+            public PrecedenceOrOverEqual() : base("true or 1 = 2") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.Or,
+                    Left: BinaryConstant { Value: true },
+                    Right: OperationAsAssertion
+                    {
+                        Source: DefaultBinaryOperation
+                        {
+                            OperationType: OperationType.Equal,
+                            Left: NumericConstant { Value: 1 },
+                            Right: NumericConstant { Value: 2 }
+                        }
+                    }
+                };
+        }
+        
+        private sealed class PrecedenceOrOverNotEqual : Template
+        {
+            public PrecedenceOrOverNotEqual() : base("true or 1 != 2") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.Or,
+                    Left: BinaryConstant { Value: true },
+                    Right: OperationAsAssertion
+                    {
+                        Source: DefaultBinaryOperation
+                        {
+                            OperationType: OperationType.NotEqual,
+                            Left: NumericConstant { Value: 1 },
+                            Right: NumericConstant { Value: 2 }
+                        }
+                    }
+                };
+        }
+        
+        private sealed class PrecedenceOrOverAnd : Template
+        {
+            public PrecedenceOrOverAnd() : base("true or false and true") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.And,
+                    Left: DefaultBinaryAssertion
+                    {
+                        AssertionType: BinaryAssertionType.Or,
+                        Left: BinaryConstant { Value: true },
+                        Right: BinaryConstant { Value: false }
+                    },
+                    Right: BinaryConstant { Value: true }
+                };
+        }
+        
+        private sealed class PrecedenceOrOverOr : Template
+        {
+            public PrecedenceOrOverOr() : base("true or false or true") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.Or,
+                    Left: DefaultBinaryAssertion
+                    {
+                        AssertionType: BinaryAssertionType.Or,
+                        Left: BinaryConstant { Value: true },
+                        Right: BinaryConstant { Value: false }
+                    },
+                    Right: BinaryConstant { Value: true }
+                };
+        }
+        
+        private sealed class PrecedenceOrOverNot : Template
+        {
+            public PrecedenceOrOverNot() : base("true or not true") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion
+                {
+                    AssertionType: BinaryAssertionType.Or,
+                    Left: BinaryConstant { Value: true },
+                    Right: NotAssertion
+                    {
+                        Source: BinaryConstant { Value: true }
+                    }
+                };
+        }
 
     #endregion
 

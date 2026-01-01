@@ -30,10 +30,10 @@
 
         private class AsAssertionWrapper : OperationAsAssertion
         {
-            public AsAssertionWrapper(DefaultBinaryOperation operation) : base(operation) { }
+            public AsAssertionWrapper(DefaultBinaryOperation source) : base(source) { }
             
             protected override LogicalProbabilityDistribution CreateProbabilityDistribution() =>
-                ((DefaultBinaryOperation) _operation).GetLogicalProbabilityDistribution();
+                ((DefaultBinaryOperation) Source).GetLogicalProbabilityDistribution();
         }
     }
 }

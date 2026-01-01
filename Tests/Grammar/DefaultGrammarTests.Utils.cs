@@ -1,4 +1,4 @@
-﻿namespace Tests
+﻿namespace Tests.Grammar.Default
 {
     // todo bad syntax assertions e.g. "1 +" throws not enough operands
     // todo bad type assertions e.g. "true" as numeric throws
