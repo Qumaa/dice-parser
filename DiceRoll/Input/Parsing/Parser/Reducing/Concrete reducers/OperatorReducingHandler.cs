@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace DiceRoll.Input.Parsing
 {
@@ -18,41 +19,47 @@ namespace DiceRoll.Input.Parsing
         public override Range Reduce(LexemesList lexemes, in Range range, Cursor cursor)
         {
             Indexer indexer = IndexOperators(lexemes, in range);
-            OperatorPrecedences precedences = IndexPrecedences(indexer);
             
             if (indexer.Count is 0)
                 return range;
+            
+            OperatorPrecedences precedences = IndexPrecedences(indexer);
 
+            Args args = new(indexer, cursor);
+            
             foreach (PrecedenceLevel precedence in precedences)
-                ExecuteAllOperatorsAtPrecedence(indexer, precedence, cursor);
+                ExecuteAllOperatorsAtPrecedence(args, precedence);
 
-            ThrowIfAnyOperatorLeft(indexer, cursor);
+            ThrowIfAnyOperatorLeft(args);
 
             return indexer.Range;
         }
 
-        private void ExecuteAllOperatorsAtPrecedence(Indexer indexer, PrecedenceLevel precedence, Cursor cursor)
+        private void ExecuteAllOperatorsAtPrecedence(Args args, PrecedenceLevel precedence)
         {
             // todo instead of restarting the loop, manually check all nearby operators
             start:
             if (precedence.HasAssociativity(Associativity.Right))
-                for (int i = indexer.Count - 1; i >= 0; i--)
-                    if (TryExecuteOperatorWithImmediateContext(indexer, i, in precedence, cursor))
+                for (int i = args.Indexer.Count - 1; i >= 0; i--)
+                    if (TryExecuteOperatorWithImmediateContext(args, new ScopeArgs(i,  precedence)))
                         goto start; 
             
             if (precedence.HasAssociativity(Associativity.Left))
-                for (int i = 0; i < indexer.Count; i++)
-                    if (TryExecuteOperatorWithImmediateContext(indexer, i, in precedence, cursor))
+                for (int i = 0; i < args.Indexer.Count; i++)
+                    if (TryExecuteOperatorWithImmediateContext(args, new ScopeArgs(i,  precedence)))
                         goto start; 
         }
 
-        private static void ThrowIfAnyOperatorLeft(Indexer indexer, Cursor cursor)
+        private static void ThrowIfAnyOperatorLeft(Args args)
         {
-            if (indexer.Count is 0)
+            if (args.Indexer.Count is 0)
                 return;
 
-            Mapped<IndexedOperator> @operator = indexer.GetOperator(0);
-            
+            ThrowNoMatchingSignature(args.Indexer.GetOperator(0), args.Cursor);
+        }
+
+        private static void ThrowNoMatchingSignature(in Mapped<IndexedOperator> @operator, Cursor cursor)
+        {
             IEnumerable<OperatorInvocationBehaviour> behaviours =
                 @operator.Value.SortedOverloads.Select(x => x.InvocationBehaviour);
             
@@ -62,43 +69,53 @@ namespace DiceRoll.Input.Parsing
             throw OperatorInvocationException.NoMatchingSignature(behaviours, operatorString);
         }
 
-        private bool TryExecuteOperatorWithImmediateContext(Indexer indexer, int i, in PrecedenceLevel precedence,
-            Cursor cursor)
+        private bool TryExecuteOperatorWithImmediateContext(Args args, in ScopeArgs scopeArgs)
         {
-            cursor.MoveTo(indexer.GetOperator(i).Range);
+            Cursor cursor = args.Cursor;
+            Indexer indexer = args.Indexer;
             
-            if (!IsPreferableWithinImmediateContext(indexer, i, precedence, out InvocationInfo invocationInfo))
+            cursor.MoveTo(indexer.GetOperator(scopeArgs.OperatorPointer).Range);
+            
+            if (!IsInvokableWithinImmediateContext(args, in scopeArgs, out InvocationInfo invocationInfo))
             {
                 cursor.MoveToPrevious();
                 return false;
             }
 
-            InvokeUsingImmediateContext(indexer, i, invocationInfo, cursor);
+            InvokeUsingImmediateContext(args, scopeArgs.OperatorPointer, in invocationInfo);
             cursor.MoveToPrevious();
             return true;
         }
 
-        private bool IsPreferableWithinImmediateContext(Indexer indexer, int i, in PrecedenceLevel precedence,
-            out InvocationInfo invocationInfo)
+        private bool IsInvokableWithinImmediateContext(Args args, in ScopeArgs scopeArgs, out InvocationInfo invocationInfo)
         {
-            IndexedOperator indexedOperator = indexer.GetOperator(i).Value;
-
+            Indexer indexer = args.Indexer;
+            PrecedenceLevel precedence = scopeArgs.PrecedenceLevel;
+            Mapped<IndexedOperator> @operator = indexer.GetOperator(scopeArgs.OperatorPointer);
+            IndexedOperator indexedOperator = @operator.Value;
+            
             foreach (Overload overload in indexedOperator.SortedOverloads)
             {
+                if (overload.Precedence > precedence.Value)
+                    continue;
+                
                 if (!overload.FitsIn(indexedOperator.Index, indexer.Range, indexer.Source.Count))
                     continue;
                 
                 if (!IsInvokableWithImmediateContext(indexer.Source, indexedOperator.Index, overload))
                     continue;
 
+                // here the very first overload that can be invoked is reached and is considered best
+                // if its precedence and associativity equals to expected values, it is invoked
+                // otherwise, since the best overload cannot be invoked, so can't be the operator
+                // todo this must be flawed
                 if (overload.Precedence != precedence.Value || !precedence.HasAssociativity(overload.Associativity))
-                    goto fail;
+                    break;
 
                 invocationInfo = new InvocationInfo(overload.Invoker, overload.CopyOperandsBuffer());
                 return true;
             }
 
-            fail:
             invocationInfo = default;
             return false;
         }
@@ -146,11 +163,12 @@ namespace DiceRoll.Input.Parsing
             return true;
         }
 
-        private static void InvokeUsingImmediateContext(Indexer indexer, int i, InvocationInfo invocationInfo,
-            Cursor cursor)
+        private static void InvokeUsingImmediateContext(Args args, int operatorPointer, in InvocationInfo invocationInfo)
         {
+            Indexer indexer = args.Indexer;
+            Cursor cursor = args.Cursor;
             OperatorInvoker invoker = invocationInfo.Invoker;
-            Mapped<IndexedOperator> @operator = indexer.GetOperator(i);
+            Mapped<IndexedOperator> @operator = indexer.GetOperator(operatorPointer);
             int position = @operator.Value.Index;
             
             cursor.MoveTo(in @operator.Range);
@@ -159,7 +177,7 @@ namespace DiceRoll.Input.Parsing
 
             Operand operand = Invoke(in invocationInfo);
 
-            indexer.DelistOperatorAt(i, invoker.Arity);
+            indexer.DelistOperatorAt(operatorPointer, invoker.Arity);
 
             indexer.Source.Replace(in usedRange, operand, in @operator.Range);
             
@@ -205,11 +223,17 @@ namespace DiceRoll.Input.Parsing
 
             public Range Range => _range;
 
-            public Indexer(LexemesList source, in Range range, IEnumerable<Mapped<IndexedOperator>> operators)
+            public Indexer(LexemesList source, in Range range, IEnumerable<Mapped<IndexedOperator>> operators) : this(
+                source,
+                in range,
+                operators.ToList()
+                ) { }
+
+            private Indexer(LexemesList source, in Range range, List<Mapped<IndexedOperator>> operators)
             {
                 Source = source;
                 _range = range;
-                _indexedOperators = operators.ToList();
+                _indexedOperators = operators;
             }
 
             public Mapped<IndexedOperator> GetOperator(int index) =>
@@ -315,6 +339,31 @@ namespace DiceRoll.Input.Parsing
                 Arity arity = Invoker.Arity;
 
                 return position - arity.Left >= start && position + arity.Right < end;
+            }
+        }
+
+        private sealed class Args
+        {
+            public readonly Indexer Indexer;
+            public readonly Cursor Cursor;
+            
+            public Args(Indexer indexer, Cursor cursor)
+            {
+                Indexer = indexer;
+                Cursor = cursor;
+            }
+        }
+
+        [StructLayout(LayoutKind.Auto)]
+        private readonly ref struct ScopeArgs
+        {
+            public readonly int OperatorPointer;
+            public readonly PrecedenceLevel PrecedenceLevel;
+            
+            public ScopeArgs(int operatorPointer, PrecedenceLevel precedenceLevel)
+            {
+                OperatorPointer = operatorPointer;
+                PrecedenceLevel = precedenceLevel;
             }
         }
     }
