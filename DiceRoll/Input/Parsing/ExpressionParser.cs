@@ -4,7 +4,7 @@ namespace DiceRoll.Input.Parsing
 {
     public sealed class ExpressionParser
     {
-        private readonly EquationParser _parser;
+        private readonly IEquationParser _parser;
 
         public ExpressionParser(TokensTable tokensTable, OperandCastingTable castingTable)
         {
@@ -34,16 +34,16 @@ namespace DiceRoll.Input.Parsing
          */
         public NodeTree Parse(string expression)
         {
-            _parser.Read(expression);
-            return _parser.Collapse(UnknownLexemeSolver.Inert);
+            _parser.AccumulateInput(expression);
+            return _parser.ParseAccumulatedInput(UnknownLexemeSolver.Inert);
         }
 
         public NodeTree Parse(IEnumerable<string> expression)
         {
             foreach (string segment in expression)
-                _parser.Read(segment);
+                _parser.AccumulateInput(segment);
 
-            return _parser.Collapse(UnknownLexemeSolver.Inert);
+            return _parser.ParseAccumulatedInput(UnknownLexemeSolver.Inert);
         }
     }
 }

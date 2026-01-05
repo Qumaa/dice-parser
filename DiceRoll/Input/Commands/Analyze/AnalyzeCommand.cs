@@ -98,9 +98,9 @@ namespace DiceRoll
             }
 
             // todo better support
-            public void ForNodePool<T>(INodePool<T> pool) where T : INode
+            public void ForSequence<T>(ISequence<T> sequence) where T : INode
             {
-                foreach (T node in pool)
+                foreach (T node in sequence)
                 {
                     node.Visit(this);
                     _console.WriteLine();

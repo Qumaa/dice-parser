@@ -281,13 +281,15 @@ namespace DiceRoll.Input.Parsing
 
         private sealed class IndexedOperator
         {
+            public readonly OperatorDefinition[] Source;
             public readonly Overload[] SortedOverloads;
 
             public int Index { get; private set; }
             
-            public IndexedOperator(int index, IEnumerable<OperatorDefinition> definitions)
+            public IndexedOperator(int index, OperatorDefinition[] definitions)
             {
                 Index = index;
+                Source = definitions;
                 SortedOverloads = Sort(definitions);
             }
 

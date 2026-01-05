@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace DiceRoll.Input.Parsing
 {
@@ -23,11 +24,11 @@ namespace DiceRoll.Input.Parsing
             string operatorString)
         {
             string expectedSignatures = string.Join(
-                ',',
+                ",\n",
                 invocationBehaviours
                     .SelectMany(x => x.Invokers)
                     .Select(invoker => _SignatureToString(
-                            invoker.Signature.EnumerateOperandTypes().Select(type => type.Name).ToArray(),
+                            invoker.Signature.EnumerateOperandTypes().Select(_GetNodeTypeName).ToArray(),
                             invoker.Arity.Left,
                             operatorString
                             )
@@ -35,7 +36,7 @@ namespace DiceRoll.Input.Parsing
                 );
             
             string message =
-                $"None of this operator's defined signatures could handle passed arguments. Candidates are {expectedSignatures}.";
+                $"None of this operator's defined signatures could handle passed arguments. Candidates are:\n{expectedSignatures}";
             
             return new OperatorInvocationException(message);
             
@@ -51,6 +52,15 @@ namespace DiceRoll.Input.Parsing
                     );
 
                 return $"<{leftArguments} {operatorString} {rightArguments}>";
+            }
+
+            static string _GetNodeTypeName(Type type)
+            {
+                BaseTypeAttribute attribute = type.GetCustomAttribute<BaseTypeAttribute>(inherit: true);
+
+                return attribute is null ?
+                    type.Name :
+                    attribute.ReadableName;
             }
         }
     }

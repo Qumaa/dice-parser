@@ -5,21 +5,27 @@ namespace DiceRoll.Input.Parsing
     public sealed class ParenthesisReducer : LexemesReducer
     {
         private readonly OperatorReducingHandler _operatorHandler;
-        private readonly NodePoolReducingHandler _nodePoolHandler;
+        private readonly SequenceReducingHandler _sequenceHandler;
         
-        public ParenthesisReducer(OperatorReducingHandler operatorHandler, NodePoolReducingHandler nodePoolHandler)
+        public ParenthesisReducer(OperatorReducingHandler operatorHandler, SequenceReducingHandler sequenceHandler)
         {
             ArgumentNullException.ThrowIfNull(operatorHandler);
-            ArgumentNullException.ThrowIfNull(nodePoolHandler);
+            ArgumentNullException.ThrowIfNull(sequenceHandler);
             
             _operatorHandler = operatorHandler;
-            _nodePoolHandler = nodePoolHandler;
+            _sequenceHandler = sequenceHandler;
         }
 
         public override void Execute(LexemesList lexemes, Cursor cursor)
         {
             for (int i = 0; i < lexemes.Count; i++)
             {
+                if (lexemes.TryGetTyped(i, out Mapped<CloseParenthesis> close))
+                {
+                    cursor.MoveTo(close.Range);
+                    throw new Exception("Unmatched closing parenthesis.");
+                }
+
                 if (!lexemes.TryGetTyped(i, out Mapped<OpenParenthesis> openParenthesis))
                     continue;
 
@@ -38,7 +44,7 @@ namespace DiceRoll.Input.Parsing
                 position++;
                 
                 if (position >= lexemes.Count)
-                    throw new UnbalancedParenthesisException();
+                    throw new Exception("Unmatched opening parenthesis.");
 
                 if (lexemes.TryGetTyped(position, out Mapped<OpenParenthesis> open))
                     DetermineRangeAndReduce(lexemes, position, cursor, in open.Range);
@@ -53,7 +59,7 @@ namespace DiceRoll.Input.Parsing
             
             Range reducedRange = _operatorHandler.Reduce(lexemes, in withinParenthesisRange, cursor);
             
-            _nodePoolHandler.Reduce(lexemes, in reducedRange, cursor);
+            _sequenceHandler.Reduce(lexemes, in reducedRange, cursor);
         }
     }
 }

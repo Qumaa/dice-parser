@@ -1,4 +1,5 @@
 ﻿namespace DiceRoll
 {
-    public interface IComposite : INumeric, INodePool<INumeric> { }
+    [BaseType("numerical set")]
+    public interface IComposite : INumeric, ISequence<INumeric> { }
 }

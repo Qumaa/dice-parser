@@ -4,9 +4,9 @@ namespace DiceRoll.Input.Parsing
 {
     public sealed class ExcessiveOperandsReducer : LexemesReducer
     {
-        private readonly NodePoolReducingHandler _handler;
+        private readonly SequenceReducingHandler _handler;
         
-        public ExcessiveOperandsReducer(NodePoolReducingHandler handler)
+        public ExcessiveOperandsReducer(SequenceReducingHandler handler)
         {
             ArgumentNullException.ThrowIfNull(handler);
             

@@ -26,7 +26,7 @@ namespace DiceRoll.Input.Parsing
         public static LexemesReducingPipeline CreateDefault(OperandCastingTable castingTable)
         {
             OperatorReducingHandler operatorHandler = new(castingTable);
-            NodePoolReducingHandler operandsHandler = new();
+            SequenceReducingHandler operandsHandler = new();
             
             return new LexemesReducingPipeline(new LexemesReducer[]
             {

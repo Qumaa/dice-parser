@@ -59,22 +59,22 @@ namespace Tests.Grammar.Default
                 };
         }
 
-        private sealed class SimpleNodePool : Template
+        private sealed class SimpleSequence : Template
         {
-            public SimpleNodePool() : base("true 15") { }
+            public SimpleSequence() : base("true 15") { }
 
             protected override bool MeetsExpectedPattern(INode node) =>
-                node is NodePool pool &&
+                node is Sequence pool &&
                 pool.ToArray() is [BinaryConstant { Value: true }, NumericConstant { Value: 15 }];
         }
 
-        private sealed class NestedNodePool : Template
+        private sealed class NestedSequence : Template
         {
-            public NestedNodePool() : base("4 ( true 15 )") { }
+            public NestedSequence() : base("4 ( true 15 )") { }
 
             protected override bool MeetsExpectedPattern(INode node) =>
-                node is NodePool pool &&
-                pool.ToArray() is [NumericConstant { Value: 4 }, NodePool pool2] &&
+                node is Sequence pool &&
+                pool.ToArray() is [NumericConstant { Value: 4 }, Sequence pool2] &&
                 pool2.ToArray() is [BinaryConstant { Value: true }, NumericConstant { Value: 15 }];
         }
 

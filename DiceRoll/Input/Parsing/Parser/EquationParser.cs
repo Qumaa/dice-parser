@@ -2,7 +2,7 @@
 
 namespace DiceRoll.Input.Parsing
 {
-    public sealed class EquationParser
+    public sealed class EquationParser : IEquationParser
     {
         private readonly EquationParserState _state;
         private readonly EquationReader _reader;
@@ -19,11 +19,11 @@ namespace DiceRoll.Input.Parsing
             _reducer = new EquationReducer(state.Lexemes, reducingPipeline);
         }
 
-        public void Read(string equation)
+        public void AccumulateInput(string input)
         {
             try
             {
-                _reader.Read(equation);
+                _reader.Read(input);
             }
             catch (Exception)
             {
@@ -32,7 +32,7 @@ namespace DiceRoll.Input.Parsing
             }
         }
 
-        public NodeTree Collapse(UnknownLexemeSolver solver)
+        public NodeTree ParseAccumulatedInput(UnknownLexemeSolver solver)
         {
             SubstringMapper mapper = _state.Mapper.BuildSubstringMapper();
             Cursor cursor = new(mapper);

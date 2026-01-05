@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace DiceRoll.Input.Parsing
 {
-    internal static class NodePoolUtils
+    internal static class SequenceUtils
     {
         public static Mapped<LinkedNode> GroupNodes(IEnumerable<Mapped<LinkedNode>> nodes) =>
             GroupNodes(nodes.ToArray());
@@ -16,7 +16,7 @@ namespace DiceRoll.Input.Parsing
             for (int i = 1; i < nodes.Length; i++)
                 poolRange = poolRange.And(nodes[i].Range);
 
-            NodePool pool = new(nodes.Select(x => x.Value.Node));
+            Sequence pool = new(nodes.Select(x => x.Value.Node));
             LinkedNode linkedPool = new(pool, typeof(INode), nodes);
             
             return new Mapped<LinkedNode>(linkedPool, poolRange);
@@ -32,7 +32,7 @@ namespace DiceRoll.Input.Parsing
             for (int i = 1; i < nodes.Length; i++)
                 poolRange = poolRange.And(nodes[i].Range);
 
-            NodePool pool = new(nodes.Select(x => x.Value.Node));
+            Sequence pool = new(nodes.Select(x => x.Value.Node));
             Operand linkedPool = new(pool, typeof(INode), nodes);
             
             return new Mapped<Operand>(linkedPool, poolRange);

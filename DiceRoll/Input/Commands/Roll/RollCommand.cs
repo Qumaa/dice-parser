@@ -73,8 +73,8 @@ namespace DiceRoll
                     outcome.ToString() :
                     _failedToPass;
 
-            public void ForNodePool<T>(INodePool<T> pool) where T : INode =>
-                _visitResult = $"[{string.Join(", ", pool.Select(x => VisitForString(x)))}]";
+            public void ForSequence<T>(ISequence<T> sequence) where T : INode =>
+                _visitResult = $"[{string.Join(", ", sequence.Select(x => VisitForString(x)))}]";
 
             public void ForAssertion(IAssertion assertion) =>
                 _visitResult = assertion.CachedEvaluation.ToString();

@@ -48,10 +48,10 @@
             }
 
             [TestMethod]
-            public void NodePoolTest()
+            public void SequenceTest()
             {
-                AssertParsingResultOf<SimpleNodePool>.MeetsExpectedPattern();
-                AssertParsingResultOf<NestedNodePool>.MeetsExpectedPattern();
+                AssertParsingResultOf<SimpleSequence>.MeetsExpectedPattern();
+                AssertParsingResultOf<NestedSequence>.MeetsExpectedPattern();
             }
         }
 

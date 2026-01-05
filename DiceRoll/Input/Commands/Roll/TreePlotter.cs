@@ -45,7 +45,7 @@ namespace DiceRoll
         
         private static string NodeToString(SubstringMapper mapper, in Mapped<LinkedNode> mappedNode)
         {
-            if (mappedNode.Value.IsOperator && mappedNode.Value.Node is not INodePool)
+            if (mappedNode.Value.IsOperator && mappedNode.Value.Node is not ISequence)
                 return StringFormatter.ToOperatorString(mapper, in mappedNode);
 
             if (mappedNode.Value.Node is Dice or IComposite)
@@ -167,8 +167,8 @@ namespace DiceRoll
                 public void ForOperation(IOperation operation) =>
                     ForAssertion(operation.AsAssertion);
 
-                public void ForNodePool<T>(INodePool<T> pool) where T : INode =>
-                    _output = $"[{string.Join(", ", pool.Select(x => GetEvaluationString(x)))}]";
+                public void ForSequence<T>(ISequence<T> sequence) where T : INode =>
+                    _output = $"[{string.Join(", ", sequence.Select(x => GetEvaluationString(x)))}]";
 
                 public string GetEvaluationString(INode node)
                 {

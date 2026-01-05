@@ -5,11 +5,11 @@ using System.Linq;
 
 namespace DiceRoll
 {
-    public sealed class NodePool : INodePool
+    public sealed class Sequence : ISequence
     {
         private readonly IEnumerable<INode> _nodes;
         
-        public NodePool(IEnumerable<INode> nodes)
+        public Sequence(IEnumerable<INode> nodes)
         {
             ArgumentNullException.ThrowIfNull(nodes);
             
@@ -17,10 +17,10 @@ namespace DiceRoll
         }
 
         public object Clone() =>
-            new NodePool(_nodes.Select(x => x.CloneTyped()));
+            new Sequence(_nodes.Select(x => x.CloneTyped()));
 
         public void Visit<T>(T visitor) where T : INodeVisitor =>
-            visitor.ForNodePool(this);
+            visitor.ForSequence(this);
 
         public void NextEvaluation()
         {

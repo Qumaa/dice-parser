@@ -28,7 +28,10 @@ namespace DiceRoll.Input.Parsing
             if (_lexemes.Count is not 1)
                 throw new Exception("More than 1 result has been produced by parser. Cannot proceed due to non deterministic output.");
 
-            return _lexemes.GetTypedOrThrow<Operand>(0).ToLinkedNode();
+            if (!_lexemes.TryGetTyped(0, out Mapped<Operand> operand))
+                throw new InvalidCastException();
+                    
+            return operand.ToLinkedNode();
         }
     }
 }

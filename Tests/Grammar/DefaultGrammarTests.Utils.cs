@@ -4,9 +4,9 @@
     // todo bad type assertions e.g. "true" as numeric throws
     public partial class DefaultGrammarTests
     {
-        private static readonly EquationParser _parser = CreateDefaultGrammarParser();
+        private static readonly IEquationParser _parser = CreateDefaultGrammarParser();
 
-        private static EquationParser CreateDefaultGrammarParser()
+        private static IEquationParser CreateDefaultGrammarParser()
         {
             EquationParserState state = new();
             LexingPipeline lexingPipeline = TokensTable.Default.ToDefaultPipeline(state.Lexemes);
@@ -17,9 +17,9 @@
         
         private static T Parse<T>(string input) where T : INode
         {
-            _parser.Read(input);
+            _parser.AccumulateInput(input);
 
-            return (T) _parser.Collapse(UnknownLexemeSolver.Inert).Root.Value.Node;
+            return (T) _parser.ParseAccumulatedInput(UnknownLexemeSolver.Inert).Root.Value.Node;
         }
 
         private static T GetTemplate<T>() where T : Template, new() =>
