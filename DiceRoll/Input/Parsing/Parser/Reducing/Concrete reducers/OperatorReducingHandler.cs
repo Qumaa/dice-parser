@@ -91,8 +91,7 @@ namespace DiceRoll.Input.Parsing
         {
             Indexer indexer = args.Indexer;
             PrecedenceLevel precedence = scopeArgs.PrecedenceLevel;
-            Mapped<IndexedOperator> @operator = indexer.GetOperator(scopeArgs.OperatorPointer);
-            IndexedOperator indexedOperator = @operator.Value;
+            IndexedOperator indexedOperator = indexer.GetOperator(scopeArgs.OperatorPointer).Value;
             
             foreach (Overload overload in indexedOperator.SortedOverloads)
             {
@@ -122,11 +121,9 @@ namespace DiceRoll.Input.Parsing
 
         private bool IsInvokableWithImmediateContext(LexemesList list, int position, Overload overload)
         {
-            OperatorInvoker invoker = overload.Invoker;
+            int offset = position - overload.Arity.Left;
             
-            int offset = position - invoker.Arity.Left;
-            
-            for (int i = 0; i < invoker.Arity; i++)
+            for (int i = 0; i < overload.Arity; i++)
             {
                 int index = offset + i; // current operand index
 
@@ -136,7 +133,7 @@ namespace DiceRoll.Input.Parsing
                 if (!list.TryGetTyped(index, out Mapped<Operand> operand))
                     return false;
                 
-                Type expectedType = invoker.Signature.OperandTypes[i];
+                Type expectedType = overload.Signature.OperandTypes[i];
 
                 if (!MatchesExpectedType(ref operand, expectedType))
                     return false;
@@ -317,6 +314,8 @@ namespace DiceRoll.Input.Parsing
             
             public int Precedence => InvocationBehaviour.Precedence;
             public Associativity Associativity => InvocationBehaviour.Associativity;
+            public Arity Arity => Invoker.Arity;
+            public Signature Signature => Invoker.Signature;
             
             public Overload(OperatorInvocationBehaviour invocationBehaviour, OperatorInvoker invoker)
             {

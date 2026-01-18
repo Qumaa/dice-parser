@@ -20,7 +20,7 @@ namespace DiceRoll
         public OptionalRollProbabilityDistribution GetProbabilityDistribution() =>
             _cachedDistribution ??= CreateProbabilityDistribution();
 
-        public void Visit<T>(T visitor) where T : INodeVisitor =>
+        public virtual void Visit<T>(T visitor) where T : INodeVisitor =>
             visitor.ForOperation(this);
 
         public virtual object Clone() =>

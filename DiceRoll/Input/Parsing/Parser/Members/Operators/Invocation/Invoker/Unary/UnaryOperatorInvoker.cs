@@ -4,11 +4,8 @@
     {
         private readonly UnaryInvocationHandler<TReturn, T> _handler;
 
-        private UnaryOperatorInvoker(UnaryInvocationHandler<TReturn, T> handler, int leftArity, int rightArity) : base(
-            Signature.Arguments<T>().Returns<TReturn>(),
-            leftArity,
-            rightArity
-            )
+        private UnaryOperatorInvoker(UnaryInvocationHandler<TReturn, T> handler, Arity arity) 
+            : base(Signature.Arguments<T>().Returns<TReturn>(), arity)
         {
             _handler = handler;
         }
@@ -21,9 +18,9 @@
         }
 
         public static UnaryOperatorInvoker<TReturn, T> Prefix(UnaryInvocationHandler<TReturn, T> handler) =>
-            new(handler, 0, 1);
+            new(handler, Arity.PrefixUnary);
 
         public static UnaryOperatorInvoker<TReturn, T> Postfix(UnaryInvocationHandler<TReturn, T> handler) =>
-            new(handler, 1, 0);
+            new(handler, Arity.PostfixUnary);
     }
 }

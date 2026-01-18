@@ -6,7 +6,7 @@
             Node.Value.Constant(value);
 
         public static INumeric AsDice(this int faces) =>
-            Node.Value.Dice(faces);
+            Node.Value.Die(faces);
         
         public static INumeric AsDice(this int dice, int faces) =>
             Node.Value.Dice(faces, dice);

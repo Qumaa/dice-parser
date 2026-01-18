@@ -7,7 +7,7 @@ namespace DiceRoll.Input.Parsing
     {
         private readonly IToken[] _tokens;
 
-        public CompositeToken(IEnumerable<IToken> tokens) : this(tokens as IToken[] ?? tokens.ToArray()) { }
+        public CompositeToken(IEnumerable<IToken> tokens) : this(tokens.ToArray()) { }
         
         public CompositeToken(IToken[] tokens)
         {
@@ -34,7 +34,7 @@ namespace DiceRoll.Input.Parsing
     public static class CompositeTokenExtensions
     {
         public static IToken ToCompositeToken(this IEnumerable<IToken> tokens) =>
-            ToCompositeToken(tokens as IToken[] ?? tokens.ToArray());
+            ToCompositeToken(tokens.ToArray());
 
         public static IToken ToCompositeToken(this IToken[] tokens) =>
             tokens.Length is 1 ? tokens[0] : new CompositeToken(tokens);

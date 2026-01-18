@@ -11,7 +11,7 @@
         public RollProbabilityDistribution GetProbabilityDistribution() =>
             _cachedDistribution ??= CreateProbabilityDistribution();
 
-        public void Visit<T>(T visitor) where T : INodeVisitor =>
+        public virtual void Visit<T>(T visitor) where T : INodeVisitor =>
             visitor.ForNumeric(this);
 
         public virtual object Clone() =>

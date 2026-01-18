@@ -6,7 +6,7 @@
         private readonly BinaryInvocationHandler<TReturn, TLeft, TRight> _handler;
 
         public BinaryOperatorInvoker(BinaryInvocationHandler<TReturn, TLeft, TRight> handler) : 
-            base(Signature.Arguments<TLeft, TRight>().Returns<TReturn>(), 1, 1)
+            base(Signature.Arguments<TLeft, TRight>().Returns<TReturn>(), Arity.Binary)
         {
             _handler = handler;
         }

@@ -6,6 +6,12 @@
         // todo composition once done
         // todo range
         // todo advanced dice (once changed to be an operator)
+
+        [TestMethod]
+        public void WeirdDie()
+        {
+            INumeric die = Parse<INumeric>("d4dd4");
+        }
         
         [TestClass]
         public class OperandTests
@@ -18,7 +24,6 @@
                 AssertParsingResultOf<SingleNumber>.FailsToMeetExpectedPatternOf<SingleBoolean>();
                 AssertParsingResultOf<SingleNumber>.FailsToMeetExpectedPatternOf<SingleDie>();
                 AssertParsingResultOf<SingleNumber>.FailsToMeetExpectedPatternOf<ImplicitCompositionDice>();
-                AssertParsingResultOf<SingleNumber>.FailsToMeetExpectedPatternOf<ExplicitCompositionDice>();
             }
 
             [TestMethod]
@@ -29,21 +34,17 @@
                 AssertParsingResultOf<SingleBoolean>.FailsToMeetExpectedPatternOf<SingleNumber>();
                 AssertParsingResultOf<SingleBoolean>.FailsToMeetExpectedPatternOf<SingleDie>();
                 AssertParsingResultOf<SingleBoolean>.FailsToMeetExpectedPatternOf<ImplicitCompositionDice>();
-                AssertParsingResultOf<SingleBoolean>.FailsToMeetExpectedPatternOf<ExplicitCompositionDice>();
             }
 
             [TestMethod]
             public void DiceTest()
             {
                 AssertParsingResultOf<SingleDie>.MeetsExpectedPattern();
-                AssertParsingResultOf<ExplicitCompositionDice>.MeetsExpectedPattern();
                 AssertParsingResultOf<ImplicitCompositionDice>.MeetsExpectedPattern();
 
                 AssertParsingResultOf<SingleDie>.FailsToMeetExpectedPatternOf<SingleBoolean>();
-                AssertParsingResultOf<ExplicitCompositionDice>.FailsToMeetExpectedPatternOf<SingleBoolean>();
                 AssertParsingResultOf<ImplicitCompositionDice>.FailsToMeetExpectedPatternOf<SingleBoolean>();
                 AssertParsingResultOf<SingleDie>.FailsToMeetExpectedPatternOf<SingleNumber>();
-                AssertParsingResultOf<ExplicitCompositionDice>.FailsToMeetExpectedPatternOf<SingleNumber>();
                 AssertParsingResultOf<ImplicitCompositionDice>.FailsToMeetExpectedPatternOf<SingleNumber>();
             }
 

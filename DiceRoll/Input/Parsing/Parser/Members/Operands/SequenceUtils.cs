@@ -1,41 +1,71 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace DiceRoll.Input.Parsing
 {
     internal static class SequenceUtils
     {
-        public static Mapped<LinkedNode> GroupNodes(IEnumerable<Mapped<LinkedNode>> nodes) =>
-            GroupNodes(nodes.ToArray());
-
-        public static Mapped<LinkedNode> GroupNodes(Mapped<LinkedNode>[] nodes)
+        private static readonly TypingVisitor _visitor = new();
+        
+        public static bool TryGroupNodes(Mapped<Operand>[] nodes, out Mapped<Operand> grouped)
         {
+            if (!_visitor.TryCreateTypedSequence(nodes, out INode sequence))
+            {
+                grouped = default;
+                return false;
+            }
+
             Range poolRange = nodes[0].Range;
-            
+
             for (int i = 1; i < nodes.Length; i++)
                 poolRange = poolRange.And(nodes[i].Range);
-
-            Sequence pool = new(nodes.Select(x => x.Value.Node));
-            LinkedNode linkedPool = new(pool, typeof(INode), nodes);
             
-            return new Mapped<LinkedNode>(linkedPool, poolRange);
+            Operand linkedSequence = new(sequence, typeof(INode), nodes);
+            
+            grouped = new Mapped<Operand>(linkedSequence, poolRange);
+            return true;
         }
         
-        public static Mapped<Operand> GroupNodes(IEnumerable<Mapped<Operand>> nodes) =>
-            GroupNodes(nodes.ToArray());
-        
-        public static Mapped<Operand> GroupNodes(Mapped<Operand>[] nodes)
+        private sealed class TypingVisitor : INodeVisitor
         {
-            Range poolRange = nodes[0].Range;
-            
-            for (int i = 1; i < nodes.Length; i++)
-                poolRange = poolRange.And(nodes[i].Range);
+            private Mapped<Operand>[] _nodes;
+            private INode _sequence;
 
-            Sequence pool = new(nodes.Select(x => x.Value.Node));
-            Operand linkedPool = new(pool, typeof(INode), nodes);
-            
-            return new Mapped<Operand>(linkedPool, poolRange);
+            public void ForNumeric(INumeric numeric) =>
+                _sequence = Type<INumeric>();
+
+            public void ForAssertion(IAssertion assertion) =>
+                _sequence = Type<IAssertion>();
+
+            public void ForOperation(IOperation operation) =>
+                _sequence = Type<IOperation>();
+
+            public void ForSequence<T>(ISequence<T> sequence) where T : INode =>
+                _sequence = Type<ISequence<T>>();
+
+            public bool TryCreateTypedSequence(Mapped<Operand>[] nodes, out INode sequence)
+            {
+                _nodes = nodes;
+                
+                _nodes[0].Value.Node.Visit(this);
+
+                sequence = _sequence;
+                return sequence is not null;
+            }
+
+            private Sequence<T> Type<T>() where T : INode
+            {
+                T[] typedNodes = new T[_nodes.Length];
+
+                for (int i = 0; i < _nodes.Length; i++)
+                {
+                    if (_nodes[i].Value.Node is not T typedNode)
+                        return null;
+
+                    typedNodes[i] = typedNode;
+                }
+
+                return new Sequence<T>(typedNodes);
+            }
         }
     }
 }

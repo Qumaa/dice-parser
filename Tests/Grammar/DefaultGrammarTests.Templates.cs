@@ -26,7 +26,7 @@ namespace Tests.Grammar.Default
             public SingleDie() : base("d8") { }
 
             protected override bool MeetsExpectedPattern(INode node) =>
-                node is Dice { Faces: 8 };
+                node is Die { Faces: 8 };
         }
 
         private sealed class ImplicitCompositionDice : Template
@@ -38,44 +38,29 @@ namespace Tests.Grammar.Default
                 {
                     UnderlyingNode: Combination
                     {
-                        CombinationType: CombinationType.Add, Left: Dice { Faces: 6 }, Right: Dice { Faces: 6 }
-                    }
-                };
-        }
-
-        private sealed class ExplicitCompositionDice : Template
-        {
-            public ExplicitCompositionDice() : base("2d20highest") { }
-
-            protected override bool MeetsExpectedPattern(INode node) =>
-                node is Composite
-                {
-                    UnderlyingNode: DefaultSelection
-                    {
-                        SelectionType: SelectionType.Highest,
-                        Left: Dice { Faces: 20 },
-                        Right: Dice { Faces: 20 }
+                        CombinationType: CombinationType.Add, Left: Die { Faces: 6 }, Right: Die { Faces: 6 }
                     }
                 };
         }
 
         private sealed class SimpleSequence : Template
         {
-            public SimpleSequence() : base("true 15") { }
+            public SimpleSequence() : base("d12 15") { }
 
             protected override bool MeetsExpectedPattern(INode node) =>
-                node is Sequence pool &&
-                pool.ToArray() is [BinaryConstant { Value: true }, NumericConstant { Value: 15 }];
+                node is ISequence<INumeric> and [Die { Faces: 12 }, NumericConstant { Value: 15 }];
         }
 
         private sealed class NestedSequence : Template
         {
-            public NestedSequence() : base("4 ( true 15 )") { }
+            public NestedSequence() : base("(4 d4) ( d12 15 )") { }
 
             protected override bool MeetsExpectedPattern(INode node) =>
-                node is Sequence pool &&
-                pool.ToArray() is [NumericConstant { Value: 4 }, Sequence pool2] &&
-                pool2.ToArray() is [BinaryConstant { Value: true }, NumericConstant { Value: 15 }];
+                node is ISequence<ISequence<INumeric>> and
+                [
+                    [NumericConstant { Value: 4 }, Die { Faces: 4 }],
+                    [Die { Faces: 12 }, NumericConstant { Value: 15 }]
+                ];
         }
 
     #endregion
@@ -90,7 +75,7 @@ namespace Tests.Grammar.Default
                 node is Combination
                 {
                     CombinationType: CombinationType.Add,
-                    Left: Dice { Faces: 4 },
+                    Left: Die { Faces: 4 },
                     Right: NumericConstant { Value: 1 }
                 };
         }
@@ -103,7 +88,7 @@ namespace Tests.Grammar.Default
                 node is Combination
                 {
                     CombinationType: CombinationType.Subtract,
-                    Left: Dice { Faces: 4 },
+                    Left: Die { Faces: 4 },
                     Right: NumericConstant { Value: 1 }
                 };
         }
@@ -124,7 +109,7 @@ namespace Tests.Grammar.Default
                 node is Combination
                 {
                     CombinationType: CombinationType.Multiply,
-                    Left: Dice { Faces: 4 },
+                    Left: Die { Faces: 4 },
                     Right: NumericConstant { Value: 3 }
                 };
         }
@@ -137,7 +122,7 @@ namespace Tests.Grammar.Default
                 node is Combination
                 {
                     CombinationType: CombinationType.DivideRoundDownwards,
-                    Left: Dice { Faces: 4 },
+                    Left: Die { Faces: 4 },
                     Right: NumericConstant { Value: 3 }
                 };
         }
@@ -150,7 +135,7 @@ namespace Tests.Grammar.Default
                 node is Combination
                 {
                     CombinationType: CombinationType.DivideRoundUpwards,
-                    Left: Dice { Faces: 4 },
+                    Left: Die { Faces: 4 },
                     Right: NumericConstant { Value: 3 }
                 };
         }
@@ -162,7 +147,7 @@ namespace Tests.Grammar.Default
             protected override bool MeetsExpectedPattern(INode node) =>
                 node is DefaultBinaryOperation
                 {
-                    OperationType: OperationType.Equal, Left: Dice { Faces: 4 }, Right: NumericConstant { Value: 3 }
+                    OperationType: OperationType.Equal, Left: Die { Faces: 4 }, Right: NumericConstant { Value: 3 }
                 };
         }
 
@@ -174,7 +159,7 @@ namespace Tests.Grammar.Default
                 node is DefaultBinaryOperation
                 {
                     OperationType: OperationType.NotEqual,
-                    Left: Dice { Faces: 4 },
+                    Left: Die { Faces: 4 },
                     Right: NumericConstant { Value: 3 }
                 };
         }
@@ -213,7 +198,7 @@ namespace Tests.Grammar.Default
                 node is DefaultBinaryOperation
                 {
                     OperationType: OperationType.GreaterThan,
-                    Left: Dice { Faces: 4 },
+                    Left: Die { Faces: 4 },
                     Right: NumericConstant { Value: 3 }
                 };
         }
@@ -226,7 +211,7 @@ namespace Tests.Grammar.Default
                 node is DefaultBinaryOperation
                 {
                     OperationType: OperationType.GreaterThanOrEqual,
-                    Left: Dice { Faces: 4 },
+                    Left: Die { Faces: 4 },
                     Right: NumericConstant { Value: 3 }
                 };
         }
@@ -239,7 +224,7 @@ namespace Tests.Grammar.Default
                 node is DefaultBinaryOperation
                 {
                     OperationType: OperationType.LessThan,
-                    Left: Dice { Faces: 4 },
+                    Left: Die { Faces: 4 },
                     Right: NumericConstant { Value: 3 }
                 };
         }
@@ -252,7 +237,7 @@ namespace Tests.Grammar.Default
                 node is DefaultBinaryOperation
                 {
                     OperationType: OperationType.LessThanOrEqual,
-                    Left: Dice { Faces: 4 },
+                    Left: Die { Faces: 4 },
                     Right: NumericConstant { Value: 3 }
                 };
         }

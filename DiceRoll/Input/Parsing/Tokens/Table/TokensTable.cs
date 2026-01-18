@@ -29,16 +29,70 @@ namespace DiceRoll.Input.Parsing
 
         public static TokensTableBuilder BuildDefault() =>
             new TokensTableBuilder(Token("("), Token(")"))
-                .Operand(in DiceOperand.Default)
                 .Operand(in NumericOperand.Default)
                 .Operand(in BinaryOperand.Default)
+                
+                .BinaryOperator(
+                    new DiceToken(Token("d")),
+                    1000,
+                    static (INumeric left, INumeric right) => Node.Value.Dice(right.Evaluate(), left.Evaluate()),
+                    Associativity.Right
+                    )
+                .PrefixUnaryOperator(
+                    new DieToken(Token("d")),
+                    1001,
+                    static (INumeric faces) => Node.Value.Die(faces.Evaluate())
+                    )
+                
+                .BinaryOperator(
+                    Token(":", "times"),
+                    990,
+                    static (INumeric left, INumeric right) => Node.Value.Sequence(left, right.Evaluate())
+                    )
+                
+                .BinaryOperator(
+                    Token("..", "through"),
+                    980,
+                    static (INumeric left, INumeric right) =>
+                    {
+                        Outcome lo = left.Evaluate();
+                        Outcome ro = right.Evaluate();
+                        
+                        IEnumerable<int> ints = Enumerable.Range(lo, ro - lo);
+                        IEnumerable<INumeric> nodes = ints.Select(x => x.AsConstant());
+
+                        return Node.Value.Sequence(nodes);
+                    }
+                    )
                 
                 .PrefixUnaryOperator(Token("!", "not"), 120, static (IAssertion node) => node.Not())
                 .PrefixUnaryOperator(Token("-"), 120, static (INumeric node) => node.Negate())
                 
-                .CompositionOperator(110, in CompositionDefinition.Summation)
-                .CompositionOperator(110, in CompositionDefinition.Highest)
-                .CompositionOperator(110, in CompositionDefinition.Lowest)
+                // todo min/max composite
+                // should be as easy as doing constant with a value of min/max of a probability dist for composite
+                // think of non-distributable seq
+                // 1..8 should be 8
+                // d4:8 should be 4?
+                // (1, 2, 3d6) should be max of 3d6 so 18
+                // iterate through source nodes and aggregate the value based on their dist?
+                
+                .PostfixUnaryOperator(
+                    Token("s", "sum", "summation", "total"),
+                    110,
+                    static (ISequence<INumeric> nodes) => Node.Value.Composite<Total>(nodes)
+                    )
+                .PostfixUnaryOperator(
+                    Token("h", "highest"),
+                    110,
+                    (ISequence<INumeric> nodes) => Node.Value.Composite<KeepHighest>(nodes)
+                    )
+                // todo infix that specifies number of highest to take (4d6 highest 3)
+                .PostfixUnaryOperator(
+                    Token("l", "lowest"),
+                    110,
+                    static (ISequence<INumeric> nodes) => Node.Value.Composite<KeepLowest>(nodes)
+                    )
+                // todo infix that specifies number of lowest to take (4d6 lowest 3)
                 
                 .BinaryOperator(Token("*"), 100, static (INumeric left, INumeric right) => left.Multiply(right))
                 .BinaryOperator(Token("//"), 100, static (INumeric left, INumeric right) => left.DivideRoundUp(right))
@@ -53,14 +107,14 @@ namespace DiceRoll.Input.Parsing
                 .BinaryOperator(Token("<"), 80, static (INumeric left, INumeric right) => left.LessThan(right))
                 
                 .OverloadedBinaryOperator(Token("==", "="), 70)
-                    .Overload(OperatorInvoker.Binary(static (INumeric left, INumeric right) => left.Equal(right)))
-                    .Overload(OperatorInvoker.Binary(static (IAssertion left, IAssertion right) => left.Equal(right)))
-                    .Finish()
+                .Overload(static (INumeric left, INumeric right) => left.Equal(right))
+                .Overload(static (IAssertion left, IAssertion right) => left.Equal(right))
+                .Finish()
                 
                 .OverloadedBinaryOperator(Token("!=", "=/="), 70)
-                    .Overload(OperatorInvoker.Binary(static (INumeric left, INumeric right) => left.NotEqual(right)))
-                    .Overload(OperatorInvoker.Binary(static (IAssertion left, IAssertion right) => left.NotEqual(right)))
-                    .Finish()
+                .Overload(static (INumeric left, INumeric right) => left.NotEqual(right))
+                .Overload(static (IAssertion left, IAssertion right) => left.NotEqual(right))
+                .Finish()
                 
                 .BinaryOperator(Token("&&", "&", "and"), 60, static (IAssertion left, IAssertion right) => left.And(right))
                 .BinaryOperator(Token("||", "|", "or"), 60, static (IAssertion left, IAssertion right) => left.Or(right));

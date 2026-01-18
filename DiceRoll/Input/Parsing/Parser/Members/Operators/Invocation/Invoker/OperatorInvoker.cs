@@ -1,4 +1,5 @@
 ﻿using System;
+using DiceRoll.Exceptions;
 
 namespace DiceRoll.Input.Parsing
 {
@@ -39,8 +40,5 @@ namespace DiceRoll.Input.Parsing
         public static OperatorInvoker PostfixUnary<TReturn, T>(UnaryInvocationHandler<TReturn, T> handler) 
             where TReturn : INode where T : INode =>
             UnaryOperatorInvoker<TReturn, T>.Postfix(handler);
-
-        public static OperatorInvoker Composition(CompositionHandler handler) =>
-            new CompositionInvoker(handler);
     }
 }

@@ -20,6 +20,7 @@ namespace DiceRoll.Input.Parsing
 
         public void Read(string equation)
         {
+            // todo with cursor
             if (string.IsNullOrWhiteSpace(equation))
                 return;
             

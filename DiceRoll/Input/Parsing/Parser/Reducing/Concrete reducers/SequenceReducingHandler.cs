@@ -12,6 +12,7 @@ namespace DiceRoll.Input.Parsing
                 return range;
             
             Mapped<Operand>[] operands = new Mapped<Operand>[length];
+            Range groupRange = default;
 
             for (int i = 0; i < length; i++)
             {
@@ -22,11 +23,17 @@ namespace DiceRoll.Input.Parsing
                 Mapped<Operand> operand = CastToOperandOrThrow(in lexeme, cursor);
                 
                 operands[i] = operand;
+
+                groupRange = i is 0 ? operand.Range : groupRange.And(operand.Range);
                 
                 cursor.MoveToPrevious();
             }
 
-            Mapped<Operand> pool = SequenceUtils.GroupNodes(operands);
+            if (!SequenceUtils.TryGroupNodes(operands, out Mapped<Operand> pool))
+            {
+                cursor.MoveTo(groupRange);
+                throw new InvalidOperationException("All operands must be of the same type to be grouped.");
+            }
 
             lexemes.Replace(in range, in pool);
 

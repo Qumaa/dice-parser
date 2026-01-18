@@ -2,8 +2,9 @@
 
 namespace DiceRoll
 {
-    public interface ISequence<out T> : INode, IEnumerable<T> where T : INode { }
-    
-    [BaseType("any sequence")]
-    public interface ISequence : ISequence<INode> { }
+    // todo base type with formattable name? (e.g. not static string but "sequence (name of T)")
+    [BaseType("typed sequence")]
+    public interface ISequence<out T> : ISequence, IReadOnlyList<T> where T : INode { }
+
+    public interface ISequence : INode { }
 }

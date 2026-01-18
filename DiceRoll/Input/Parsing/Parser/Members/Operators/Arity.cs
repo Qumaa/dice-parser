@@ -6,6 +6,10 @@ namespace DiceRoll.Input.Parsing
     [StructLayout(LayoutKind.Explicit)]
     public readonly struct Arity : IComparable<Arity>, IComparable
     {
+        public static readonly Arity Binary = new(1, 1);
+        public static readonly Arity PrefixUnary = new(0, 1);
+        public static readonly Arity PostfixUnary = new(1, 0);
+        
         [FieldOffset(0)] private readonly ushort _left;
         [FieldOffset(2)] private readonly ushort _right;
         

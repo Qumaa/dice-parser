@@ -12,7 +12,7 @@
         public LogicalProbabilityDistribution GetProbabilityDistribution() =>
             _cachedDistribution ??= CreateProbabilityDistribution();
 
-        public void Visit<T>(T visitor) where T : INodeVisitor =>
+        public virtual void Visit<T>(T visitor) where T : INodeVisitor =>
             visitor.ForAssertion(this);
 
         public virtual object Clone() =>

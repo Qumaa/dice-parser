@@ -48,7 +48,7 @@ namespace DiceRoll
             if (mappedNode.Value.IsOperator && mappedNode.Value.Node is not ISequence)
                 return StringFormatter.ToOperatorString(mapper, in mappedNode);
 
-            if (mappedNode.Value.Node is Dice or IComposite)
+            if (mappedNode.Value.Node is Die or IComposite)
                 return StringFormatter.ToRolledResultString(mapper, in mappedNode);
 
             return StringFormatter.ToEvaluationString(in mappedNode);

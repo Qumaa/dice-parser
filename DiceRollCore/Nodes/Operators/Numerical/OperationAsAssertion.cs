@@ -14,7 +14,7 @@
             Source = source;
         }
 
-        public void Visit<T>(T visitor) where T : INodeVisitor =>
+        public virtual void Visit<T>(T visitor) where T : INodeVisitor =>
             visitor.ForAssertion(this);
 
         public void NextEvaluation() =>
