@@ -29,9 +29,9 @@ namespace Tests.Grammar.Default
                 node is Die { Faces: 8 };
         }
 
-        private sealed class ImplicitCompositionDice : Template
+        private sealed class SingleDice : Template
         {
-            public ImplicitCompositionDice() : base("2d6") { }
+            public SingleDice() : base("2d6") { }
 
             protected override bool MeetsExpectedPattern(INode node) =>
                 node is Composite
@@ -301,12 +301,100 @@ namespace Tests.Grammar.Default
                 };
         }
         
+        private sealed class BinaryDice : OperatorContract
+        {
+            public BinaryDice() : base(sampler: ArgumentsSampler.Numeric, arity: Arity.Binary, "d") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is IComposite;
+        }
+        
+        private sealed class UnaryDie : OperatorContract
+        {
+            public UnaryDie() : base(sampler: ArgumentsSampler.Numeric, arity: Arity.PrefixUnary, "d") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is Die;
+        }
+        
+        private sealed class Times : OperatorContract
+        {
+            public Times() : base(sampler: ArgumentsSampler.Numeric, arity: Arity.Binary, ":", "times") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is ISequence<INumeric>;
+        }
+        
+        private sealed class Range : OperatorContract
+        {
+            public Range() : base(sampler: ArgumentsSampler.Numeric, arity: Arity.Binary, "..", "through") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is ISequence<INumeric>;
+        }
+        
+        private sealed class Not : OperatorContract
+        {
+            public Not() : base(sampler: ArgumentsSampler.Boolean, arity: Arity.PrefixUnary, "!", "not") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is NotAssertion;
+        }
+        
+        private sealed class Negate : OperatorContract
+        {
+            public Negate() : base(sampler: ArgumentsSampler.Numeric, arity: Arity.PrefixUnary, "-") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is Negation;
+        }
+        
+        private sealed class UnaryTotal : OperatorContract
+        {
+            public UnaryTotal() : base(sampler: ArgumentsSampler.Composite, arity: Arity.PostfixUnary, "s", "sum", "summation", "total") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is Composite { UnderlyingNode: Combination { CombinationType: CombinationType.Add } };
+        }
+        
+        private sealed class UnaryHighest : OperatorContract
+        {
+            public UnaryHighest() : base(sampler: ArgumentsSampler.Composite, arity: Arity.PostfixUnary, "h", "highest") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is Composite { UnderlyingNode: DefaultSelection { SelectionType: SelectionType.Highest } };
+        }
+
+        private sealed class UnaryLowest : OperatorContract
+        {
+            public UnaryLowest() : base(sampler: ArgumentsSampler.Composite, arity: Arity.PostfixUnary, "l", "lowest") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is Composite { UnderlyingNode: DefaultSelection { SelectionType: SelectionType.Lowest } };
+        }
+        
         private sealed class Multiply : OperatorContract
         {
             public Multiply() : base(ArgumentsSampler.Numeric, Arity.Binary, "*") { }
 
             protected override bool MeetsExpectedPattern(INode node) =>
                 node is Combination { CombinationType: CombinationType.Multiply };
+        }
+
+        private sealed class DivideRoundUp : OperatorContract
+        {
+            public DivideRoundUp() : base(ArgumentsSampler.Numeric, Arity.Binary, "//") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is Combination { CombinationType: CombinationType.DivideRoundUpwards };
+        }
+
+        private sealed class DivideRoundDown : OperatorContract
+        {
+            public DivideRoundDown() : base(ArgumentsSampler.Numeric, Arity.Binary, "/") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is Combination { CombinationType: CombinationType.DivideRoundDownwards };
         }
         
         private sealed class Add : OperatorContract
@@ -317,12 +405,92 @@ namespace Tests.Grammar.Default
                 node is Combination { CombinationType: CombinationType.Add };
         }
 
+        private sealed class Subtract : OperatorContract
+        {
+            public Subtract() : base(ArgumentsSampler.Numeric, Arity.Binary, "-") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is Combination { CombinationType: CombinationType.Subtract };
+        }
+        
+        private sealed class GreaterThanOrEqual : OperatorContract
+        {
+            public GreaterThanOrEqual() : base(sampler: ArgumentsSampler.Numeric, arity: Arity.Binary, ">=") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation { OperationType: OperationType.GreaterThanOrEqual };
+        }
+
+        private sealed class LessThanOrEqual : OperatorContract
+        {
+            public LessThanOrEqual() : base(sampler: ArgumentsSampler.Numeric, arity: Arity.Binary, "<=") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation { OperationType: OperationType.LessThanOrEqual };
+        }
+        
+        private sealed class GreaterThan : OperatorContract
+        {
+            public GreaterThan() : base(sampler: ArgumentsSampler.Numeric, arity: Arity.Binary, ">") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation { OperationType: OperationType.GreaterThan };
+        }
+
+        private sealed class LessThan : OperatorContract
+        {
+            public LessThan() : base(sampler: ArgumentsSampler.Numeric, arity: Arity.Binary, "<") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation { OperationType: OperationType.LessThan };
+        }
+        
+        private sealed class NumericEqual : OperatorContract
+        {
+            public NumericEqual() : base(sampler: ArgumentsSampler.Numeric, arity: Arity.Binary, "=", "==") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation { OperationType: OperationType.Equal };
+        }
+        
+        private sealed class NumericNotEqual : OperatorContract
+        {
+            public NumericNotEqual() : base(sampler: ArgumentsSampler.Numeric, arity: Arity.Binary, "!=", "=/=") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryOperation { OperationType: OperationType.NotEqual };
+        }
+        
+        private sealed class BooleanEqual : OperatorContract
+        {
+            public BooleanEqual() : base(sampler: ArgumentsSampler.Boolean, arity: Arity.Binary, "=", "==") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion { AssertionType: BinaryAssertionType.Equal };
+        }
+        
+        private sealed class BooleanNotEqual : OperatorContract
+        {
+            public BooleanNotEqual() : base(sampler: ArgumentsSampler.Boolean, arity: Arity.Binary, "!=", "=/=") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion { AssertionType: BinaryAssertionType.NotEqual };
+        }
+
         private sealed class And : OperatorContract
         {
             public And() : base(ArgumentsSampler.Boolean, Arity.Binary, "&", "&&", "and") { }
             
             protected override bool MeetsExpectedPattern(INode node) =>
                 node is DefaultBinaryAssertion { AssertionType: BinaryAssertionType.And };
+        }
+        
+        private sealed class Or : OperatorContract
+        {
+            public Or() : base(sampler: ArgumentsSampler.Boolean, arity: Arity.Binary, "|", "||", "or") { }
+
+            protected override bool MeetsExpectedPattern(INode node) =>
+                node is DefaultBinaryAssertion { AssertionType: BinaryAssertionType.Or };
         }
 
     #endregion

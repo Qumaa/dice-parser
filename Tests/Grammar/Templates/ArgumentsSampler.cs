@@ -4,6 +4,7 @@
     {
         public static readonly ArgumentsSampler Numeric = new NumericImpl();
         public static readonly ArgumentsSampler Boolean = new BooleanImpl();
+        public static readonly ArgumentsSampler Composite = new CompositeImpl();
             
         public abstract string Generate(int operatorIndex);
 
@@ -16,7 +17,7 @@
         public bool Verify(Mapped<LinkedNode> operatorNode, int operatorIndex) =>
             Verify(
                 operatorNode.Value.Parents.Where(x => x.Value.IsOperand).Select(x => x.Value.Node),
-                Generate(operatorIndex)
+                operatorIndex
                 );
 
         public bool VerifyLeft(Mapped<LinkedNode> operatorNode) =>
@@ -25,15 +26,15 @@
         public bool VerifyRight(Mapped<LinkedNode> operatorNode) =>
             Verify(operatorNode, 1);
             
-        protected abstract bool Verify(IEnumerable<INode> arguments, string value);
+        protected abstract bool Verify(IEnumerable<INode> arguments, int operatorIndex);
             
         private sealed class NumericImpl : ArgumentsSampler
         {
             public override string Generate(int operatorIndex) =>
                 (operatorIndex + 1).ToString();
 
-            protected override bool Verify(IEnumerable<INode> arguments, string value) =>
-                arguments.All(x => x is NumericConstant constant && constant.Value.ToString().Equals(value));
+            protected override bool Verify(IEnumerable<INode> arguments, int operatorIndex) =>
+                arguments.All(x => x is NumericConstant constant && constant.Value == operatorIndex + 1);
         }
 
         private sealed class BooleanImpl : ArgumentsSampler
@@ -41,8 +42,24 @@
             public override string Generate(int operatorIndex) =>
                 (operatorIndex % 2 is 0).ToString();
 
-            protected override bool Verify(IEnumerable<INode> arguments, string value) =>
-                arguments.All(x => x is BinaryConstant constant && constant.Value.ToString().Equals(value));
+            protected override bool Verify(IEnumerable<INode> arguments, int operatorIndex) =>
+                arguments.All(x => x is BinaryConstant constant && constant.Value == operatorIndex % 2 is 0);
+        }
+        
+        private sealed class CompositeImpl : ArgumentsSampler
+        {
+            public override string Generate(int operatorIndex)
+            {
+                int value = operatorIndex + 1;
+
+                return $"{value}d{value}";
+            }
+
+            protected override bool Verify(IEnumerable<INode> arguments, int operatorIndex) =>
+                arguments.All(x =>
+                        x is IComposite composite && composite.Count == (operatorIndex + 1) &&
+                        composite.All(y => y is Die die && die.Faces == (operatorIndex + 1))
+                    );
         }
     }
 }

@@ -23,7 +23,7 @@
 
                 Assert.That.ParsingResultOf<SingleNumber>().FailsToMeetExpectedPatternOf<SingleBoolean>();
                 Assert.That.ParsingResultOf<SingleNumber>().FailsToMeetExpectedPatternOf<SingleDie>();
-                Assert.That.ParsingResultOf<SingleNumber>().FailsToMeetExpectedPatternOf<ImplicitCompositionDice>();
+                Assert.That.ParsingResultOf<SingleNumber>().FailsToMeetExpectedPatternOf<SingleDice>();
             }
 
             [TestMethod]
@@ -33,19 +33,19 @@
 
                 Assert.That.ParsingResultOf<SingleBoolean>().FailsToMeetExpectedPatternOf<SingleNumber>();
                 Assert.That.ParsingResultOf<SingleBoolean>().FailsToMeetExpectedPatternOf<SingleDie>();
-                Assert.That.ParsingResultOf<SingleBoolean>().FailsToMeetExpectedPatternOf<ImplicitCompositionDice>();
+                Assert.That.ParsingResultOf<SingleBoolean>().FailsToMeetExpectedPatternOf<SingleDice>();
             }
 
             [TestMethod]
             public void DiceTest()
             {
                 Assert.That.ParsingResultOf<SingleDie>().MeetsExpectedPattern();
-                Assert.That.ParsingResultOf<ImplicitCompositionDice>().MeetsExpectedPattern();
+                Assert.That.ParsingResultOf<SingleDice>().MeetsExpectedPattern();
 
                 Assert.That.ParsingResultOf<SingleDie>().FailsToMeetExpectedPatternOf<SingleBoolean>();
-                Assert.That.ParsingResultOf<ImplicitCompositionDice>().FailsToMeetExpectedPatternOf<SingleBoolean>();
+                Assert.That.ParsingResultOf<SingleDice>().FailsToMeetExpectedPatternOf<SingleBoolean>();
                 Assert.That.ParsingResultOf<SingleDie>().FailsToMeetExpectedPatternOf<SingleNumber>();
-                Assert.That.ParsingResultOf<ImplicitCompositionDice>().FailsToMeetExpectedPatternOf<SingleNumber>();
+                Assert.That.ParsingResultOf<SingleDice>().FailsToMeetExpectedPatternOf<SingleNumber>();
             }
 
             [TestMethod]
