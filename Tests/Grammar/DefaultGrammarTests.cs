@@ -19,72 +19,72 @@
             [TestMethod]
             public void IntConstantTest()
             {
-                AssertParsingResultOf<SingleNumber>.MeetsExpectedPattern();
+                Assert.That.ParsingResultOf<SingleNumber>().MeetsExpectedPattern();
 
-                AssertParsingResultOf<SingleNumber>.FailsToMeetExpectedPatternOf<SingleBoolean>();
-                AssertParsingResultOf<SingleNumber>.FailsToMeetExpectedPatternOf<SingleDie>();
-                AssertParsingResultOf<SingleNumber>.FailsToMeetExpectedPatternOf<ImplicitCompositionDice>();
+                Assert.That.ParsingResultOf<SingleNumber>().FailsToMeetExpectedPatternOf<SingleBoolean>();
+                Assert.That.ParsingResultOf<SingleNumber>().FailsToMeetExpectedPatternOf<SingleDie>();
+                Assert.That.ParsingResultOf<SingleNumber>().FailsToMeetExpectedPatternOf<ImplicitCompositionDice>();
             }
 
             [TestMethod]
             public void BoolConstantTest()
             {
-                AssertParsingResultOf<SingleBoolean>.MeetsExpectedPattern();
+                Assert.That.ParsingResultOf<SingleBoolean>().MeetsExpectedPattern();
 
-                AssertParsingResultOf<SingleBoolean>.FailsToMeetExpectedPatternOf<SingleNumber>();
-                AssertParsingResultOf<SingleBoolean>.FailsToMeetExpectedPatternOf<SingleDie>();
-                AssertParsingResultOf<SingleBoolean>.FailsToMeetExpectedPatternOf<ImplicitCompositionDice>();
+                Assert.That.ParsingResultOf<SingleBoolean>().FailsToMeetExpectedPatternOf<SingleNumber>();
+                Assert.That.ParsingResultOf<SingleBoolean>().FailsToMeetExpectedPatternOf<SingleDie>();
+                Assert.That.ParsingResultOf<SingleBoolean>().FailsToMeetExpectedPatternOf<ImplicitCompositionDice>();
             }
 
             [TestMethod]
             public void DiceTest()
             {
-                AssertParsingResultOf<SingleDie>.MeetsExpectedPattern();
-                AssertParsingResultOf<ImplicitCompositionDice>.MeetsExpectedPattern();
+                Assert.That.ParsingResultOf<SingleDie>().MeetsExpectedPattern();
+                Assert.That.ParsingResultOf<ImplicitCompositionDice>().MeetsExpectedPattern();
 
-                AssertParsingResultOf<SingleDie>.FailsToMeetExpectedPatternOf<SingleBoolean>();
-                AssertParsingResultOf<ImplicitCompositionDice>.FailsToMeetExpectedPatternOf<SingleBoolean>();
-                AssertParsingResultOf<SingleDie>.FailsToMeetExpectedPatternOf<SingleNumber>();
-                AssertParsingResultOf<ImplicitCompositionDice>.FailsToMeetExpectedPatternOf<SingleNumber>();
+                Assert.That.ParsingResultOf<SingleDie>().FailsToMeetExpectedPatternOf<SingleBoolean>();
+                Assert.That.ParsingResultOf<ImplicitCompositionDice>().FailsToMeetExpectedPatternOf<SingleBoolean>();
+                Assert.That.ParsingResultOf<SingleDie>().FailsToMeetExpectedPatternOf<SingleNumber>();
+                Assert.That.ParsingResultOf<ImplicitCompositionDice>().FailsToMeetExpectedPatternOf<SingleNumber>();
             }
 
             [TestMethod]
             public void SequenceTest()
             {
-                AssertParsingResultOf<SimpleSequence>.MeetsExpectedPattern();
-                AssertParsingResultOf<NestedSequence>.MeetsExpectedPattern();
+                Assert.That.ParsingResultOf<SimpleSequence>().MeetsExpectedPattern();
+                Assert.That.ParsingResultOf<NestedSequence>().MeetsExpectedPattern();
             }
         }
 
         [TestMethod]
         public void SimpleTests()
         {
-            AssertParsingResultOf<SimpleAddition>.MeetsExpectedPattern();
+            Assert.That.ParsingResultOf<SimpleAddition>().MeetsExpectedPattern();
             
-            AssertParsingResultOf<SimpleSubtraction>.MeetsExpectedPattern();
-            AssertParsingResultOf<SimpleNegation>.MeetsExpectedPattern();
+            Assert.That.ParsingResultOf<SimpleSubtraction>().MeetsExpectedPattern();
+            Assert.That.ParsingResultOf<SimpleNegation>().MeetsExpectedPattern();
             
-            AssertParsingResultOf<SimpleMultiplication>.MeetsExpectedPattern();
+            Assert.That.ParsingResultOf<SimpleMultiplication>().MeetsExpectedPattern();
             
-            AssertParsingResultOf<SimpleDivideRoundDown>.MeetsExpectedPattern();
-            AssertParsingResultOf<SimpleDivideRoundUp>.MeetsExpectedPattern();
+            Assert.That.ParsingResultOf<SimpleDivideRoundDown>().MeetsExpectedPattern();
+            Assert.That.ParsingResultOf<SimpleDivideRoundUp>().MeetsExpectedPattern();
             
-            AssertParsingResultOf<SimpleEqualNumeric>.MeetsExpectedPattern();
-            AssertParsingResultOf<SimpleNotEqualNumeric>.MeetsExpectedPattern();
+            Assert.That.ParsingResultOf<SimpleEqualNumeric>().MeetsExpectedPattern();
+            Assert.That.ParsingResultOf<SimpleNotEqualNumeric>().MeetsExpectedPattern();
             
-            AssertParsingResultOf<SimpleEqualBinary>.MeetsExpectedPattern();
-            AssertParsingResultOf<SimpleNotEqualBinary>.MeetsExpectedPattern();
+            Assert.That.ParsingResultOf<SimpleEqualBinary>().MeetsExpectedPattern();
+            Assert.That.ParsingResultOf<SimpleNotEqualBinary>().MeetsExpectedPattern();
             
-            AssertParsingResultOf<SimpleGreaterThan>.MeetsExpectedPattern();
-            AssertParsingResultOf<SimpleGreaterThanOrEqual>.MeetsExpectedPattern();
+            Assert.That.ParsingResultOf<SimpleGreaterThan>().MeetsExpectedPattern();
+            Assert.That.ParsingResultOf<SimpleGreaterThanOrEqual>().MeetsExpectedPattern();
             
-            AssertParsingResultOf<SimpleLessThan>.MeetsExpectedPattern();
-            AssertParsingResultOf<SimpleLessThanOrEqual>.MeetsExpectedPattern();
+            Assert.That.ParsingResultOf<SimpleLessThan>().MeetsExpectedPattern();
+            Assert.That.ParsingResultOf<SimpleLessThanOrEqual>().MeetsExpectedPattern();
             
-            AssertParsingResultOf<SimpleAnd>.MeetsExpectedPattern();
-            AssertParsingResultOf<SimpleOr>.MeetsExpectedPattern();
+            Assert.That.ParsingResultOf<SimpleAnd>().MeetsExpectedPattern();
+            Assert.That.ParsingResultOf<SimpleOr>().MeetsExpectedPattern();
             
-            AssertParsingResultOf<SimpleNot>.MeetsExpectedPattern();
+            Assert.That.ParsingResultOf<SimpleNot>().MeetsExpectedPattern();
         }
 
         [TestClass]
@@ -93,13 +93,13 @@
             [TestMethod]
             public void ParenthesisTest()
             {
-                AssertParsingResultOf<PrecedenceOverridenByParenthesis>.MeetsExpectedPattern();
+                Assert.That.ParsingResultOf<PrecedenceOverridenByParenthesis>().MeetsExpectedPattern();
             }
 
             [TestMethod]
             public void AddTests()
             {
-                AssertThat<Add>.PrecedenceOver<Multiply>.IsLower();
+                Assert.That.PrecedenceOf<Add>().Over<Multiply>().IsLower();
             }
             
             [TestMethod]
@@ -110,7 +110,7 @@
             [TestMethod]
             public void MultiplyTests()
             {
-                AssertThat<Multiply>.PrecedenceOver<Add>.IsHigher();
+                Assert.That.PrecedenceOf<Multiply>().Over<Add>().IsHigher();
             }
 
             [TestMethod]
@@ -156,7 +156,7 @@
             [TestMethod]
             public void AndTests()
             {
-                AssertThat<And>.PrecedenceOver<And>.IsHigher();
+                Assert.That.PrecedenceOf<And>().Over<And>().IsHigher();
             }
             
             [TestMethod]
