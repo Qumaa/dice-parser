@@ -33,7 +33,7 @@
             string leftSymbol = leftOp.RootSubstring().ToString();
             string rightSymbol = rightOp.RootSubstring().ToString();
 
-            int leftSamplesCount = _left.SampleStrings.Length;
+            int leftSamplesCount = _right.SampleStrings.Length;
                 
             int leftSampleIndex = sampleIndex / leftSamplesCount;
             int rightSampleIndex = sampleIndex % leftSamplesCount;
@@ -61,13 +61,18 @@
         private static string[] GenerateSamples(OperatorContract left, OperatorContract right, bool favorLeft)
         {
             List<string> parts = [];
-            string leftArg = left.ArgumentsSampler.GenerateLeft();
-            string rightArg = right.ArgumentsSampler.GenerateRight();
+            string[] leftArg = left.ArgumentsSampler.GenerateLeft(left);
+            string[] rightArg = right.ArgumentsSampler.GenerateRight(right);
 
             for (int i = 0; i < left.Arity.Left; i++)
-                parts.Add(leftArg);
+            {
+                parts.Add(leftArg[i]);
+                
+                if (i < left.Arity.Left - 1)
+                    parts.Add(" ");
+            }
 
-            parts.Add("{0}");
+            parts.Add(left.SpaceAroundSymbol ? " {0} " : "{0}");
 
             int inBetweenArgs = (left.Arity.Right + right.Arity.Left) - 1;
             int breakPoint = left.Arity.Right;
@@ -76,14 +81,28 @@
                 breakPoint--;
                 
             for (int i = 0; i < inBetweenArgs; i++)
-                parts.Add(i >= breakPoint ? rightArg : leftArg);
+            {
+                string arg = i >= breakPoint ? 
+                    rightArg[i - breakPoint] : 
+                    leftArg[left.Arity.Left + i];
+                
+                parts.Add(arg);
+                
+                if (i < inBetweenArgs - 1)
+                    parts.Add(" ");
+            }
 
-            parts.Add("{1}");
+            parts.Add(right.SpaceAroundSymbol ? " {1} " : "{1}");
 
             for (int i = 0; i < right.Arity.Right; i++)
-                parts.Add(rightArg);
+            {
+                parts.Add(rightArg[right.Arity.Left + i]);
+                
+                if (i < right.Arity.Right - 1)
+                    parts.Add(" ");
+            }
 
-            string format = string.Join(" ", parts);
+            string format = string.Concat(parts).TrimEnd();
 
             return left.SampleStrings.SelectMany(_ => right.SampleStrings, (l, r) => string.Format(format, l, r)).ToArray();
         }

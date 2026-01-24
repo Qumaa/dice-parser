@@ -6,12 +6,18 @@
         public static NodeTree[]? SampleParseResult { get; private set; }
         public static bool IsEmpty => Instance is null;
 
-        public static void CacheInstance(T instance)
+        public static void CacheInstanceAndParseSamples(T instance)
         {
-            Instance = instance;
-            SampleParseResult = Instance.SampleStrings.Select(DefaultGrammarTests.Parse).ToArray();
+            CacheInstance(instance);
+            CacheParseResult(instance.SampleStrings.Select(DefaultGrammarTests.Parse).ToArray());
         }
-            
+
+        public static void CacheInstance(T instance) =>
+            Instance = instance;
+
+        public static void CacheParseResult(NodeTree[] parseResult) =>
+            SampleParseResult = parseResult;
+
         public static void AssertFailsToMeetExpectedPatternOf<TOther>(TOther other) where TOther : VerboseTemplate
         {
             if (IsEmpty)

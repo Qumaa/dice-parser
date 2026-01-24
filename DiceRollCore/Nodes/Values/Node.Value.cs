@@ -17,7 +17,7 @@ namespace DiceRoll
                 new BinaryConstant(value);
 
             public static INumeric Die(int faces) =>
-                faces is 1 ? Constant(1) : new Die(_sharedRandom, faces);
+                new Die(_sharedRandom, faces);
             
             public static IComposite Dice(int faces, int dice) =>
                 Dice<Total>(faces, dice);

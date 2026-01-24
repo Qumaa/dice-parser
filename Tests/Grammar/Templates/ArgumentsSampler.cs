@@ -4,62 +4,67 @@
     {
         public static readonly ArgumentsSampler Numeric = new NumericImpl();
         public static readonly ArgumentsSampler Boolean = new BooleanImpl();
-        public static readonly ArgumentsSampler Composite = new CompositeImpl();
+        public static readonly ArgumentsSampler Sequence = new SequenceImpl();
             
-        public abstract string Generate(int operatorIndex);
+        public abstract string[] Generate(int operatorIndex, int argumentsCount);
 
-        public string GenerateLeft() =>
-            Generate(0);
+        public string[] GenerateLeft(OperatorContract left) =>
+            Generate(0, left.Arity);
 
-        public string GenerateRight() =>
-            Generate(1);
+        public string[] GenerateRight(OperatorContract right) =>
+            Generate(1, right.Arity);
 
         public bool Verify(LinkedNode operatorNode, int operatorIndex) =>
-            Verify(
-                operatorNode.Parents.Where(x => x.IsOperand).Select(x => x.Node),
-                operatorIndex
-                );
+            operatorNode.Parents
+                .Select((x, i) => (node: x, i))
+                .Where(x => x.node.IsOperand)
+                .All(x => Verify(x.node.Node, operatorIndex, x.i));
 
         public bool VerifyLeft(LinkedNode operatorNode) =>
             Verify(operatorNode, 0);
 
         public bool VerifyRight(LinkedNode operatorNode) =>
             Verify(operatorNode, 1);
+
+        protected string[] GenerateRepeating(string argumentString, int argumentsCount)
+        {
+            string[] args = new string[argumentsCount];
+
+            for (int i = 0; i < args.Length; i++)
+                args[i] = argumentString;
+
+            return args;
+        }
             
-        protected abstract bool Verify(IEnumerable<INode> arguments, int operatorIndex);
+        protected abstract bool Verify(INode argument, int operatorIndex, int argumentIndex);
             
         private sealed class NumericImpl : ArgumentsSampler
         {
-            public override string Generate(int operatorIndex) =>
-                (operatorIndex + 1).ToString();
+            public override string[] Generate(int operatorIndex, int argumentsCount) =>
+                GenerateRepeating((operatorIndex + 1).ToString(), argumentsCount);
 
-            protected override bool Verify(IEnumerable<INode> arguments, int operatorIndex) =>
-                arguments.All(x => x is NumericConstant constant && constant.Value == operatorIndex + 1);
+            protected override bool Verify(INode argument, int operatorIndex, int argumentIndex) =>
+                argument is NumericConstant constant && constant.Value == operatorIndex + 1;
         }
 
         private sealed class BooleanImpl : ArgumentsSampler
         {
-            public override string Generate(int operatorIndex) =>
-                (operatorIndex % 2 is 0).ToString();
+            public override string[] Generate(int operatorIndex, int argumentsCount) =>
+                GenerateRepeating((operatorIndex % 2 is 0).ToString(), argumentsCount);
 
-            protected override bool Verify(IEnumerable<INode> arguments, int operatorIndex) =>
-                arguments.All(x => x is BinaryConstant constant && constant.Value == operatorIndex % 2 is 0);
+            protected override bool Verify(INode argument, int operatorIndex, int argumentIndex) =>
+                argument is BinaryConstant constant && constant.Value == operatorIndex % 2 is 0;
         }
         
-        private sealed class CompositeImpl : ArgumentsSampler
+        private sealed class SequenceImpl : ArgumentsSampler
         {
-            public override string Generate(int operatorIndex)
-            {
-                int value = operatorIndex + 1;
+            public override string[] Generate(int operatorIndex, int argumentsCount) =>
+                Enumerable.Range(0, argumentsCount).Select(x => $"({operatorIndex + 1} {operatorIndex + 1 + x})").ToArray();
 
-                return $"{value}d{value}";
-            }
-
-            protected override bool Verify(IEnumerable<INode> arguments, int operatorIndex) =>
-                arguments.All(x =>
-                        x is IComposite composite && composite.Count == (operatorIndex + 1) &&
-                        composite.All(y => y is Die die && die.Faces == (operatorIndex + 1))
-                    );
+            protected override bool Verify(INode argument, int operatorIndex, int argumentIndex) =>
+                argument is ISequence<INumeric> and [NumericConstant op, NumericConstant arg] &&
+                op.Value == (operatorIndex + 1) &&
+                arg.Value == (operatorIndex + 1 + argumentIndex);
         }
     }
 }

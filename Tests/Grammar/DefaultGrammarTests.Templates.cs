@@ -303,7 +303,7 @@ namespace Tests.Grammar.Default
         
         private sealed class BinaryDice : OperatorContract
         {
-            public BinaryDice() : base(sampler: ArgumentsSampler.Numeric, arity: Arity.Binary, "d") { }
+            public BinaryDice() : base(sampler: ArgumentsSampler.Numeric, arity: Arity.Binary, false, "d") { }
 
             protected override bool MeetsExpectedPattern(INode node) =>
                 node is IComposite;
@@ -311,7 +311,7 @@ namespace Tests.Grammar.Default
         
         private sealed class UnaryDie : OperatorContract
         {
-            public UnaryDie() : base(sampler: ArgumentsSampler.Numeric, arity: Arity.PrefixUnary, "d") { }
+            public UnaryDie() : base(sampler: ArgumentsSampler.Numeric, arity: Arity.PrefixUnary, false, "d") { }
 
             protected override bool MeetsExpectedPattern(INode node) =>
                 node is Die;
@@ -319,7 +319,7 @@ namespace Tests.Grammar.Default
         
         private sealed class Times : OperatorContract
         {
-            public Times() : base(sampler: ArgumentsSampler.Numeric, arity: Arity.Binary, ":", "times") { }
+            public Times() : base(sampler: ArgumentsSampler.Numeric, arity: Arity.Binary, false, ":", "times") { }
 
             protected override bool MeetsExpectedPattern(INode node) =>
                 node is ISequence<INumeric>;
@@ -327,10 +327,19 @@ namespace Tests.Grammar.Default
         
         private sealed class Range : OperatorContract
         {
-            public Range() : base(sampler: ArgumentsSampler.Numeric, arity: Arity.Binary, "..", "through") { }
+            public Range() : base(sampler: new Sampler(), arity: Arity.Binary, false, "..", "through") { }
 
             protected override bool MeetsExpectedPattern(INode node) =>
                 node is ISequence<INumeric>;
+            
+            private sealed class Sampler : ArgumentsSampler
+            {
+                public override string[] Generate(int operatorIndex, int argumentsCount) =>
+                    Enumerable.Range(operatorIndex + 1, argumentsCount).Select(x => x.ToString()).ToArray();
+
+                protected override bool Verify(INode argument, int operatorIndex, int argumentIndex) =>
+                    argument is NumericConstant constant && constant.Value == operatorIndex + 1 + argumentIndex;
+            }
         }
         
         private sealed class Not : OperatorContract
@@ -351,26 +360,26 @@ namespace Tests.Grammar.Default
         
         private sealed class UnaryTotal : OperatorContract
         {
-            public UnaryTotal() : base(sampler: ArgumentsSampler.Composite, arity: Arity.PostfixUnary, "s", "sum", "summation", "total") { }
+            public UnaryTotal() : base(sampler: ArgumentsSampler.Sequence, arity: Arity.PostfixUnary, false, "s", "sum", "summation", "total") { }
 
             protected override bool MeetsExpectedPattern(INode node) =>
-                node is Composite { UnderlyingNode: Combination { CombinationType: CombinationType.Add } };
+                node is Composite { UnderlyingNode: Combination { CombinationType: CombinationType.Add } } or INumeric;
         }
         
         private sealed class UnaryHighest : OperatorContract
         {
-            public UnaryHighest() : base(sampler: ArgumentsSampler.Composite, arity: Arity.PostfixUnary, "h", "highest") { }
+            public UnaryHighest() : base(sampler: ArgumentsSampler.Sequence, arity: Arity.PostfixUnary, false, "h", "highest") { }
 
             protected override bool MeetsExpectedPattern(INode node) =>
-                node is Composite { UnderlyingNode: DefaultSelection { SelectionType: SelectionType.Highest } };
+                node is Composite { UnderlyingNode: DefaultSelection { SelectionType: SelectionType.Highest } } or INumeric;
         }
 
         private sealed class UnaryLowest : OperatorContract
         {
-            public UnaryLowest() : base(sampler: ArgumentsSampler.Composite, arity: Arity.PostfixUnary, "l", "lowest") { }
+            public UnaryLowest() : base(sampler: ArgumentsSampler.Sequence, arity: Arity.PostfixUnary, false, "l", "lowest") { }
 
             protected override bool MeetsExpectedPattern(INode node) =>
-                node is Composite { UnderlyingNode: DefaultSelection { SelectionType: SelectionType.Lowest } };
+                node is Composite { UnderlyingNode: DefaultSelection { SelectionType: SelectionType.Lowest } } or INumeric;
         }
         
         private sealed class Multiply : OperatorContract
@@ -418,7 +427,8 @@ namespace Tests.Grammar.Default
             public GreaterThanOrEqual() : base(sampler: ArgumentsSampler.Numeric, arity: Arity.Binary, ">=") { }
 
             protected override bool MeetsExpectedPattern(INode node) =>
-                node is DefaultBinaryOperation { OperationType: OperationType.GreaterThanOrEqual };
+                node is DefaultBinaryOperation { OperationType: OperationType.GreaterThanOrEqual } ||
+                node is OperationAsAssertion oas && MeetsExpectedPattern(oas.Source);
         }
 
         private sealed class LessThanOrEqual : OperatorContract
@@ -426,7 +436,8 @@ namespace Tests.Grammar.Default
             public LessThanOrEqual() : base(sampler: ArgumentsSampler.Numeric, arity: Arity.Binary, "<=") { }
 
             protected override bool MeetsExpectedPattern(INode node) =>
-                node is DefaultBinaryOperation { OperationType: OperationType.LessThanOrEqual };
+                node is DefaultBinaryOperation { OperationType: OperationType.LessThanOrEqual } ||
+                node is OperationAsAssertion oas && MeetsExpectedPattern(oas.Source);
         }
         
         private sealed class GreaterThan : OperatorContract
@@ -434,7 +445,8 @@ namespace Tests.Grammar.Default
             public GreaterThan() : base(sampler: ArgumentsSampler.Numeric, arity: Arity.Binary, ">") { }
 
             protected override bool MeetsExpectedPattern(INode node) =>
-                node is DefaultBinaryOperation { OperationType: OperationType.GreaterThan };
+                node is DefaultBinaryOperation { OperationType: OperationType.GreaterThan } ||
+                node is OperationAsAssertion oas && MeetsExpectedPattern(oas.Source);
         }
 
         private sealed class LessThan : OperatorContract
@@ -442,7 +454,8 @@ namespace Tests.Grammar.Default
             public LessThan() : base(sampler: ArgumentsSampler.Numeric, arity: Arity.Binary, "<") { }
 
             protected override bool MeetsExpectedPattern(INode node) =>
-                node is DefaultBinaryOperation { OperationType: OperationType.LessThan };
+                node is DefaultBinaryOperation { OperationType: OperationType.LessThan } ||
+                node is OperationAsAssertion oas && MeetsExpectedPattern(oas.Source);
         }
         
         private sealed class NumericEqual : OperatorContract
@@ -450,7 +463,8 @@ namespace Tests.Grammar.Default
             public NumericEqual() : base(sampler: ArgumentsSampler.Numeric, arity: Arity.Binary, "=", "==") { }
 
             protected override bool MeetsExpectedPattern(INode node) =>
-                node is DefaultBinaryOperation { OperationType: OperationType.Equal };
+                node is DefaultBinaryOperation { OperationType: OperationType.Equal } ||
+                node is OperationAsAssertion oas && MeetsExpectedPattern(oas.Source);
         }
         
         private sealed class NumericNotEqual : OperatorContract
@@ -458,7 +472,8 @@ namespace Tests.Grammar.Default
             public NumericNotEqual() : base(sampler: ArgumentsSampler.Numeric, arity: Arity.Binary, "!=", "=/=") { }
 
             protected override bool MeetsExpectedPattern(INode node) =>
-                node is DefaultBinaryOperation { OperationType: OperationType.NotEqual };
+                node is DefaultBinaryOperation { OperationType: OperationType.NotEqual } ||
+                node is OperationAsAssertion oas && MeetsExpectedPattern(oas.Source);
         }
         
         private sealed class BooleanEqual : OperatorContract

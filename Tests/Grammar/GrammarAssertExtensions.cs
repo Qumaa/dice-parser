@@ -5,7 +5,7 @@
         public static ParseResultAsserter<T> ParsingResultOf<T>(this Assert assert) where T : VerboseTemplate, new()
         {
             if (TemplateCache<T>.IsEmpty)
-                TemplateCache<T>.CacheInstance(new T());
+                TemplateCache<T>.CacheInstanceAndParseSamples(new T());
 
             return new ParseResultAsserter<T>();
         }
@@ -26,7 +26,7 @@
             public void FailsToMeetExpectedPatternOf<TOther>() where TOther : VerboseTemplate, new()
             {
                 if (TemplateCache<TOther>.IsEmpty)
-                    TemplateCache<TOther>.CacheInstance(new TOther());
+                    TemplateCache<TOther>.CacheInstanceAndParseSamples(new TOther());
                 
                 TOther otherTemplate = TemplateCache<TOther>.Instance!;
                 
@@ -57,7 +57,7 @@
             {
                 if (TemplateCache<OperatorPrecedenceTemplate<TL, TR>>.IsEmpty ||
                     TemplateCache<OperatorPrecedenceTemplate<TL, TR>>.Instance!.FavorLeft != favorLeft)
-                    TemplateCache<OperatorPrecedenceTemplate<TL, TR>>.CacheInstance(new OperatorPrecedenceTemplate<TL, TR>(favorLeft));
+                    TemplateCache<OperatorPrecedenceTemplate<TL, TR>>.CacheInstanceAndParseSamples(new OperatorPrecedenceTemplate<TL, TR>(favorLeft));
                     
                 TemplateCache<OperatorPrecedenceTemplate<TL, TR>>.AssertMeetsExpectedPattern();
             }
