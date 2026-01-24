@@ -44,7 +44,7 @@ namespace DiceRoll
                 return;
             }
 
-            INode node = nodeTree.Root.Value.Node;
+            INode node = nodeTree.Root.Node;
             
             Visitor visitor = new(strings.FailedToPass);
             

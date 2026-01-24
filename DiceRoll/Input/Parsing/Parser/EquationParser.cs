@@ -39,7 +39,7 @@ namespace DiceRoll.Input.Parsing
             
             try
             {
-                Mapped<LinkedNode> root = _reducer.Reduce(cursor, solver);
+                LinkedNode root = _reducer.Reduce(cursor, solver);
                 
                 _state.Reset();
             

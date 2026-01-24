@@ -29,7 +29,7 @@ namespace DiceRoll
             AnalyzeOutputStyle style = context.ParseResult.GetValueForOption(styleOption);
                     
             if (ExpressionParsingHelper.Try(tokens, context.Console, out NodeTree tree))
-                tree.Root.Value.Node.Visit(new Visitor(context.Console, formatter, style));
+                tree.Root.Node.Visit(new Visitor(context.Console, formatter, style));
         }
         
         private sealed class Visitor : INodeVisitor

@@ -11,44 +11,44 @@ namespace DiceRoll
         public static void Plot(IConsole output, NodeTree tree)
         {
             WriteHeader(output, tree.SubstringMapper.Source);
-            WriteWithChildren(output, tree.SubstringMapper, tree.Root, isLast: tree.Root.Value.IsOperand);
+            WriteWithChildren(output, tree.SubstringMapper, tree.Root, isLast: tree.Root.IsOperand);
         }
         
         private static void WriteHeader(IConsole output, string expression) =>
             output.WriteLine($"Input: \'{expression}\'");
 
         private static void WriteWithChildren(IConsole output, SubstringMapper mapper,
-            in Mapped<LinkedNode> node, string indent = null, bool isLast = false)
+            LinkedNode node, string indent = null, bool isLast = false)
         {
             string nodeString = NodeToString(mapper, in node);
 
             WriteNode(output, nodeString, indent, isLast);
             indent = UpdateIndent(indent, isLast);
             
-            if (node.Value.Node is IComposite composite)
+            if (node.Node is IComposite composite)
             {
-                WriteCompositeNodeEvaluations(output, mapper, composite, node.Value.Parents, indent);
+                WriteCompositeNodeEvaluations(output, mapper, composite, node.Parents, indent);
                 return;
             }
             
-            if (node.Value.IsOperand)
+            if (node.IsOperand)
                 return;
 
-            Mapped<LinkedNode>[] parents = node.Value.Parents;
+            LinkedNode[] parents = node.Parents;
             for (int i = 0; i < parents.Length; i++)
             {
                 bool isLastChild = i == (parents.Length - 1);
                 
-                WriteWithChildren(output, mapper, in parents[i], indent, isLastChild);
+                WriteWithChildren(output, mapper, parents[i], indent, isLastChild);
             }
         }
         
-        private static string NodeToString(SubstringMapper mapper, in Mapped<LinkedNode> mappedNode)
+        private static string NodeToString(SubstringMapper mapper, in LinkedNode mappedNode)
         {
-            if (mappedNode.Value.IsOperator && mappedNode.Value.Node is not ISequence)
+            if (mappedNode.IsOperator && mappedNode.Node is not ISequence)
                 return StringFormatter.ToOperatorString(mapper, in mappedNode);
 
-            if (mappedNode.Value.Node is Die or IComposite)
+            if (mappedNode.Node is Die or IComposite)
                 return StringFormatter.ToRolledResultString(mapper, in mappedNode);
 
             return StringFormatter.ToEvaluationString(in mappedNode);
@@ -90,7 +90,7 @@ namespace DiceRoll
         }
         
         private static void WriteCompositeNodeEvaluations(IConsole output, SubstringMapper mapper, IComposite composite, 
-            Mapped<LinkedNode>[] parents, string indent)
+            LinkedNode[] parents, string indent)
         {
             // todo: only simple composite (repeated node) are handled now
             using IEnumerator<INumeric> enumerator = composite.GetEnumerator();
@@ -119,7 +119,7 @@ namespace DiceRoll
                         output,
                         mapper,
                         nestedComposite,
-                        parents[1].Value.Parents,
+                        parents[1].Parents,
                         UpdateIndent(indent, isLast)
                         );
             }
@@ -129,15 +129,15 @@ namespace DiceRoll
         {
             private static readonly EvaluationStringVisitor _visitor = new();
             
-            public static string ToExpressionString(SubstringMapper mapper, in Mapped<LinkedNode> node) =>
-                mapper.GetSubstringOf(in node).ToString();
+            public static string ToExpressionString(SubstringMapper mapper, in LinkedNode node) =>
+                mapper.GetSubstring(in node.MappingRange).ToString();
 
-            public static string ToEvaluationString(in Mapped<LinkedNode> mappedNode) =>
-                ToEvaluationString(mappedNode.Value.Node);
+            public static string ToEvaluationString(in LinkedNode mappedNode) =>
+                ToEvaluationString(mappedNode.Node);
             public static string ToEvaluationString(INode node) =>
                 _visitor.GetEvaluationString(node);
 
-            public static string ToOperatorString(SubstringMapper mapper, in Mapped<LinkedNode> operatorNode)
+            public static string ToOperatorString(SubstringMapper mapper, in LinkedNode operatorNode)
             {
                 string evaluationString = ToEvaluationString(in operatorNode);
                 string operatorString = OperatorStringFormatter.Format(mapper, in operatorNode);
@@ -151,8 +151,8 @@ namespace DiceRoll
             public static string ToRolledResultString(string expressionString, INode node) =>
                 $"{expressionString} = {ToEvaluationString(node)}";
 
-            public static string ToRolledResultString(SubstringMapper mapper, in Mapped<LinkedNode> rolledNode) =>
-                ToRolledResultString(ToExpressionString(mapper, in rolledNode), rolledNode.Value.Node);
+            public static string ToRolledResultString(SubstringMapper mapper, in LinkedNode rolledNode) =>
+                ToRolledResultString(ToExpressionString(mapper, in rolledNode), rolledNode.Node);
 
             private sealed class EvaluationStringVisitor : INodeVisitor
             {
@@ -179,43 +179,43 @@ namespace DiceRoll
 
             private static class OperatorStringFormatter
             {
-                public static string Format(SubstringMapper mapper, in Mapped<LinkedNode> operatorNode)
+                public static string Format(SubstringMapper mapper, in LinkedNode operatorNode)
                 {
-                    if (operatorNode.Value.Parents.Length is 1)
+                    if (operatorNode.Parents.Length is 1)
                         return UnaryLikeString(mapper, in operatorNode);
                     
-                    if (operatorNode.Value.Node is IComposite composite)
+                    if (operatorNode.Node is IComposite composite)
                         return CompositionString(composite, ToExpressionString(mapper, in operatorNode));
 
                     return GenericSpacedString(mapper, in operatorNode);
                 }
                 
-                private static string UnaryLikeString(SubstringMapper mapper, in Mapped<LinkedNode> operatorNode)
+                private static string UnaryLikeString(SubstringMapper mapper, in LinkedNode operatorNode)
                 {
                     string first = ToExpressionString(mapper, in operatorNode);
-                    string second = ToEvaluationString(GetOperand(operatorNode.Value, 0));
+                    string second = ToEvaluationString(GetOperand(operatorNode, 0));
 
                     if (GetOperandPosition(in operatorNode, 0, mapper.Source.Length) is OperandPosition.Left)
-                        _SwapValues(ref first, ref second);
+                        _Swas(ref first, ref second);
 
                     return $"{first}{second}";
 
-                    static void _SwapValues(ref string first, ref string second) =>
+                    static void _Swas(ref string first, ref string second) =>
                         (first, second) = (second, first);
                 }
                 
                 private static string CompositionString(IComposite composite, string operatorString) =>
                     $"[{string.Join(',', composite.Select(x => x.CachedEvaluation.ToString()))}] {operatorString}";
                 
-                private static string GenericSpacedString(SubstringMapper mapper, in Mapped<LinkedNode> operatorNode)
+                private static string GenericSpacedString(SubstringMapper mapper, in LinkedNode operatorNode)
                 {
                     OperandPosition previousPosition = OperandPosition.Left;
                     string operatorString = ToExpressionString(mapper, in operatorNode);
                     string accumulated = null;
 
-                    for (int i = 0; i < operatorNode.Value.Parents.Length; i++)
+                    for (int i = 0; i < operatorNode.Parents.Length; i++)
                     {
-                        Mapped<LinkedNode> operand = GetOperand(operatorNode.Value, i);
+                        LinkedNode operand = GetOperand(operatorNode, i);
 
                         string s = ToEvaluationString(in operand);
 
@@ -233,14 +233,14 @@ namespace DiceRoll
                     return accumulated;
                 }
                 
-                private static Mapped<LinkedNode> GetOperand(LinkedNode node, int operandIndex) =>
+                private static LinkedNode GetOperand(LinkedNode node, int operandIndex) =>
                     node.Parents[operandIndex];
 
-                private static OperandPosition GetOperandPosition(in Mapped<LinkedNode> operatorNode, int operandIndex,
+                private static OperandPosition GetOperandPosition(in LinkedNode operatorNode, int operandIndex,
                     int expressionLength)
                 {
-                    Range operandRange = GetOperand(operatorNode.Value, operandIndex).Range;
-                    Range operatorRange = operatorNode.Range;
+                    Range operandRange = GetOperand(operatorNode, operandIndex).MappingRange;
+                    Range operatorRange = operatorNode.MappingRange;
 
                     return AverageFromRange(in operandRange, expressionLength) <
                            AverageFromRange(in operatorRange, expressionLength) ?

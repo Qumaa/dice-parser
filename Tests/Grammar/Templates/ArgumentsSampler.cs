@@ -14,16 +14,16 @@
         public string GenerateRight() =>
             Generate(1);
 
-        public bool Verify(Mapped<LinkedNode> operatorNode, int operatorIndex) =>
+        public bool Verify(LinkedNode operatorNode, int operatorIndex) =>
             Verify(
-                operatorNode.Value.Parents.Where(x => x.Value.IsOperand).Select(x => x.Value.Node),
+                operatorNode.Parents.Where(x => x.IsOperand).Select(x => x.Node),
                 operatorIndex
                 );
 
-        public bool VerifyLeft(Mapped<LinkedNode> operatorNode) =>
+        public bool VerifyLeft(LinkedNode operatorNode) =>
             Verify(operatorNode, 0);
 
-        public bool VerifyRight(Mapped<LinkedNode> operatorNode) =>
+        public bool VerifyRight(LinkedNode operatorNode) =>
             Verify(operatorNode, 1);
             
         protected abstract bool Verify(IEnumerable<INode> arguments, int operatorIndex);

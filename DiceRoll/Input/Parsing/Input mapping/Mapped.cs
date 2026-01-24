@@ -24,7 +24,6 @@ namespace DiceRoll.Input.Parsing
     public static class MappedExtensions
     {
         public static bool TryCastValue<TSource, TResult>(this Mapped<TSource> source, out Mapped<TResult> result)
-            where TSource : class where TResult : TSource
         {
             if (source.Value is TResult castedValue)
             {
@@ -37,8 +36,12 @@ namespace DiceRoll.Input.Parsing
         }
 
         public static Mapped<TResult> CastValueOrThrow<TSource, TResult>(this Mapped<TSource> source)
-            where TSource : class where TResult : TSource =>
-            new((TResult) source.Value, in source.Range);
+        {
+            if (source.TryCastValue(out Mapped<TResult> result))
+                return result;
+
+            throw new InvalidCastException();
+        }
 
         public static Mapped<T> WithValue<T>(this Mapped<T> mapped, in T value) =>
             new(in value, in mapped.Range);

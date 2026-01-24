@@ -1,5 +1,4 @@
 ﻿using System;
-using DiceRoll.Exceptions;
 
 namespace DiceRoll.Input.Parsing
 {

@@ -23,24 +23,23 @@ namespace DiceRoll.Input.Parsing
     
     public static class OperandExtensions
     {
-        public static Mapped<LinkedNode> ToLinkedNode(this Mapped<Operand> lexeme)
+        public static LinkedNode ToLinkedNode(this Mapped<Operand> lexeme)
         {
             Operand operand = lexeme.Value;
-            Mapped<Operand>[] source = operand.Parents;
+            Mapped<Operand>[] parents = operand.Parents;
             
-            if (source.Length is 0)
-                return new Mapped<LinkedNode>(new LinkedNode(operand.Node, operand.EvaluationType), lexeme.Range);
+            if (parents.Length is 0)
+                return new LinkedNode(operand.Node, lexeme.Range);
 
-            Mapped<LinkedNode>[] linkedNodes = new Mapped<LinkedNode>[source.Length];
+            LinkedNode[] linkedParents = new LinkedNode[parents.Length];
 
-            for (int i = 0; i < linkedNodes.Length; i++)
-                linkedNodes[i] = ToLinkedNode(source[i]);
+            for (int i = 0; i < linkedParents.Length; i++)
+                linkedParents[i] = ToLinkedNode(parents[i]);
 
-            LinkedNode linkedNode = new(operand.Node, operand.EvaluationType, linkedNodes);
-            return new Mapped<LinkedNode>(linkedNode, lexeme.Range);
+            return new LinkedNode(operand.Node, in lexeme.Range, linkedParents);
         }
 
-        public static Mapped<LinkedNode> ToLinkedNode(this Operand lexeme, in Range mappingRange) =>
+        public static LinkedNode ToLinkedNode(this Operand lexeme, in Range mappingRange) =>
             new Mapped<Operand>(lexeme, mappingRange).ToLinkedNode();
     }
 }

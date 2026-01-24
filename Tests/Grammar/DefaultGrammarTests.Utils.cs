@@ -23,6 +23,6 @@
         }
 
         public static T Parse<T>(string input) where T : INode =>
-            (T) Parse(input).Root.Value.Node;
+            (T) Parse(input).Root.Node;
     }
 }

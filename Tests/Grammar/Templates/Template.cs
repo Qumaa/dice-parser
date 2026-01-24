@@ -7,7 +7,7 @@
         protected Template(string formatString, params string[] options) : base(formatString, options) { }
 
         public sealed override bool MeetsExpectedPattern(NodeTree tree, int sampleIndex) =>
-            MeetsExpectedPattern(tree.Root.Value.Node);
+            MeetsExpectedPattern(tree.Root.Node);
 
         protected abstract bool MeetsExpectedPattern(INode node);
     }
