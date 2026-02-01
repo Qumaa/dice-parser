@@ -40,7 +40,7 @@ namespace DiceRoll
             Outcome outcome;
             ofFalse = Probability.Zero;
             
-            while (!enumerator.Current.Outcome.Exists(out outcome))
+            while (!enumerator.Current.Outcome.GetIfExists(out outcome))
             {
                 ofFalse += enumerator.Current.Probability;
 
@@ -59,7 +59,7 @@ namespace DiceRoll
         {
             while (enumerator.MoveNext())
             {
-                if (!enumerator.Current.Outcome.Exists(out Outcome outcome))
+                if (!enumerator.Current.Outcome.GetIfExists(out Outcome outcome))
                     continue;
 
                 if (outcome < min)

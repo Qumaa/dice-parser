@@ -69,7 +69,7 @@ namespace DiceRoll
                 _visitResult = numeric.CachedEvaluation.ToString();
 
             public void ForOperation(IOperation operation) =>
-                _visitResult = operation.CachedEvaluation.Exists(out Outcome outcome) ?
+                _visitResult = operation.CachedEvaluation.GetIfExists(out Outcome outcome) ?
                     outcome.ToString() :
                     _failedToPass;
 

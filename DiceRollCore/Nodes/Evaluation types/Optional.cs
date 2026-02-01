@@ -6,30 +6,30 @@ namespace DiceRoll
     [StructLayout(LayoutKind.Auto)]
     public readonly struct Optional<T>
     {
-        private readonly bool _exists;
-        private readonly T _value;
+        public readonly bool Exists;
+        public readonly T Value;
 
         public static Optional<T> Empty => new();
 
         public Optional(T value)
         {
-            _value = value;
-            _exists = true;
+            Value = value;
+            Exists = true;
         }
         
-        public bool Exists(out T value)
+        public bool GetIfExists(out T value)
         {
-            value = _value;
-            return _exists;
+            value = Value;
+            return Exists;
         }
 
         public Binary AsBinary() =>
-            new(_exists);
+            new(Exists);
 
         public override string ToString() =>
             ToString(false.ToString());
         
         public string ToString(string noValue) =>
-            _exists ? _value.ToString() : noValue;
+            Exists ? Value.ToString() : noValue;
     }
 }

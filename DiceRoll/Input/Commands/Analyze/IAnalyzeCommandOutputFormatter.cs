@@ -2,7 +2,7 @@
 {
     public interface IAnalyzeCommandOutputFormatter
     {
-        string Rolling(Outcome outcome, Probability probability);
+        string Rolling(string outcome, string probability, string bar);
         string Asserting(in Logical logical);
         string CumulativeFailing(Probability probability);
         string CumulativeSucceeding(Probability probability);

@@ -1,35 +1,44 @@
 ﻿using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.Linq;
 using DiceRoll.Input.Parsing;
 
 namespace DiceRoll
 {
     internal sealed class AnalyzeCommand : Command
     {
-        public AnalyzeCommand(AnalyzeCommandStrings strings, DiceExpressionArgument argument) : base(
+        private readonly AnalyzeCommandStrings _strings;
+        private readonly DiceExpressionArgument _argument;
+        private readonly AnalyzeBarsBuilder _barsBuilder;
+        private readonly StyleOption _style;
+
+        public AnalyzeCommand(AnalyzeCommandStrings strings, DiceExpressionArgument argument,
+            AnalyzeBarsBuilder barsBuilder) : base(
             "analyze",
             strings.Description
             )
         {
+            _strings = strings;
+            _argument = argument;
+            _barsBuilder = barsBuilder;
             AddAlias("a");
             AddArgument(argument);
 
-            StyleOption style = new(strings);
-            
-            AddOption(style);
+            _style = new StyleOption(strings);
 
-            this.SetHandler(context => CommandHandler(context, argument, style, strings.AnalyzeCommandOutput));
+            AddOption(_style);
+
+            this.SetHandler(CommandHandler);
         }
 
-        private static void CommandHandler(InvocationContext context, DiceExpressionArgument argument, 
-            StyleOption styleOption, IAnalyzeCommandOutputFormatter formatter)
+        private void CommandHandler(InvocationContext context)
         {
-            IEnumerable<string> tokens = context.ParseResult.GetValueForArgument(argument);
-            AnalyzeOutputStyle style = context.ParseResult.GetValueForOption(styleOption);
+            IEnumerable<string> tokens = context.ParseResult.GetValueForArgument(_argument);
+            AnalyzeOutputStyle style = context.ParseResult.GetValueForOption(_style);
                     
             if (ExpressionParsingHelper.Try(tokens, context.Console, out NodeTree tree))
-                tree.Root.Node.Visit(new Visitor(context.Console, formatter, style));
+                tree.Root.Node.Visit(new Visitor(context.Console, _strings.AnalyzeCommandOutput, style, _barsBuilder));
         }
         
         private sealed class Visitor : INodeVisitor
@@ -37,18 +46,22 @@ namespace DiceRoll
             private readonly IConsole _console;
             private readonly IAnalyzeCommandOutputFormatter _formatter;
             private readonly AnalyzeOutputStyle _style;
+            private readonly AnalyzeBarsBuilder _barsBuilder;
 
-            public Visitor(IConsole console, IAnalyzeCommandOutputFormatter formatter, AnalyzeOutputStyle style)
+            public Visitor(IConsole console, IAnalyzeCommandOutputFormatter formatter, AnalyzeOutputStyle style, AnalyzeBarsBuilder barsBuilder)
             {
                 _console = console;
                 _formatter = formatter;
                 _style = style;
+                _barsBuilder = barsBuilder;
             }
 
             public void ForNumeric(INumeric numeric)
             {
-                foreach (Roll roll in numeric.GetProbabilityDistribution())
-                    _console.WriteLine(_formatter.Rolling(roll.Outcome, roll.Probability));
+                string[] rolledStrings = GetRolledStrings(numeric.GetProbabilityDistribution());
+
+                foreach (string rolledString in rolledStrings)
+                    _console.WriteLine(rolledString);
             }
 
             public void ForOperation(IOperation operation)
@@ -60,41 +73,40 @@ namespace DiceRoll
                 bool omitsSuccess = _style.OmitsSuccess();
                 bool omitsCumulativeFailure = _style.OmitsCumulativeFailure();
                 bool omitsCumulativeSuccess = _style.OmitsCumulativeSuccess();
-                
-                int successfulRolls = 0;
-                foreach (OptionalRoll roll in distribution)
+
+                if (!omitsCumulativeFailure)
                 {
-                    Probability probability = roll.Probability;
-                    
-                    if (roll.Outcome.Exists(out Outcome outcome))
-                    {
-                        if (!omitsRolls)
-                            _console.WriteLine(_formatter.Rolling(outcome, probability));
-                        
-                        successfulRolls++;
-                        continue;
-                    }
-
-                    if (omitsCumulativeFailure)
-                        continue;
-
                     string failing = omitsSuccess && omitsRolls ?
-                        _formatter.AssertingFalse(probability) :
-                        _formatter.CumulativeFailing(probability);
+                        _formatter.AssertingFalse(distribution.False) :
+                        _formatter.CumulativeFailing(distribution.False);
                     
                     _console.WriteLine(failing);
                 }
-
-                if (omitsCumulativeSuccess || successfulRolls <= 1)
-                    return;
-
-                Probability ofSucceeding = distribution.False.Inversed();
                 
-                string succeeding = omitsFailure && omitsRolls ?
-                        _formatter.AssertingTrue(ofSucceeding):
+                int successfulRolls = 0;
+                if (!omitsRolls)
+                {
+                    string[] rolledStrings = GetRolledStrings(
+                        distribution.Where(x => x.Outcome.Exists)
+                            .Select(x =>  new Roll(x.Outcome.Value, x.Probability))
+                        );
+
+                    successfulRolls = rolledStrings.Length;
+
+                    foreach (string rolledString in rolledStrings)
+                        _console.WriteLine(rolledString);
+                }
+
+                if (!omitsCumulativeSuccess && successfulRolls > 1)
+                {
+                    Probability ofSucceeding = distribution.False.Inversed();
+
+                    string succeeding = omitsFailure && omitsRolls ?
+                        _formatter.AssertingTrue(ofSucceeding) :
                         _formatter.CumulativeSucceeding(ofSucceeding);
-                
-                _console.WriteLine(succeeding);
+
+                    _console.WriteLine(succeeding);
+                }
             }
 
             // todo better support
@@ -116,6 +128,36 @@ namespace DiceRoll
                 
                 if (!_style.OmitsSuccess())
                     _console.WriteLine(_formatter.AssertingTrue(distribution.True));
+            }
+
+            private string[] GetRolledStrings(IEnumerable<Roll> rolls)
+            {
+                rolls = rolls as Roll[] ?? rolls.ToArray();
+
+                string[] outcomes = rolls.Select(x => x.Outcome.ToString()).ToArray();
+                string[] probabilities = rolls.Select(x => x.Probability.ToString()).ToArray();
+                string[] bars = _barsBuilder.CreatePaddedBarStrings(rolls.Select(x => x.Probability), 32); // todo change with variable length
+                
+                PadToMaxLength(outcomes, false);
+                PadToMaxLength(probabilities);
+
+                return outcomes.Zip(probabilities, (o, p) => (o, p))
+                    .Zip(bars, (x, b) => (x.o, x.p, b))
+                    .Select(x => $"{x.o}: {x.p} {x.b}")
+                    .ToArray();
+            }
+
+            private static void PadToMaxLength(string[] strings, bool right = true)
+            {
+                int maxLength = strings[0].Length;
+
+                for (int i = 1; i < strings.Length; i++)
+                    if (strings[i].Length > maxLength)
+                        maxLength = strings[i].Length;
+            
+                for (int i = 0; i < strings.Length; i++)
+                    if (strings[i].Length < maxLength)
+                        strings[i] = right ? strings[i].PadRight(maxLength) : strings[i].PadLeft(maxLength);
             }
         }
     }
