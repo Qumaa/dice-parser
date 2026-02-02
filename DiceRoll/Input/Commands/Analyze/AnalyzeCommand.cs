@@ -191,7 +191,7 @@ namespace DiceRoll
                 int barWidth = width - usedChars;
 
                 string bar = _barsBuilder.CreatePaddedBarString(ofTrue, Probability.Hundred, barWidth);
-                string scale = CreateScale(barWidth, 2, 3);
+                string scale = CreateScale(barWidth, 4, 1);
 
                 return $"{t} [ {bar} ] {f}\n{pt} [ {scale} ] {pf}";
             }
@@ -256,18 +256,33 @@ namespace DiceRoll
                 IEnumerable<string> rows = outcomes.Items.Zip(probabilities.Items, (o, p) => (o, p)).Select(x => $"{x.o}: {x.p}");
 
                 int barsWidth = width - usedChars;
+                bool isNormalized = _normalize && !IsUniform(rolls);
                 
-                string barsHeader = CreateScale(barsWidth, 2, 3);
-                headers = $"{headers} {barsHeader}";
+                Probability max = isNormalized ? GetHighestProbability(rolls) : Probability.Hundred;
+                
+                string barsScale = CreateScale(barsWidth, 4, 1);
+                string scaleLabels = CreateScaleLabels(barsScale, max.Value);
+                headers = $"{headers} {barsScale}";
+                scaleLabels = scaleLabels.PadLeft(headers.Length);
+                headers = $"{scaleLabels}\n{headers}";
 
                 IEnumerable<Probability> enumerable = rolls.Select(x => x.Probability);
-                string[] bars = !_normalize || IsUniform(rolls) ? 
-                    _barsBuilder.CreatePaddedBarStrings(enumerable, Probability.Hundred, barsWidth) :
-                    _barsBuilder.CreateNormalizedPaddedBarStrings(enumerable, barsWidth);
+                string[] bars = _barsBuilder.CreatePaddedBarStrings(enumerable, max, barsWidth);
 
                 return rows.Zip(bars, (x, b) => (x, b))
                     .Select(x => $"{x.x} {x.b}")
                     .Prepend(headers);
+            }
+            
+            private static Probability GetHighestProbability(Roll[] array)
+            {
+                Probability max = array[0].Probability;
+
+                for (int i = 1; i < array.Length; i++)
+                    if (array[i].Probability > max)
+                        max = array[i].Probability;
+            
+                return max;
             }
 
             private static string CreateScale(int length, int segments, int segmentSeparators)
@@ -288,6 +303,9 @@ namespace DiceRoll
                 for (int i = 0; i < segments; i++)
                 {
                     result[index++] = '|';
+                    
+                    if (index >= length)
+                        goto end;
 
                     int currentBlockSize = baseBlockSize + (i < remainder ? 1 : 0);
 
@@ -299,17 +317,88 @@ namespace DiceRoll
                         int size = smallBlockSize + (j < smallRemainder ? 1 : 0);
 
                         for (int k = 0; k < size; k++)
+                        {
                             result[index++] = '-';
+                            
+                            if (index >= length)
+                                goto end;
+                        }
 
                         if (j < segmentSeparators)
+                        {
                             result[index++] = '+';
+                            
+                            if (index >= length)
+                                goto end;
+                        }
+                    }
+                }
+                
+                end:
+                result[^1] = '|';
+                return new string(result);
+            }
+
+            private static string CreateScaleLabels(string scale, double max)
+            {
+                const string format = "0.#%";
+                
+                char[] result = new char[scale.Length];
+
+                List<int> separatorIndices = new();
+
+                for (int i = 0; i < scale.Length; i++)
+                {
+                    result[i] = ' ';
+                    
+                    if (scale[i] == '|')
+                        separatorIndices.Add(i);
+                }
+
+                int first = separatorIndices.First();
+                int last = separatorIndices.Last();
+
+                for (int i = 0; i < separatorIndices.Count; i++)
+                {
+                    int pos = separatorIndices[i];
+
+                    double ratio = (double)(pos - first) / (last - first);
+                    double value = ratio * max;
+
+                    string text = value.ToString(format);
+
+                    int startIndex;
+
+                    if (i == 0)
+                    {
+                        startIndex = pos;
+                    }
+                    else if (i == separatorIndices.Count - 1)
+                    {
+                        startIndex = pos - text.Length + 1;
+                    }
+                    else
+                    {
+                        int half = text.Length / 2;
+                        bool even = text.Length % 2 is 0;
+
+                        startIndex = pos - half;
+                        
+                        if (even)
+                            startIndex++;
+                    }
+
+                    for (int j = 0; j < text.Length; j++)
+                    {
+                        int idx = startIndex + j;
+                        if (idx >= 0 && idx < result.Length)
+                            result[idx] = text[j];
                     }
                 }
 
-                result[index] = '|';
-
                 return new string(result);
             }
+
 
             private static bool IsUniform(Roll[] rolls)
             {

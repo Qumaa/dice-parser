@@ -20,24 +20,7 @@ namespace DiceRoll
 
             return bars;
         }
-        
-        public string[] CreateNormalizedPaddedBarStrings(IEnumerable<Probability> probabilities, int barWidth)
-        {
-            Probability[] array = probabilities as Probability[] ?? probabilities.ToArray();
-            return CreatePaddedBarStrings(array, GetHighestProbability(array), barWidth);
-        }
 
         public abstract string CreatePaddedBarString(Probability probability, Probability maxProbability, int barWidth);
-        
-        private static Probability GetHighestProbability(Probability[] array)
-        {
-            Probability max = array[0];
-
-            for (int i = 1; i < array.Length; i++)
-                if (array[i] > max)
-                    max = array[i];
-            
-            return max;
-        }
     }
 }
