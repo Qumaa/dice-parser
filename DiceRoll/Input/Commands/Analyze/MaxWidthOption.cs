@@ -7,7 +7,7 @@ namespace DiceRoll
         public MaxWidthOption(AnalyzeCommandStrings strings, int defaultMaxWidth) : base(
             "--max-width",
             () => defaultMaxWidth,
-            strings.StyleOptionDescription
+            strings.MaxWidthOptionDescription
             )
         {
             AddAlias("-w");

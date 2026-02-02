@@ -10,11 +10,10 @@ namespace DiceRoll
 {
     internal sealed class AnalyzeCommand : Command
     {
-        private readonly AnalyzeCommandStrings _strings;
         private readonly DiceExpressionArgument _argument;
-        private readonly AnalyzeBarsBuilder _barsBuilder;
-        private readonly StyleOption _styleOption;
         private readonly MaxWidthOption _maxWidthOption;
+        private readonly NormalizePlotBarsOption _normalizeOption;
+        private readonly Plotter _plotter;
 
         public AnalyzeCommand(AnalyzeCommandStrings strings, DiceExpressionArgument argument,
             AnalyzeBarsBuilder barsBuilder) : base(
@@ -22,17 +21,17 @@ namespace DiceRoll
             strings.Description
             )
         {
-            _strings = strings;
             _argument = argument;
-            _barsBuilder = barsBuilder;
             AddAlias("a");
             AddArgument(argument);
 
-            _styleOption = new StyleOption(strings);
-            AddOption(_styleOption);
-
             _maxWidthOption = new MaxWidthOption(strings, 64);
             AddOption(_maxWidthOption);
+
+            _normalizeOption = new NormalizePlotBarsOption(strings, false);
+            AddOption(_normalizeOption);
+
+            _plotter = new Plotter(strings, barsBuilder);
 
             this.SetHandler(CommandHandler);
         }
@@ -44,96 +43,134 @@ namespace DiceRoll
             if (!ExpressionParsingHelper.Try(tokens, context.Console, out NodeTree tree))
                 return;
             
-            AnalyzeOutputStyle style = context.ParseResult.GetValueForOption(_styleOption);
             int maxWidth = context.ParseResult.GetValueForOption(_maxWidthOption);
+            bool normalize = context.ParseResult.GetValueForOption(_normalizeOption);
 
             context.Console.WriteLine();
             context.Console.WriteLine(tree.SubstringMapper.Source);
             context.Console.WriteLine();
-            tree.Root.Node.Visit(new PlotVisitor(context.Console, _strings, style, _barsBuilder, maxWidth));
+            _plotter.PlotRoot(context.Console, tree, maxWidth, normalize);
             context.Console.WriteLine();
         }
         
-        private sealed class PlotVisitor : INodeVisitor
+        private sealed class Plotter : INodeVisitor
         {
-            private readonly IConsole _console;
             private readonly AnalyzeCommandStrings _strings;
-            private readonly AnalyzeOutputStyle _style;
-            private readonly int _maxWidth;
             private readonly AnalyzeBarsBuilder _barsBuilder;
+            
+            private IConsole _console;
+            private int _maxWidth;
+            private NodeTree _tree;
+            private bool _normalize;
 
-            public PlotVisitor(IConsole console, AnalyzeCommandStrings strings, AnalyzeOutputStyle style, AnalyzeBarsBuilder barsBuilder, int maxWidth)
+            private LinkedNode _currentNode;
+
+            public Plotter(AnalyzeCommandStrings strings, AnalyzeBarsBuilder barsBuilder)
             {
-                _console = console;
                 _strings = strings;
-                _style = style;
                 _barsBuilder = barsBuilder;
-                _maxWidth = maxWidth;
             }
 
-            public void ForNumeric(INumeric numeric)
+            void INodeVisitor.ForNumeric(INumeric numeric)
             {
                 Roll[] rolls = numeric.GetProbabilityDistribution().ToArray();
-                Plot(rolls);
+                PlotRolls(rolls);
+                _console.WriteLine();
             }
 
-            public void ForOperation(IOperation operation)
+            void INodeVisitor.ForOperation(IOperation operation)
             {
                 OptionalRollProbabilityDistribution distribution = operation.GetProbabilityDistribution();
 
-                bool omitsRolls = _style.OmitsRolls();
-                bool omitsFailure = _style.OmitsFailure();
-                bool omitsSuccess = _style.OmitsSuccess();
-                bool omitsCumulativeFailure = _style.OmitsCumulativeFailure();
-                bool omitsCumulativeSuccess = _style.OmitsCumulativeSuccess();
+                Roll[] rolls = distribution.Where(x => x.Outcome.Exists)
+                    .Select(x =>  new Roll(x.Outcome.Value, x.Probability))
+                    .ToArray();
+                    
+                PlotRolls(rolls);
 
-                IAnalyzeCommandOutputFormatter formatter = _strings.Formatter;
-                
-                int successfulRolls = 0;
-                if (!omitsRolls)
-                {
-                    Roll[] rolls = distribution.Where(x => x.Outcome.Exists)
-                        .Select(x =>  new Roll(x.Outcome.Value, x.Probability))
-                        .ToArray();
-                    
-                    successfulRolls = rolls.Length;
-                    
-                    Plot(rolls, false);
-                }
+                _console.WriteLine();
 
-                if (!omitsCumulativeSuccess && successfulRolls > 1)
-                {
-                    _console.WriteLine();
+                Probability ofTrue = distribution.False.Inversed();
+                    
+                PlotTrueFalse(ofTrue);
 
-                    string binaryBlock = CreateBinaryBlock(distribution.False.Inversed(), GetPlotWidth());
-                    
-                    _console.WriteLine(binaryBlock);
-                    
-                    _console.WriteLine();
-                }
+                _console.WriteLine();
             }
 
-            // todo better support
-
-            public void ForSequence<T>(ISequence<T> sequence) where T : INode
+            void INodeVisitor.ForSequence<T>(ISequence<T> sequence)
             {
-                foreach (T node in sequence)
+                string separator = new('=', GetPlotWidth());
+
+                bool isRoot = ReferenceEquals(_currentNode, _tree.Root);
+                
+                _console.WriteLine(separator);
+
+                for (int i = 0; i < sequence.Count; i++)
                 {
-                    node.Visit(this);
+                    T node = sequence[i];
+                    string source = GetNodeString(_currentNode.Parents[i]);
+
                     _console.WriteLine();
+                    _console.WriteLine(source);
+                    _console.WriteLine();
+
+                    LinkedNode previous = _currentNode;
+                    _currentNode = _currentNode.Parents[i];
+                    node.Visit(this);
+                    _currentNode = previous;
+                    
+                    if (i < sequence.Count - 1 || isRoot)
+                        _console.WriteLine(separator);
                 }
             }
 
-            public void ForAssertion(IAssertion assertion)
+            void INodeVisitor.ForAssertion(IAssertion assertion)
             {
                 LogicalProbabilityDistribution distribution = assertion.GetProbabilityDistribution();
+
+                Probability ofTrue = distribution.False.Inversed();
                 
-                string binaryBlock = CreateBinaryBlock(distribution.False.Inversed(), GetPlotWidth());
-                    
+                PlotTrueFalse(ofTrue);
+            }
+
+            private string GetNodeString(LinkedNode node)
+            {
+                Range range = _AccumulateRangeRecursive(node);
+
+                return _tree.SubstringMapper.Source[range];
+                
+                static Range _AccumulateRangeRecursive(LinkedNode linkedNode) =>
+                    linkedNode.Parents.Aggregate(
+                        linkedNode.MappingRange,
+                        (current, node) => current.And(_AccumulateRangeRecursive(node))
+                        );
+            }
+
+            public void PlotRoot(IConsole contextConsole, NodeTree tree, int maxWidth, bool normalize)
+            {
+                _console = contextConsole;
+                _tree = tree;
+                _maxWidth = maxWidth;
+                _normalize = normalize;
+
+                PlotNode(tree.Root);
+            }
+
+            private void PlotNode(LinkedNode node)
+            {
+                _currentNode = node;
+                node.Node.Visit(this);
+                _currentNode = null;
+            }
+
+            private void PlotTrueFalse(Probability ofTrue)
+            {
+                string binaryBlock = CreateTrueFalseBlock(ofTrue, GetPlotWidth());
+
                 _console.WriteLine(binaryBlock);
             }
 
-            private string CreateBinaryBlock(Probability ofTrue, int width)
+            private string CreateTrueFalseBlock(Probability ofTrue, int width)
             {
                 string f = false.ToString();
                 string pf = ofTrue.Inversed().ToString();
@@ -159,15 +196,14 @@ namespace DiceRoll
                 return $"{t} [ {bar} ] {f}\n{pt} [ {scale} ] {pf}";
             }
 
-            private void Plot(Roll[] rolls, bool includeStats = true)
+            private void PlotRolls(Roll[] rolls)
             {
                 if (rolls is not { Length: > 0 })
                     return;
                 
                 int width = GetPlotWidth();
                 
-                if (includeStats)
-                    WriteStats(rolls, width);
+                PlotStats(rolls, width);
                 
                 foreach (string row in FormatRows(rolls, width))
                     _console.WriteLine(row);
@@ -176,7 +212,7 @@ namespace DiceRoll
             private int GetPlotWidth() =>
                 _maxWidth <= 0 ? Console.WindowWidth : Math.Min(Console.WindowWidth, _maxWidth);
 
-            private void WriteStats(Roll[] rolls, int width)
+            private void PlotStats(Roll[] rolls, int width)
             {
                 double average = rolls.Aggregate(0d, (avg, roll) => avg + roll.Outcome.Value * roll.Probability.Value);
                 double deviation = Math.Sqrt(rolls.Aggregate(
@@ -212,22 +248,22 @@ namespace DiceRoll
                     rolls.Select(x => x.Probability.ToString())
                     );
 
-                int usedChars = 3; // due to formatting below
+                int usedChars = 3;
                 usedChars += outcomes.Width;
                 usedChars += probabilities.Width;
 
                 string headers = $"{outcomes.Header}  {probabilities.Header}";
                 IEnumerable<string> rows = outcomes.Items.Zip(probabilities.Items, (o, p) => (o, p)).Select(x => $"{x.o}: {x.p}");
 
-                if (IsUniform(rolls))
-                    return rows.Prepend(headers);
-
                 int barsWidth = width - usedChars;
                 
                 string barsHeader = CreateScale(barsWidth, 2, 3);
                 headers = $"{headers} {barsHeader}";
-                
-                string[] bars = _barsBuilder.CreatePaddedBarStrings(rolls.Select(x => x.Probability), barsWidth);
+
+                IEnumerable<Probability> enumerable = rolls.Select(x => x.Probability);
+                string[] bars = !_normalize || IsUniform(rolls) ? 
+                    _barsBuilder.CreatePaddedBarStrings(enumerable, Probability.Hundred, barsWidth) :
+                    _barsBuilder.CreateNormalizedPaddedBarStrings(enumerable, barsWidth);
 
                 return rows.Zip(bars, (x, b) => (x, b))
                     .Select(x => $"{x.x} {x.b}")
