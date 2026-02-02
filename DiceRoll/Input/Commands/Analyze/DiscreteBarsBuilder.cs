@@ -1,48 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace DiceRoll
+﻿namespace DiceRoll
 {
     public sealed class DiscreteBarsBuilder : AnalyzeBarsBuilder
     {
-        public override string[] CreatePaddedBarStrings(IEnumerable<Probability> probabilities, int barStringLength)
+        public override string CreatePaddedBarString(Probability probability, Probability maxProbability, int barWidth)
         {
-            Probability[] array = probabilities.ToArray();
-
-            if (array.Length is 0)
-                return Array.Empty<string>();
-            
-            string[] bars = new string[array.Length];
-
-            Probability max = GetHighestProbability(array);
-
-            for (int i = 0; i < bars.Length; i++)
-                bars[i] = BuildBar(array[i], max, barStringLength);
-
-            return bars;
-        }
-
-        private static Probability GetHighestProbability(Probability[] array)
-        {
-            Probability max = array[0];
-
-            for (int i = 1; i < array.Length; i++)
-                if (array[i] > max)
-                    max = array[i];
-            
-            return max;
-        }
-
-        private string BuildBar(Probability current, Probability max, int stringLength)
-        {
-            int allUnits = stringLength * Boxes.UNITS_PER_BOX;
-            int normalizedUnits = (int) (allUnits * (current / max).Value);
+            int allUnits = barWidth * Boxes.UNITS_PER_BOX;
+            int normalizedUnits = (int) (allUnits * (probability / maxProbability).Value);
 
             int fullBlocks = normalizedUnits / 8;
             int remainingUnits = normalizedUnits % 8;
 
-            char[] chars = new char[stringLength];
+            char[] chars = new char[barWidth];
 
             for (int i = 0; i < fullBlocks; i++)
                 chars[i] = Boxes.B8;
@@ -56,7 +24,7 @@ namespace DiceRoll
             return new string(chars, 0, chars.Length);
         }
 
-        private char GetBarTip(int units) =>
+        private static char GetBarTip(int units) =>
             units switch
             {
                 8 => Boxes.B8,

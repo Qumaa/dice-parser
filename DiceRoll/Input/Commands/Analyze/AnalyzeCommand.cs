@@ -74,13 +74,7 @@ namespace DiceRoll
             public void ForNumeric(INumeric numeric)
             {
                 Roll[] rolls = numeric.GetProbabilityDistribution().ToArray();
-                int width = GetPlotWidth();
-                
-                WriteStats(rolls, width);
-                string[] rows = FormatRows(rolls, width);
-
-                foreach (string row in rows)
-                    _console.WriteLine(row);
+                Plot(rolls);
             }
 
             public void ForOperation(IOperation operation)
@@ -94,15 +88,6 @@ namespace DiceRoll
                 bool omitsCumulativeSuccess = _style.OmitsCumulativeSuccess();
 
                 IAnalyzeCommandOutputFormatter formatter = _strings.Formatter;
-
-                if (!omitsCumulativeFailure)
-                {
-                    string failing = omitsSuccess && omitsRolls ?
-                        formatter.AssertingFalse(distribution.False) :
-                        formatter.CumulativeFailing(distribution.False);
-                    
-                    _console.WriteLine(failing);
-                }
                 
                 int successfulRolls = 0;
                 if (!omitsRolls)
@@ -110,30 +95,26 @@ namespace DiceRoll
                     Roll[] rolls = distribution.Where(x => x.Outcome.Exists)
                         .Select(x =>  new Roll(x.Outcome.Value, x.Probability))
                         .ToArray();
-                    int width = GetPlotWidth();
                     
-                    WriteStats(rolls, width);
-                    string[] rows = FormatRows(rolls, width);
-
-                    successfulRolls = rows.Length;
-
-                    foreach (string row in rows)
-                        _console.WriteLine(row);
+                    successfulRolls = rolls.Length;
+                    
+                    Plot(rolls, false);
                 }
 
                 if (!omitsCumulativeSuccess && successfulRolls > 1)
                 {
-                    Probability ofSucceeding = distribution.False.Inversed();
+                    _console.WriteLine();
 
-                    string succeeding = omitsFailure && omitsRolls ?
-                        formatter.AssertingTrue(ofSucceeding) :
-                        formatter.CumulativeSucceeding(ofSucceeding);
-
-                    _console.WriteLine(succeeding);
+                    string binaryBlock = CreateBinaryBlock(distribution.False.Inversed(), GetPlotWidth());
+                    
+                    _console.WriteLine(binaryBlock);
+                    
+                    _console.WriteLine();
                 }
             }
 
             // todo better support
+
             public void ForSequence<T>(ISequence<T> sequence) where T : INode
             {
                 foreach (T node in sequence)
@@ -146,14 +127,54 @@ namespace DiceRoll
             public void ForAssertion(IAssertion assertion)
             {
                 LogicalProbabilityDistribution distribution = assertion.GetProbabilityDistribution();
-                IAnalyzeCommandOutputFormatter formatter = _strings.Formatter;
                 
-                if (!_style.OmitsFailure())
-                    _console.WriteLine(formatter.AssertingFalse(distribution.False));
-                
-                if (!_style.OmitsSuccess())
-                    _console.WriteLine(formatter.AssertingTrue(distribution.True));
+                string binaryBlock = CreateBinaryBlock(distribution.False.Inversed(), GetPlotWidth());
+                    
+                _console.WriteLine(binaryBlock);
             }
+
+            private string CreateBinaryBlock(Probability ofTrue, int width)
+            {
+                string f = false.ToString();
+                string pf = ofTrue.Inversed().ToString();
+                
+                string t = true.ToString();
+                string pt = ofTrue.ToString();
+
+                int left = Math.Max(t.Length, pt.Length);
+                int right = Math.Max(f.Length, pf.Length);
+
+                t = t.PadLeft(left);
+                pt = pt.PadLeft(left);
+
+                f = f.PadRight(right);
+                pf = pf.PadRight(right);
+
+                int usedChars = 6 + left + right;
+                int barWidth = width - usedChars;
+
+                string bar = _barsBuilder.CreatePaddedBarString(ofTrue, Probability.Hundred, barWidth);
+                string scale = CreateScale(barWidth, 2, 3);
+
+                return $"{t} [ {bar} ] {f}\n{pt} [ {scale} ] {pf}";
+            }
+
+            private void Plot(Roll[] rolls, bool includeStats = true)
+            {
+                if (rolls is not { Length: > 0 })
+                    return;
+                
+                int width = GetPlotWidth();
+                
+                if (includeStats)
+                    WriteStats(rolls, width);
+                
+                foreach (string row in FormatRows(rolls, width))
+                    _console.WriteLine(row);
+            }
+
+            private int GetPlotWidth() =>
+                _maxWidth <= 0 ? Console.WindowWidth : Math.Min(Console.WindowWidth, _maxWidth);
 
             private void WriteStats(Roll[] rolls, int width)
             {
@@ -178,7 +199,7 @@ namespace DiceRoll
                 _console.WriteLine(value);
             }
 
-            private string[] FormatRows(Roll[] rolls, int width)
+            private IEnumerable<string> FormatRows(Roll[] rolls, int width)
             {
                 PaddedColumn outcomes = CreatePaddedColumn(
                     _strings.RollResultColumnHeader,
@@ -195,29 +216,25 @@ namespace DiceRoll
                 usedChars += outcomes.Width;
                 usedChars += probabilities.Width;
 
-                string headers = $"{outcomes.Header}| {probabilities.Header}";
-                IEnumerable<string> strings = outcomes.Items.Zip(probabilities.Items, (o, p) => (o, p)).Select(x => $"{x.o}: {x.p}");
+                string headers = $"{outcomes.Header}  {probabilities.Header}";
+                IEnumerable<string> rows = outcomes.Items.Zip(probabilities.Items, (o, p) => (o, p)).Select(x => $"{x.o}: {x.p}");
 
                 if (IsUniform(rolls))
-                    return strings.Prepend(headers).ToArray();
+                    return rows.Prepend(headers);
 
                 int barsWidth = width - usedChars;
                 
-                string barsHeader = CreateBarsHeader(barsWidth, 2, 3);
+                string barsHeader = CreateScale(barsWidth, 2, 3);
                 headers = $"{headers} {barsHeader}";
                 
                 string[] bars = _barsBuilder.CreatePaddedBarStrings(rolls.Select(x => x.Probability), barsWidth);
 
-                return strings.Zip(bars, (x, b) => (x, b))
+                return rows.Zip(bars, (x, b) => (x, b))
                     .Select(x => $"{x.x} {x.b}")
-                    .Prepend(headers)
-                    .ToArray();
+                    .Prepend(headers);
             }
 
-            private int GetPlotWidth() =>
-                _maxWidth <= 0 ? Console.WindowWidth : Math.Min(Console.WindowWidth, _maxWidth);
-
-            private static string CreateBarsHeader(int length, int segments, int segmentSeparators)
+            private static string CreateScale(int length, int segments, int segmentSeparators)
             {
                 char[] result = new char[length];
 
