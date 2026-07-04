@@ -118,7 +118,10 @@ namespace DiceRoll.Input.Parsing
                 .Finish()
                 
                 .BinaryOperator(Token("&&", "&", "and"), 60, static (IAssertion left, IAssertion right) => left.And(right))
-                .BinaryOperator(Token("||", "|", "or"), 60, static (IAssertion left, IAssertion right) => left.Or(right));
+                .BinaryOperator(Token("||", "|", "or"), 60, static (IAssertion left, IAssertion right) => left.Or(right))
+            
+                .BinaryOperator(Token("?"), 50, static (IAssertion condition, INumeric value) => value.WhenTrue(condition))
+            ;
 
         private static StringComparisonToken Token(params string[] values) =>
             StringComparisonToken.CaseInsensitive(values);

@@ -58,5 +58,8 @@
 
         public static IOperation LessThanOrEqual(this INumeric node, INumeric other) =>
             Node.Operator.LessThanOrEqual(node, other);
+
+        public static IOperation WhenTrue(this INumeric node, IAssertion condition) =>
+            Node.Value.Conditional(node, condition);
     }
 }

@@ -72,9 +72,8 @@ namespace DiceRoll
             public static IComposite Lowest(INumeric numeric, int repetitionCount) =>
                 Composite<KeepLowest>(numeric, repetitionCount);
 
-            // todo wip
-            // public static IOperation Conditional(INumeric value, IAssertion condition) =>
-            //     new Conditional(condition, value);
+            public static IOperation Conditional(INumeric value, IAssertion condition) =>
+                new Conditional(condition, value);
         }
     }
 }
