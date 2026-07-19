@@ -16,16 +16,16 @@ namespace DiceRoll.Input.Parsing
             _castingTable = castingTable;
         }
 
-        public override Range Reduce(LexemesList lexemes, in Range range, Cursor cursor)
+        public override Range Reduce(EquationParserState state, in Range range)
         {
-            Indexer indexer = IndexOperators(lexemes, in range);
+            Indexer indexer = IndexOperators(state.Lexemes, in range);
             
             if (indexer.Count is 0)
                 return range;
             
             OperatorPrecedences precedences = IndexPrecedences(indexer);
 
-            Args args = new(indexer, cursor);
+            Args args = new(indexer, state.Cursor, state.Mapper);
             
             foreach (PrecedenceLevel precedence in precedences)
                 ExecuteAllOperatorsAtPrecedence(args, precedence);
@@ -55,16 +55,16 @@ namespace DiceRoll.Input.Parsing
             if (args.Indexer.Count is 0)
                 return;
 
-            ThrowNoMatchingSignature(args.Indexer.GetOperator(0), args.Cursor);
+            ThrowNoMatchingSignature(args.Indexer.GetOperator(0), args.Cursor, args.Mapper);
         }
 
-        private static void ThrowNoMatchingSignature(in Mapped<IndexedOperator> @operator, Cursor cursor)
+        private static void ThrowNoMatchingSignature(in Mapped<IndexedOperator> @operator, Cursor cursor, InputMapper mapper)
         {
             IEnumerable<OperatorInvocationBehaviour> behaviours =
                 @operator.Value.SortedOverloads.Select(x => x.InvocationBehaviour);
             
             cursor.MoveTo(@operator.Range);
-            string operatorString = cursor.GetSubstringOfCurrent().ToString();
+            string operatorString = cursor.GetSubstringOfCurrent(mapper).ToString();
             
             throw OperatorInvocationException.NoMatchingSignature(behaviours, operatorString);
         }
@@ -347,11 +347,13 @@ namespace DiceRoll.Input.Parsing
         {
             public readonly Indexer Indexer;
             public readonly Cursor Cursor;
+            public readonly InputMapper Mapper;
             
-            public Args(Indexer indexer, Cursor cursor)
+            public Args(Indexer indexer, Cursor cursor, InputMapper mapper)
             {
                 Indexer = indexer;
                 Cursor = cursor;
+                Mapper = mapper;
             }
         }
 

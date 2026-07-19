@@ -2,6 +2,6 @@
 {
     public abstract class LexemesReducer
     {
-        public abstract void Execute(LexemesList lexemes, Cursor cursor);
+        public abstract void Execute(EquationParserState state, UnknownLexemeSolver solver);
     }
 }

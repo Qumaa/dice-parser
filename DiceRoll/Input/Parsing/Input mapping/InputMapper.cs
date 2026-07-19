@@ -9,7 +9,7 @@ namespace DiceRoll.Input.Parsing
         private int _inputLength;
         private int _previousLength;
 
-        public int InputLength => _inputLength;
+        public int InputLength => _inputLength - 1;
             
         public Range Map(int start, int length)
         {
@@ -83,7 +83,7 @@ namespace DiceRoll.Input.Parsing
             mapper.BuildSubstringMapper().GetSubstringOf(mapped);
         
         public static Substring GetSubstringOf(this InputMapper mapper, in Range mapped) =>
-            mapper.BuildSubstringMapper().GetSubstring(mapped);
+            mapper.BuildSubstringMapper().GetSubstringOf(mapped);
 
         public static Substring MapAndGetSubstringOf(this InputMapper mapper, in Substring substring) =>
             mapper.GetSubstringOf(mapper.Map(in substring));

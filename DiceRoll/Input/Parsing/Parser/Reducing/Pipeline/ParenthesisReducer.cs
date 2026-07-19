@@ -16,50 +16,49 @@ namespace DiceRoll.Input.Parsing
             _sequenceHandler = sequenceHandler;
         }
 
-        public override void Execute(LexemesList lexemes, Cursor cursor)
+        public override void Execute(EquationParserState state, UnknownLexemeSolver solver)
         {
-            for (int i = 0; i < lexemes.Count; i++)
+            for (int i = 0; i < state.Lexemes.Count; i++)
             {
-                if (lexemes.TryGetTyped(i, out Mapped<CloseParenthesis> close))
+                if (state.Lexemes.TryGetTyped(i, out Mapped<CloseParenthesis> close))
                 {
-                    cursor.MoveTo(close.Range);
+                    state.Cursor.MoveTo(close.Range);
                     throw new Exception("Unmatched closing parenthesis.");
                 }
 
-                if (!lexemes.TryGetTyped(i, out Mapped<OpenParenthesis> openParenthesis))
+                if (!state.Lexemes.TryGetTyped(i, out Mapped<OpenParenthesis> openParenthesis))
                     continue;
 
-                DetermineRangeAndReduce(lexemes, i, cursor, in openParenthesis.Range);
+                DetermineRangeAndReduce(state, i, in openParenthesis.Range);
             }
         }
 
-        private void DetermineRangeAndReduce(LexemesList lexemes, int openParenthesisPosition, Cursor cursor,
-            in Range openParenthesisRange)
+        private void DetermineRangeAndReduce(EquationParserState state, int openParenthesisPosition, in Range openParenthesisRange)
         {
             int position = openParenthesisPosition;
-            cursor.MoveTo(in openParenthesisRange);
+            state.Cursor.MoveTo(in openParenthesisRange);
 
             do
             {
                 position++;
                 
-                if (position >= lexemes.Count)
+                if (position >= state.Lexemes.Count)
                     throw new Exception("Unmatched opening parenthesis.");
 
-                if (lexemes.TryGetTyped(position, out Mapped<OpenParenthesis> open))
-                    DetermineRangeAndReduce(lexemes, position, cursor, in open.Range);
-            } while (!lexemes.TryGetTyped(position, out Mapped<CloseParenthesis> _));
+                if (state.Lexemes.TryGetTyped(position, out Mapped<OpenParenthesis> open))
+                    DetermineRangeAndReduce(state, position, in open.Range);
+            } while (!state.Lexemes.TryGetTyped(position, out Mapped<CloseParenthesis> _));
             
-            cursor.MoveToPrevious();
+            state.Cursor.MoveToPrevious();
 
-            lexemes.Remove(position);
-            lexemes.Remove(openParenthesisPosition);
+            state.Lexemes.Remove(position);
+            state.Lexemes.Remove(openParenthesisPosition);
             
             Range withinParenthesisRange = openParenthesisPosition..(position - 1);
             
-            Range reducedRange = _operatorHandler.Reduce(lexemes, in withinParenthesisRange, cursor);
+            Range reducedRange = _operatorHandler.Reduce(state, in withinParenthesisRange);
             
-            _sequenceHandler.Reduce(lexemes, in reducedRange, cursor);
+            _sequenceHandler.Reduce(state, in reducedRange);
         }
     }
 }

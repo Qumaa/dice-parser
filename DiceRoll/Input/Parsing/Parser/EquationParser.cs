@@ -15,8 +15,8 @@ namespace DiceRoll.Input.Parsing
             ArgumentNullException.ThrowIfNull(reducingPipeline);
 
             _state = state;
-            _reader = new EquationReader(state.Mapper, state.Lexemes, lexingPipeline);
-            _reducer = new EquationReducer(state.Lexemes, reducingPipeline);
+            _reader = new EquationReader(state, lexingPipeline);
+            _reducer = new EquationReducer(state, reducingPipeline);
         }
 
         public void AccumulateInput(string input)
@@ -35,11 +35,10 @@ namespace DiceRoll.Input.Parsing
         public NodeTree ParseAccumulatedInput(UnknownLexemeSolver solver)
         {
             SubstringMapper mapper = _state.Mapper.BuildSubstringMapper();
-            Cursor cursor = new(mapper);
             
             try
             {
-                LinkedNode root = _reducer.Reduce(cursor, solver);
+                LinkedNode root = _reducer.Reduce(solver);
                 
                 _state.Reset();
             
@@ -47,9 +46,9 @@ namespace DiceRoll.Input.Parsing
             }
             catch (Exception e)
             {
-                _state.Reset();
+                Substring cause = _state.Cursor.GetSubstringOfCurrent(mapper);
 
-                Substring cause = mapper.GetSubstring(cursor.Current);
+                _state.Reset();
 
                 throw new ParsingException(in cause, e);
             }

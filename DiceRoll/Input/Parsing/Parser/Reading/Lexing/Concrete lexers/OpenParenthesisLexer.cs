@@ -16,12 +16,17 @@ namespace DiceRoll.Input.Parsing
             _openParenthesis = token;
         }
 
-        public override bool TryExecute(in Substring substring, out Substring match)
+        public override bool TryExecute(in Substring substring, Cursor cursor, out Substring match)
         {
             if (!_openParenthesis.MatchesStart(in substring, out match))
                 return false;
 
+            cursor.MoveTo(match.AsRange());
+            
             _lexemes.Push(OpenParenthesis.Shared, in match);
+            
+            cursor.MoveToPrevious();
+            
             return true;
         }
     }

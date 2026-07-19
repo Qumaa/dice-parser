@@ -21,7 +21,7 @@ namespace DiceRoll.Input.Parsing
             nodeTree.Root.Node.NextEvaluation();
 
         public static Substring RootSubstring(this NodeTree tree) =>
-            tree.SubstringMapper.GetSubstring(in tree.Root.MappingRange);
+            tree.SubstringMapper.GetSubstringOf(in tree.Root.MappingRange);
 
         public static Navigator Navigate(this NodeTree tree) =>
             new(tree);

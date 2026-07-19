@@ -15,12 +15,12 @@ namespace DiceRoll.Input.Parsing
             _lexers = lexers.ToArray();
         }
 
-        public bool TryExecuteAll(in Substring substring, out Substring match)
+        public bool TryExecuteAll(in Substring substring, Cursor stateCursor, out Substring match)
         {
             Substring earliestMatch = substring.Empty();
             
             foreach (Lexer lexer in _lexers)
-                if (lexer.TryExecute(in substring, out Substring newMatch))
+                if (lexer.TryExecute(in substring, stateCursor, out Substring newMatch))
                 {
                     match = newMatch;
                     return true;

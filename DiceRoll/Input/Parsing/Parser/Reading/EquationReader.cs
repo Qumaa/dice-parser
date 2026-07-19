@@ -4,23 +4,20 @@ namespace DiceRoll.Input.Parsing
 {
     public sealed class EquationReader
     {
-        private readonly InputMapper _inputMapper;
-        private readonly LexemesList _lexemes;
+        private readonly EquationParserState _state;
         private readonly LexingPipeline _pipeline;
-        public EquationReader(InputMapper inputMapper, LexemesList lexemes, LexingPipeline pipeline)
+
+        public EquationReader(EquationParserState state, LexingPipeline pipeline)
         {
-            ArgumentNullException.ThrowIfNull(inputMapper);
-            ArgumentNullException.ThrowIfNull(lexemes);
+            ArgumentNullException.ThrowIfNull(state);
             ArgumentNullException.ThrowIfNull(pipeline);
             
-            _inputMapper = inputMapper;
-            _lexemes = lexemes;
+            _state = state;
             _pipeline = pipeline;
         }
 
         public void Read(string equation)
         {
-            // todo with cursor
             if (string.IsNullOrWhiteSpace(equation))
                 return;
             
@@ -29,7 +26,7 @@ namespace DiceRoll.Input.Parsing
         }
 
         private void AppendToMapper(string equation) =>
-            _inputMapper.Append(equation);
+            _state.Mapper.Append(equation);
 
         private void ReadIteratively(in Substring equation)
         {
@@ -51,20 +48,20 @@ namespace DiceRoll.Input.Parsing
             
             try
             {
-                if (!_pipeline.TryExecuteAll(in toRead, out read))
+                if (!_pipeline.TryExecuteAll(in toRead, _state.Cursor, out read))
                     PushUnresolvedMember(in read);
 
                 return read;
             }
             catch (Exception e)
             {
-                Substring exceptionCause = _inputMapper.MapAndGetSubstringOf(in read);
+                Substring exceptionCause = _state.Cursor.GetSubstringOfCurrent(_state.Mapper);
                 
                 throw new ParsingException(exceptionCause, e);
             }
         }
 
         private void PushUnresolvedMember(in Substring memberSubstring) =>
-            _lexemes.Push(UnknownLexeme.Shared, in memberSubstring);
+            _state.Lexemes.Push(UnknownLexeme.Shared, in memberSubstring);
     }
 }

@@ -19,13 +19,18 @@ namespace DiceRoll.Input.Parsing
             _definitions = definitions.OrderByDescending(x => x.InvocationBehaviour.Precedence).ToArray();
         }
         
-        public override bool TryExecute(in Substring substring, out Substring match)
+        public override bool TryExecute(in Substring substring, Cursor cursor, out Substring match)
         {
             if (!StartsWithOperator(in substring, out OperatorDefinition[] definitions, out match))
                 return false;
 
+            cursor.MoveTo(match.AsRange());
+            
             Operator @operator = new(definitions);
             _lexemes.Push(@operator, in match);
+            
+            cursor.MoveToPrevious();
+            
             return true;
         }
 

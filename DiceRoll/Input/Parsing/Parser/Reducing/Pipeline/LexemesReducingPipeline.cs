@@ -17,10 +17,10 @@ namespace DiceRoll.Input.Parsing
             _reducers = reducers.ToArray();
         }
 
-        public void ExecuteAll(LexemesList lexemes, Cursor cursor, UnknownLexemeSolver solver)
+        public void ExecuteAll(EquationParserState state, UnknownLexemeSolver solver)
         {
             foreach (LexemesReducer reducer in _reducers)
-                reducer.Execute(lexemes, cursor);
+                reducer.Execute(state, solver);
         }
 
         public static LexemesReducingPipeline CreateDefault(OperandCastingTable castingTable)

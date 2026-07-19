@@ -18,13 +18,18 @@ namespace DiceRoll.Input.Parsing
             _definitions = definitions.ToArray();
         }
 
-        public override bool TryExecute(in Substring substring, out Substring match)
+        public override bool TryExecute(in Substring substring, Cursor cursor, out Substring match)
         {
             if (!StartsWithOperand(in substring, out OperandDefinition definition, out match))
                 return false;
             
+            cursor.MoveTo(match.AsRange());
+            
             Operand operand = ParseOperand(definition, in match);
             _lexemes.Push(operand, in match);
+            
+            cursor.MoveToPrevious();
+            
             return true;
         }
 

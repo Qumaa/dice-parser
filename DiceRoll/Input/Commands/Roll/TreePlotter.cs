@@ -130,7 +130,7 @@ namespace DiceRoll
             private static readonly EvaluationStringVisitor _visitor = new();
             
             public static string ToExpressionString(SubstringMapper mapper, in LinkedNode node) =>
-                mapper.GetSubstring(in node.MappingRange).ToString();
+                mapper.GetSubstringOf(in node.MappingRange).ToString();
 
             public static string ToEvaluationString(in LinkedNode mappedNode) =>
                 ToEvaluationString(mappedNode.Node);
