@@ -26,7 +26,7 @@ namespace DiceRoll.Input.Parsing
         
         public static Substring GetSubstringOfCurrent(this Cursor cursor, InputMapper mapper)
         {
-            int length = mapper.InputLength;
+            int length = mapper.InputLength - 1;
             (int _, int currentLength) = cursor.Current.GetOffsetAndLength(length);
 
             Range currentRange = (length - currentLength)..length;

@@ -16,7 +16,7 @@ namespace DiceRoll.Input.Parsing
             _castingTable = castingTable;
         }
 
-        public override Range Reduce(EquationParserState state, in Range range)
+        public override Range Reduce(EquationParserState state, in Range range, UnknownLexemeSolver solver)
         {
             Indexer indexer = IndexOperators(state.Lexemes, in range);
             

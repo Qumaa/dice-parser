@@ -33,11 +33,12 @@ namespace DiceRoll.Input.Parsing
         {
             if (lexeme is null)
                 return;
-            
+
+            Mapped<Lexeme> mapped = new(in lexeme, start, length);
             if (index == Count)
-                Push(lexeme, start, length);
+                _lexemes.Add(mapped);
             else
-                _lexemes.Insert(index, _mapper.Map(lexeme, start, length));
+                _lexemes.Insert(index, mapped);
         }
 
         public Mapped<Lexeme> Take(int index)

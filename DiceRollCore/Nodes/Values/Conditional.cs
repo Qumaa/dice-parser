@@ -4,26 +4,26 @@ namespace DiceRoll
 {
     public sealed class Conditional : Operation
     {
-        private readonly IAssertion _assertion;
-        private readonly INumeric _value;
+        public readonly IAssertion Assertion;
+        public readonly INumeric Value;
 
         public Conditional(IAssertion condition, INumeric value)
         {
-            _assertion = condition;
-            _value = value;
+            Assertion = condition;
+            Value = value;
         }
 
         public override void NextEvaluation()
         {
-            _assertion.NextEvaluation();
-            _value.NextEvaluation();
+            Assertion.NextEvaluation();
+            Value.NextEvaluation();
             
-            CacheEvaluation(_assertion.CachedEvaluation ? new Optional<Outcome>(_value.CachedEvaluation) : Optional<Outcome>.Empty);
+            CacheEvaluation(Assertion.CachedEvaluation ? new Optional<Outcome>(Value.CachedEvaluation) : Optional<Outcome>.Empty);
         }
 
         protected override OptionalRollProbabilityDistribution CreateProbabilityDistribution() =>
-            _value.GetProbabilityDistribution()
-                .Select(x => new Roll(x.Outcome, x.Probability * _assertion.True))
+            Value.GetProbabilityDistribution()
+                .Select(x => new Roll(x.Outcome, x.Probability * Assertion.True))
                 .ToOptionalRollProbabilityDistribution();
     }
 }

@@ -14,6 +14,6 @@ namespace DiceRoll.Input.Parsing
         }
 
         public override void Execute(EquationParserState state, UnknownLexemeSolver solver) =>
-            _handler.Reduce(state, Range.All);
+            _handler.Reduce(state, Range.All, solver);
     }
 }

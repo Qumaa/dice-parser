@@ -4,7 +4,7 @@ namespace DiceRoll.Input.Parsing
 {
     public sealed class SequenceReducingHandler : LexemesReducingHandler
     {
-        public override Range Reduce(EquationParserState state, in Range range)
+        public override Range Reduce(EquationParserState state, in Range range, UnknownLexemeSolver solver)
         {
             (int start, int length) = range.GetOffsetAndLength(state.Lexemes.Count);
 

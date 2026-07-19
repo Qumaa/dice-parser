@@ -9,7 +9,7 @@ namespace DiceRoll.Input.Parsing
         private int _inputLength;
         private int _previousLength;
 
-        public int InputLength => _inputLength - 1;
+        public int InputLength => _inputLength;
             
         public Range Map(int start, int length)
         {

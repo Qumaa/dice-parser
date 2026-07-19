@@ -42,7 +42,8 @@ namespace DiceRoll.Input.Parsing
 
         public static OperandCastersTableBuilder BuilderWithDefaults() =>
             new OperandCastersTableBuilder()
-                .Caster(new OperationOperandCaster());
+                .Caster(new OperationOperandCaster())
+                .Caster(OperandCaster.Default<IOperation, Conditional>());
 
     }
 

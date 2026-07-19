@@ -29,11 +29,16 @@ namespace DiceRoll.Input.Parsing
                 if (!state.Lexemes.TryGetTyped(i, out Mapped<OpenParenthesis> openParenthesis))
                     continue;
 
-                DetermineRangeAndReduce(state, i, in openParenthesis.Range);
+                DetermineRangeAndReduce(state, i, in openParenthesis.Range, solver);
             }
         }
 
-        private void DetermineRangeAndReduce(EquationParserState state, int openParenthesisPosition, in Range openParenthesisRange)
+        private void DetermineRangeAndReduce(
+            EquationParserState state,
+            int openParenthesisPosition,
+            in Range openParenthesisRange,
+            UnknownLexemeSolver solver
+            )
         {
             int position = openParenthesisPosition;
             state.Cursor.MoveTo(in openParenthesisRange);
@@ -46,7 +51,7 @@ namespace DiceRoll.Input.Parsing
                     throw new Exception("Unmatched opening parenthesis.");
 
                 if (state.Lexemes.TryGetTyped(position, out Mapped<OpenParenthesis> open))
-                    DetermineRangeAndReduce(state, position, in open.Range);
+                    DetermineRangeAndReduce(state, position, in open.Range, solver);
             } while (!state.Lexemes.TryGetTyped(position, out Mapped<CloseParenthesis> _));
             
             state.Cursor.MoveToPrevious();
@@ -56,9 +61,9 @@ namespace DiceRoll.Input.Parsing
             
             Range withinParenthesisRange = openParenthesisPosition..(position - 1);
             
-            Range reducedRange = _operatorHandler.Reduce(state, in withinParenthesisRange);
+            Range reducedRange = _operatorHandler.Reduce(state, in withinParenthesisRange, solver);
             
-            _sequenceHandler.Reduce(state, in reducedRange);
+            _sequenceHandler.Reduce(state, in reducedRange, solver);
         }
     }
 }
