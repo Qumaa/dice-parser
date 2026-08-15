@@ -33,7 +33,7 @@ namespace DiceRoll.Input.Parsing
                 int matchStart = input.Start + i;
                 int matchLength = value.Length;
 
-                if (TokenUtils.ShouldUpdateMatch(in firstMatch, matchStart, matchLength))
+                if (MatchUtils.ShouldUpdateMatch(in firstMatch, matchStart, matchLength))
                     firstMatch = new Substring(in input, i, value.Length);
             }
             

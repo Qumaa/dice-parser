@@ -23,7 +23,7 @@ namespace DiceRoll.Input.Parsing
                 if (!token.Matches(in input, out Substring newMatch))
                     continue;
 
-                if (TokenUtils.ShouldUpdateMatch(in firstMatch, newMatch.Start, newMatch.Length))
+                if (MatchUtils.ShouldUpdateMatch(in firstMatch, newMatch.Start, newMatch.Length))
                     firstMatch = newMatch;
             }
 

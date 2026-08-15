@@ -1,6 +1,6 @@
 ﻿namespace DiceRoll.Input.Parsing
 {
-    public static class TokenUtils
+    public static class MatchUtils
     {
         public static bool ShouldUpdateMatch(in Substring firstMatch, int newMatchStart, int newMatchLength)
         {
