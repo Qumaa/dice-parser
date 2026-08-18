@@ -1,7 +1,7 @@
 ﻿// ReSharper disable ClassNeverInstantiated.Local
-namespace Tests.Grammar.Default
+namespace Tests.Syntax.Default
 {
-    public partial class DefaultGrammarTests
+    public partial class DefaultSyntaxTests
     {
     #region Operands
 

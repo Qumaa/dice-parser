@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace DiceRoll.Input.Parsing
 {
-    public sealed class Then : ISequentialGrammar
+    public sealed class Then : IChainableGrammar
     {
         private readonly List<IGrammar> _grammars;
 

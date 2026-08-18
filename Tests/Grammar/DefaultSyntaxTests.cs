@@ -1,7 +1,7 @@
-﻿namespace Tests.Grammar.Default
+﻿namespace Tests.Syntax.Default
 {
     [TestClass]
-    public partial class DefaultGrammarTests
+    public partial class DefaultSyntaxTests
     {
         // todo composition once done
         // todo range

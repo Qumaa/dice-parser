@@ -1,4 +1,4 @@
-﻿namespace Tests.Grammar.Default
+﻿namespace Tests.Syntax.Default
 {
     public sealed class OperatorPrecedenceTemplate<TL, TR> : VerboseTemplate
         where TL : OperatorContract, new() where TR : OperatorContract, new()

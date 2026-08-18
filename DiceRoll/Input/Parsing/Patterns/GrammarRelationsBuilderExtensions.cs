@@ -2,68 +2,96 @@
 
 namespace DiceRoll.Input.Parsing
 {
-    public static class GrammarRelationsBuilderExtensions
+    public static class GrammarCollectionBuilderExtensions
     {
-        public static RelationToSelector<RelationsBuilderWrapper> Relate(this GrammarRelationsBuilder builder, string tag) =>
+        public static GrammarCollectionBuilder Add(
+            this GrammarCollectionBuilder builder,
+            string tag,
+            IGrammar grammar
+            )
+        {
+            builder.TryAdd(tag, grammar);
+            return builder;
+        }
+        
+        public static GrammarCollectionBuilder Relate(
+            this GrammarCollectionBuilder builder,
+            string tag,
+            string tagTo,
+            Relation relation
+            )
+        {
+            builder.TryRelate(tag, tagTo, relation);
+            return builder;
+        }
+
+        public static RelationToSelector<RelationsBuilderWrapper, GrammarCollectionBuilder> Relate(
+            this GrammarCollectionBuilder builder,
+            string tag
+            ) =>
             new(new RelationsBuilderWrapper(builder), tag);
 
-        public static RelationToSelector<GraphBuilderWrapper> Relate(this GrammarGraphBuilder builder, string tag) =>
+        public static RelationToSelector<GraphBuilderWrapper, GrammarGraphBuilder> Relate(
+            this GrammarGraphBuilder builder,
+            string tag
+            ) =>
             new(new GraphBuilderWrapper(builder), tag);
 
         [StructLayout(LayoutKind.Auto)]
-        public readonly struct RelationToSelector<T> where T : struct, IWrapper
+        public readonly struct RelationToSelector<T, U> where T : struct, IWrapper<U>
         {
-            private readonly T _builder;
+            private readonly T _wrapper;
             private readonly string _tag;
             
-            public RelationToSelector(T builder, string tag)
+            public RelationToSelector(T wrapper, string tag)
             {
-                _builder = builder;
+                _wrapper = wrapper;
                 _tag = tag;
             }
 
-            public RelationKindSelector<T> To(string tag) =>
-                new(_builder, _tag, tag);
+            public RelationKindSelector<T, U> To(string tag) =>
+                new(_wrapper, _tag, tag);
         }
 
         [StructLayout(LayoutKind.Auto)]
-        public readonly struct RelationKindSelector<T> where T : struct, IWrapper
+        public readonly struct RelationKindSelector<T, U> where T : struct, IWrapper<U>
         {
-            private readonly T _builder;
+            private readonly T _wrapper;
             private readonly string _tag;
             private readonly string _tagTo;
             
-            public RelationKindSelector(T builder, string tag, string tagTo)
+            public RelationKindSelector(T wrapper, string tag, string tagTo)
             {
-                _builder = builder;
+                _wrapper = wrapper;
                 _tag = tag;
                 _tagTo = tagTo;
             }
 
-            public T AsSuperior() =>
+            public U AsSuperior() =>
                 Relate(Relation.Superior);
 
-            public T AsInferior() =>
+            public U AsInferior() =>
                 Relate(Relation.Inferior);
 
-            private T Relate(Relation relation)
+            private U Relate(Relation relation)
             {
                 // ReSharper disable once PossiblyImpureMethodCallOnReadonlyVariable
-                _builder.Relate(_tag, _tagTo, relation);
-                return _builder;
+                _wrapper.Relate(_tag, _tagTo, relation);
+                return _wrapper.Builder;
             }
         }
 
-        public interface IWrapper
+        public interface IWrapper<out T>
         {
+            T Builder { get; }
             void Relate(string tag, string tagTo, Relation relation);
         }
 
-        public readonly struct RelationsBuilderWrapper : IWrapper
+        public readonly struct RelationsBuilderWrapper : IWrapper<GrammarCollectionBuilder>
         {
-            public readonly GrammarRelationsBuilder Builder;
+            public GrammarCollectionBuilder Builder { get; }
             
-            public RelationsBuilderWrapper(GrammarRelationsBuilder builder)
+            public RelationsBuilderWrapper(GrammarCollectionBuilder builder)
             {
                 Builder = builder;
             }
@@ -72,10 +100,10 @@ namespace DiceRoll.Input.Parsing
                 Builder.Relate(tag, tagTo, relation);
         }
 
-        public readonly struct GraphBuilderWrapper : IWrapper
+        public readonly struct GraphBuilderWrapper : IWrapper<GrammarGraphBuilder>
         {
-            public readonly GrammarGraphBuilder Builder;
-            
+            public GrammarGraphBuilder Builder { get; }
+
             public GraphBuilderWrapper(GrammarGraphBuilder builder)
             {
                 Builder = builder;

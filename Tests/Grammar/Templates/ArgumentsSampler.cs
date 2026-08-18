@@ -1,4 +1,4 @@
-﻿namespace Tests.Grammar.Default
+﻿namespace Tests.Syntax.Default
 {
     public abstract class ArgumentsSampler
     {

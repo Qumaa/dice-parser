@@ -1,4 +1,4 @@
-﻿namespace Tests.Grammar.Default
+﻿namespace Tests.Syntax.Default
 {
     public static class TemplateCache<T> where T : VerboseTemplate
     {
@@ -9,7 +9,7 @@
         public static void CacheInstanceAndParseSamples(T instance)
         {
             CacheInstance(instance);
-            CacheParseResult(instance.SampleStrings.Select(DefaultGrammarTests.Parse).ToArray());
+            CacheParseResult(instance.SampleStrings.Select(DefaultSyntaxTests.Parse).ToArray());
         }
 
         public static void CacheInstance(T instance) =>

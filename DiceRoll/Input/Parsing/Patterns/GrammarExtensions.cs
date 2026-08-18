@@ -7,7 +7,7 @@ namespace DiceRoll.Input.Parsing
     {
         public static IGrammar Then(this IGrammar grammar, IGrammar next)
         {
-            if (grammar is not ISequentialGrammar composite)
+            if (grammar is not IChainableGrammar composite)
                 return new Then(grammar, next);
 
             composite.Add(next);
@@ -16,7 +16,7 @@ namespace DiceRoll.Input.Parsing
 
         public static IGrammar Or(this IGrammar grammar, IGrammar next)
         {
-            if (grammar is not ISequentialGrammar composite)
+            if (grammar is not IChainableGrammar composite)
                 return new Or(grammar, next);
 
             composite.Add(next);
@@ -48,6 +48,8 @@ namespace DiceRoll.Input.Parsing
             
             if (!probe.IsSuccessful)
                 return GrammarProbe.Failed;
+            
+            int offset = context.PushRecognized(probe);
 
             while (TryMoveToNext(enumerator))
             {
@@ -55,9 +57,15 @@ namespace DiceRoll.Input.Parsing
                 probe = aggregator(probe, nextProbe);
             
                 if (!probe.IsSuccessful)
+                {
+                    context.PopRecognized(offset);
                     return GrammarProbe.Failed;
+                }
+
+                offset += context.PushRecognized(nextProbe);
             }
             
+            context.PopRecognized(offset);
             return probe;
         }
         
@@ -90,14 +98,14 @@ namespace DiceRoll.Input.Parsing
 
             using IEnumerator<IGrammar> enumerator = grammars.GetEnumerator();
 
-            GrammarProbe? probe = null;
+            GrammarProbe probe = null;
             
             while (TryMoveToNext(enumerator))
             {
                 GrammarProbe nextProbe = enumerator.Current!.ProbeContext(context);
                 
                 if (nextProbe.IsSuccessful)
-                    probe = probe is null ? nextProbe : aggregator(probe.Value, nextProbe);
+                    probe = probe is null ? nextProbe : aggregator(probe, nextProbe);
             }
             
             return probe ?? GrammarProbe.Failed;

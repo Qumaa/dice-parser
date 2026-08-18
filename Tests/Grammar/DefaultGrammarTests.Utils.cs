@@ -1,8 +1,8 @@
-﻿namespace Tests.Grammar.Default
+﻿namespace Tests.Syntax.Default
 {
     // todo bad syntax assertions e.g. "1 +" throws not enough operands
     // todo bad type assertions e.g. "true" as numeric throws
-    public partial class DefaultGrammarTests
+    public partial class DefaultSyntaxTests
     {
         private static readonly IEquationParser _parser = CreateDefaultGrammarParser();
 
