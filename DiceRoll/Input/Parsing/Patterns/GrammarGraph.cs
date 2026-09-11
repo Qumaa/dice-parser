@@ -13,7 +13,7 @@ namespace DiceRoll.Input.Parsing
             _collection = collection;
         }
 
-        public void Parse(string input)
+        public CompletedChain[] Parse(string input)
         {
             ParseContext context = new(input, _collection);
             GrammarChainCollection chainCollection = new();
@@ -29,8 +29,12 @@ namespace DiceRoll.Input.Parsing
                 if (recognized > 0)
                     chainCollection.FlushDetectedChainStarts();
             } while (context.HasUnrecognizedInput);
+
+            return chainCollection.GetCompletedChains();
         }
 
+        // todo: re-read grammars that return 0 length probes (means an optional grammar)
+        // letting it into the next loop will cut off the rest of chains
         private int AdvanceDetectedChains(ParseContext context, GrammarChainCollection chainCollection)
         {
             int shortestRecognitionLength = -1;
@@ -55,7 +59,7 @@ namespace DiceRoll.Input.Parsing
             GrammarChainCollection collection
             )
         {
-            GrammarChain[] chains = _chainProvider.GetChainsThatStartWith(context, collection, out int shortestRecognitionLength);
+            Tagged<GrammarChain>[] chains = _chainProvider.GetChainsThatStartWith(context, collection, out int shortestRecognitionLength);
             collection.AddNewChains(chains);
             return shortestRecognitionLength;
         }

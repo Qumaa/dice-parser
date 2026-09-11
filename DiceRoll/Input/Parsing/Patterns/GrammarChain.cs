@@ -41,6 +41,18 @@ namespace DiceRoll.Input.Parsing
             return TryAdvanceWithProbe(probe);
         }
 
+        public bool TryConvertToCompleteChain(string tag, out CompletedChain chain)
+        {
+            if (_state < _chain.Length)
+            {
+                chain = null;
+                return false;
+            }
+
+            chain = new CompletedChain(tag, _chain, _probes);
+            return true;
+        }
+
         private int GetRecognizedOffset(Substring unrecognized)
         {
             if (_state <= 0)

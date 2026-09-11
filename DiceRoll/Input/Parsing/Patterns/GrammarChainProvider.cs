@@ -5,18 +5,18 @@ namespace DiceRoll.Input.Parsing
 {
     public sealed class GrammarChainProvider
     {
-        private readonly IGrammar[][] _chains;
+        private readonly Tagged<IGrammar[]>[] _chains;
         
-        public GrammarChainProvider(IGrammar[][] chains)
+        public GrammarChainProvider(Tagged<IGrammar[]>[] chains)
         {
             _chains = chains;
         }
 
-        public GrammarChain[] GetChainsThatStartWith(ParseContext context, GrammarChainCollection collection, out int shortestRecognitionLength)
+        public Tagged<GrammarChain>[] GetChainsThatStartWith(ParseContext context, GrammarChainCollection collection, out int shortestRecognitionLength)
         {
-            IGrammar[] single = null;
+            Tagged<IGrammar[]> single = default;
             GrammarProbe singleProbe = null;
-            List<IGrammar[]> many = null;
+            List<Tagged<IGrammar[]>> many = null;
             List<GrammarProbe> manyProbes = null;
 
             int shortestRecognition = -1;
@@ -26,8 +26,8 @@ namespace DiceRoll.Input.Parsing
                 if (collection.HasBeenDetected(i))
                     continue;
                 
-                IGrammar[] chain = _chains[i];
-                GrammarProbe probe = chain[0].ProbeContext(context);
+                Tagged<IGrammar[]> chain = _chains[i];
+                GrammarProbe probe = chain.Value[0].ProbeContext(context);
 
                 if (!probe.IsSuccessful)
                     continue;
@@ -45,9 +45,9 @@ namespace DiceRoll.Input.Parsing
             shortestRecognitionLength = shortestRecognition;
             return _ToArray();
 
-            void _AddChain(IGrammar[] grammars, GrammarProbe probe)
+            void _AddChain(Tagged<IGrammar[]> grammars, GrammarProbe probe)
             {
-                if (single is null)
+                if (single.Value is null)
                 {
                     single = grammars;
                     singleProbe = probe;
@@ -56,7 +56,7 @@ namespace DiceRoll.Input.Parsing
 
                 if (many is null)
                 {
-                    many = new List<IGrammar[]>(capacity: _chains.Length)
+                    many = new List<Tagged<IGrammar[]>>(capacity: _chains.Length)
                     {
                         single,
                         grammars
@@ -66,28 +66,29 @@ namespace DiceRoll.Input.Parsing
                         singleProbe,
                         probe
                     };
+                    return;
                 }
                 
                 many.Add(grammars);
                 manyProbes!.Add(probe);
             }
 
-            GrammarChain[] _ToArray()
+            Tagged<GrammarChain>[] _ToArray()
             {
                 if (many is { Count: > 0 })
                 {
-                    GrammarChain[] chains = new GrammarChain[many.Count];
+                    Tagged<GrammarChain>[] chains = new Tagged<GrammarChain>[many.Count];
 
                     for (int i = 0; i < many.Count; i++)
-                        chains[i] = new GrammarChain(many[i], manyProbes![i]);
+                        chains[i] = new Tagged<GrammarChain>(many[i].Tag, new GrammarChain(many[i].Value, manyProbes![i]));
 
                     return chains;
                 }
 
-                if (single is not null)
-                    return new[] { new GrammarChain(single, singleProbe) };
+                if (single.Value is not null)
+                    return new[] { new Tagged<GrammarChain>(single.Tag, new GrammarChain(single.Value, singleProbe)) };
                 
-                return Array.Empty<GrammarChain>();
+                return Array.Empty<Tagged<GrammarChain>>();
             }
         }
     }

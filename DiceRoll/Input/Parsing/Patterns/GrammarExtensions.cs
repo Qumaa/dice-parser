@@ -16,7 +16,7 @@ namespace DiceRoll.Input.Parsing
 
         public static IGrammar Or(this IGrammar grammar, IGrammar next)
         {
-            if (grammar is not IChainableGrammar composite)
+            if (grammar is not ISelectiveGrammar composite)
                 return new Or(grammar, next);
 
             composite.Add(next);

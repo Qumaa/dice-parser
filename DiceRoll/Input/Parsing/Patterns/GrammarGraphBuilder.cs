@@ -10,7 +10,7 @@
             if (!_collectionBuilder.TryAdd(tag, grammar))
                 return this;
             
-            _chainProviderBuilder.Add(grammar);
+            _chainProviderBuilder.Add(tag, grammar);
             return this;
         }
 
@@ -21,6 +21,6 @@
         }
 
         public GrammarGraph Build() =>
-            new GrammarGraph(_chainProviderBuilder.Build(), _collectionBuilder.Build());
+            new(_chainProviderBuilder.Build(), _collectionBuilder.Build());
     }
 }

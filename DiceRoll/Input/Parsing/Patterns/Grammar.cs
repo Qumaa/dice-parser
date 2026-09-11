@@ -26,5 +26,8 @@ namespace DiceRoll.Input.Parsing
 
         public static IGrammar Reference(string tag) =>
             new Reference(tag);
+
+        public static IGrammar Reference(params string[] tags) =>
+            new ReferenceMany(tags);
     }
 }

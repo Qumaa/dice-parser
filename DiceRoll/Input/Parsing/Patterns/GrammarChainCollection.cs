@@ -6,11 +6,11 @@ namespace DiceRoll.Input.Parsing
 {
     public sealed class GrammarChainCollection
     {
-        private readonly List<GrammarChain> _active = new();
+        private readonly List<Tagged<GrammarChain>> _active = new();
         private readonly HashSet<int> _previouslyDetectedIds = new();
-        private readonly List<GrammarChain> _completed = new();
+        private readonly List<CompletedChain> _completed = new();
         
-        public void AddNewChains(IEnumerable<GrammarChain> chains) =>
+        public void AddNewChains(IEnumerable<Tagged<GrammarChain>> chains) =>
             _active.AddRange(chains);
 
         public void MarkChainStartAsDetected(int id) =>
@@ -39,18 +39,18 @@ namespace DiceRoll.Input.Parsing
 
             public int TryAdvanceOrRemove(ParseContext context)
             {
-                GrammarChain chain = _chainCollection._active[_index];
+                Tagged<GrammarChain> chain = _chainCollection._active[_index];
 
-                if (!chain.TryAdvance(context, out GrammarProbe probe))
+                if (!chain.Value.TryAdvance(context, out GrammarProbe probe))
                 {
                     RemoveReferencedActiveChain();
                     return -1;
                 }
 
-                if (chain.IsComplete)
+                if (chain.Value.TryConvertToCompleteChain(chain.Tag, out CompletedChain completedChain))
                 {
                     RemoveReferencedActiveChain();
-                    _chainCollection._completed.Add(chain);
+                    _chainCollection._completed.Add(completedChain);
                 }
                     
                 return context.GetRecognizedOffset(probe);
@@ -101,5 +101,8 @@ namespace DiceRoll.Input.Parsing
 
             public void Dispose() { }
         }
+
+        public CompletedChain[] GetCompletedChains() =>
+            _completed.ToArray();
     }
 }
